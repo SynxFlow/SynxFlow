@@ -10,6 +10,8 @@ Welcome to pypims's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   source/installing
+
 
 
 Indices and tables
