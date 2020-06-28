@@ -41,6 +41,7 @@ The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). 
 
 ```python
 from pypims import IO
+```
 
 Once the inputs have all been prepared, the simulations  can be started by
 
