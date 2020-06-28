@@ -13,7 +13,7 @@ import datetime
 import warnings
 import numpy as np
 import pandas as pd
-import hipims_io.spatial_analysis as sp
+from . import spatial_analysis as sp
 from .Raster import Raster
 from .indep_functions import save_object, _create_io_folders
 class OutputHipims:

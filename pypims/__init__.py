@@ -10,9 +10,10 @@ Created on Wed Apr  1 14:56:15 2020
 """
 
 from .version import __version__
-from pypims import flood
+from . import flood, IO
 
 __all__ = [
   '__version__',
   'flood',
+  'IO',
 ]

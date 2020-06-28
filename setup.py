@@ -14,7 +14,7 @@ import pathlib
 import sys
 import platform
 
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
 
@@ -79,7 +79,7 @@ setup(
     version=version['__version__'],
     author='Xilin Xia',
     author_email='x.xia2@lboro.ac.uk',
-    packages=[_this_package],
+    packages=find_packages(),
     ext_modules=[CMakeExtension('pypims/apps/cudaFloodSolversPybind/cuda_flood_solvers_pybind')],
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
@@ -96,7 +96,10 @@ setup(
         'Programming Language :: C++',
         'Intended Audience :: Science/Research'
     ],
-    install_requires=[
-    'hipims-io'
-    ]
-) 
+    package_data={'pypims.IO': ['sample/Example_DEM.asc',
+                            'sample/DEM.gz',
+                            'sample/landcover.gz',
+                            'sample/rain_mask.gz',
+                            'sample/rain_source.csv',
+                            'sample/Example_data.npy'],},
+)

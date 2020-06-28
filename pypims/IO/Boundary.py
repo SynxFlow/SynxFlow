@@ -12,7 +12,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.patches as mplP
-import hipims_io.spatial_analysis as sp
+from . import spatial_analysis as sp
 #%% boundary class definition
 class Boundary(object):
     """Class for boundary conditions
