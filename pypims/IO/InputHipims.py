@@ -6,8 +6,6 @@ InputHipims
 
 Generate input files for a hipims flood model
 
-@author: Xiaodong Ming
-Created on Tue Mar 31 16:03:57 2020
 
 Assumptions:
 
@@ -34,6 +32,7 @@ Structure:
 ------------
 
 """
+# Created on Tue Mar 31 16:03:57 2020
 __author__ = "Xiaodong Ming"
 import os
 import shutil
