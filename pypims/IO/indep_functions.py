@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Created on Thu Apr 23 11:45:24 2020
+
 """
 Independent functions
 =====================
@@ -7,10 +9,6 @@ Independent functions
 To do:
     non-object-based independent functions to support hipims IO
     
-Created on Thu Apr 23 11:45:24 2020
-
-@author: Xiaodong Ming
-
 -----------------
 
 """
