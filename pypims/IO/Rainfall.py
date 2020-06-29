@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# Created on Tue Jun 23 21:32:54 2020
+
 """
 Rainfall
 =======
 
 To do:
     To read, compute, and show rainfall data
-    
-Created on Tue Jun 23 21:32:54 2020
-
-@author: Xiaodong Ming
 
 -----------------
 
