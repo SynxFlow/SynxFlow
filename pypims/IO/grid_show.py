@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Created on Tue Mar 10 15:37:28 2020
+
 """
 grid_show
 ============
@@ -22,9 +24,6 @@ To do:
 
     6. make_mp4: create a video file to show values of a series of grids
 
-Created on Tue Mar 10 15:37:28 2020
-
-@author: Xiaodong Ming
 
 ------------------
 
