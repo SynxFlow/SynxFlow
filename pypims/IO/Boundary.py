@@ -7,13 +7,10 @@ Boundary
 To do:
     Define boundary conditions for hipims model
 
-Created on Tue Mar 31 16:05:27 2020
-
-@author: Xiaodong Ming
-
 -----------
 
 """
+# Created on Tue Mar 31 16:05:27 2020
 import warnings
 import numpy as np
 import pandas as pd
