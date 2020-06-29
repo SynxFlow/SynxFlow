@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Created on Wed Dec  4 14:26:04 2019
+
 """
 rainfall_processing
 ===================
 
 To do:
     Processing rainfall
-
-Created on Wed Dec  4 14:26:04 2019
-
-@author: Xiaodong Ming
 
 ----------------
 
