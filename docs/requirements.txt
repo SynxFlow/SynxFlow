@@ -1,0 +1,6 @@
+numpy
+scipy
+matplotlib
+imageio
+pandas
+pyshp
