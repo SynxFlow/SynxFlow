@@ -42,7 +42,23 @@ The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). 
 ```python
 from pypims import IO
 ```
+A quick demonstration to prepare input files with attached sample data contaning the following files:
+- DEM.gz/.asc/.tif (essential file, in projected crs, map unit:m)
+- rain_mask.gz/.asc/.tif (optional file for setting rainfall, having the same crs with DEM)
+- rain_source.csv (optional file for setting rainfall rate in timeseries, unit:m/s]
+- landcover.gz/.asc/.tif (optional file for setting landcover-based parameters, having the same crs with DEM)
 
+```python
+import os
+from IO.demo_functions import get_sample_data
+data_path = get_sample_data(return_path=True) # get the path of sample data
+case_folder = os.path.join(os.getcwd(), 'model_case') # define a case folder in the current directory
+obj_in = IO.InputHipims(case_folder=case_folder, num_of_sections=1, 
+                        data_path=data_path) # create input object
+obj_in.domain_show() # show domain map
+print(obj_in) # show case information
+obj_in.write_input_files() # create all input files
+```
 Once the inputs have all been prepared, the simulations  can be started by
 
 ```python
