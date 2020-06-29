@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# Created on Wed Apr  1 23:46:54 2020
+
 """
 OutputHipims
 ============
 
 To do:
     Process output files from HiPIMS
-
-Created on Wed Apr  1 23:46:54 2020
-
-@author: Xiaodong Ming
 
 ----------------------
 
