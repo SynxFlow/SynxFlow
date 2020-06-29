@@ -6,7 +6,7 @@
 Welcome to pypims's documentation
 =================================
 
-Pypims: Python APIs for hipims
+Pypims: Python APIs for `hipims <https://github.com/HEMLab/hipims>`_.
 
 
 .. toctree::
