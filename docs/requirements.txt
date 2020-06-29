@@ -4,3 +4,4 @@ matplotlib
 imageio
 pandas
 pyshp
+sphinx>=3.1
