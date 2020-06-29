@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# Created on Tue Mar 31 16:20:13 2020
+    
 """
 Raster
 =======
 
 To do:
     Read, write and analyze gridded Raster data
-
-Created on Tue Mar 31 16:20:13 2020
-
-@author: Xiaodong Ming
 
 ---------------
 
