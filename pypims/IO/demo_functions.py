@@ -1,6 +1,7 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Created on Wed Apr  1 14:56:15 2020
+
 """
 
 Demo functions
@@ -8,10 +9,6 @@ Demo functions
 
 To do:
     Create the demo
-
-Created on Wed Apr  1 14:56:15 2020
-
-@author: Xiaodong Ming
 
 ---------------
 
