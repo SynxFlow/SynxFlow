@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+#Created on Wed Jun 24 09:20:53 2020
+
 """
 Landcover
 =========
 
 To do:
     To read, compute, and show Landcover types
-
-Created on Wed Jun 24 09:20:53 2020
-
-@author: Xiaodong Ming
 
 -------------
 
