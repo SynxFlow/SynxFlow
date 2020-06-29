@@ -3,16 +3,35 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pypims's documentation!
-==================================
+Welcome to pypims's documentation
+=================================
+
+Pypims: Python APIs for hipims
+
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
+   :caption: Getting started:
 
-   source/installing
+   quickstart
 
+.. toctree::
+   :maxdepth: 3
+   :caption: List of modules:
 
+   Modules/demo_functions
+   Modules/InputHipims
+   Modules/OutputHipims
+   Modules/Boundary
+   Modules/Landcover
+   Modules/Raster
+   Modules/Rainfall
+   Modules/Summary
+   Modules/rainfall_processing
+   Modules/grid_show
+   Modules/spatial_analysis
+   Modules/indep_functions
+   
 
 Indices and tables
 ==================
@@ -20,3 +39,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-raster
+Raster
+=======
+
 To do:
     Read, write and analyze gridded Raster data
+
 Created on Tue Mar 31 16:20:13 2020
 
 @author: Xiaodong Ming
+
+---------------
+
 """
 import copy
 import math
@@ -20,28 +26,46 @@ from . import grid_show as gs
 class Raster(object):
     """    
     To deal with raster data with a ESRI ASCII or GTiff format
+
     Properties:
+
         source_file: file name to read grid data
+
         output_file: file name to write a raster object
+
         array: a numpy array storing grid cell values
+
         header: a dict storing reference information of the grid
+
         extent: a tuple storing outline limits of the raster (left, right, 
         bottom, top)
+
         shape: shape of the Raster value array
+
         extent_dict: a dictionary storing outline limits of the raster
+
         projection: (string) the Well-Known_Text (wkt) projection information
     
     Methods(public):
+
         Write_asc: write grid data into an asc file with or without 
             compression(.gz)
+
         to_osgeo_raster: convert this object to an osgeo raster object
+
         rect_clip: clip raster according to a rectangle extent
+
         clip: clip raster according to a polygon
+
         rasterize: rasterize a shapefile on the Raster object and return a 
             bool array with 'Ture' in and on the polygon/polyline
+
         resample: resample the raster to a new cellsize
+
         to_points: Get X and Y coordinates of all raster cells
+
         mapshow: draw a map of the raster dataset
+
         VelocityShow: draw velocity vectors as arrows with values on two Raster
             datasets (u, v)
             
@@ -57,13 +81,18 @@ class Raster(object):
                  epsg=None, projection=None, num_header_rows=6):
         """
         source_file: name of a asc/tif file if a file read is needed
+
         array: values in each raster cell [a numpy array]
+
         header: georeference of the raster [a dictionary containing 6 keys]:
             nrows, nclos [int]
             cellsize, xllcorner, yllcorner
             NODATA_value
+
         epsg: epsg code [int]
+
         projection: WktProjection [string]
+
         """
         if epsg is not None:
             projection = self.__set_wkt_projection(epsg)
@@ -94,7 +123,9 @@ class Raster(object):
     def rect_clip(self, clip_extent):
         """
         clip_extent: left, right, bottom, top
+
         clip raster according to a rectangle extent
+
         return:
            a new raster object
         """
@@ -117,11 +148,15 @@ class Raster(object):
     def clip(self, mask=None):
         """
         clip raster according to a mask
+
         mask: 
+
             1. string name of a shapefile
+
             2. numpy vector giving X and Y coords of the mask points
         
         return:
+
             a new raster object
         """
         if isinstance(mask, str):
@@ -146,9 +181,12 @@ class Raster(object):
         """
         rasterize the shapefile to the raster object and return a bool array
             with Ture value in and on the polygon/polyline
+
         shpDSName: string for shapefilename, dataset for ogr('ESRI Shapefile')
             object
+
         return numpy array
+
         """
         from osgeo import gdal, ogr
         if isinstance(shpDSName, str):
@@ -172,28 +210,43 @@ class Raster(object):
     def resample(self, cellsize_n, method='bilinear'):
         """
         resample the raster to a new cellsize
+
         cellsize_n: cellsize of the new raster
+
         method: Resampling method to use. Available methods are:
+
             near: nearest neighbour resampling (default, fastest algorithm, 
-                                                worst interpolation quality).        
+                                                worst interpolation quality). 
+
             bilinear: bilinear resampling.        
+
             cubic: cubic resampling.        
-            cubicspline: cubic spline resampling.        
-            lanczos: Lanczos windowed sinc resampling.        
+
+            cubicspline: cubic spline resampling.     
+
+            lanczos: Lanczos windowed sinc resampling.
+
             average: average resampling, computes the average of all 
-                    non-NODATA contributing pixels.        
+                    non-NODATA contributing pixels.
+
             mode: mode resampling, selects the value which appears most often 
-                    of all the sampled points.        
+                    of all the sampled points.
+
             max: maximum resampling, selects the maximum value from all 
-                    non-NODATA contributing pixels.        
+                    non-NODATA contributing pixels.
+
             min: minimum resampling, selects the minimum value from all 
-                    non-NODATA contributing pixels.        
+                    non-NODATA contributing pixels.
+
             med: median resampling, selects the median value of all 
-                    non-NODATA contributing pixels.        
+                    non-NODATA contributing pixels.
+
             q1: first quartile resampling, selects the first quartile 
-                value of all non-NODATA contributing pixels.        
+                value of all non-NODATA contributing pixels.
+
             q3: third quartile resampling, selects the third quartile 
                 value of all non-NODATA contributing pixels
+
         """
         from osgeo import gdal
         cellSize = self.header['cellsize']
@@ -235,15 +288,21 @@ class Raster(object):
     
     def point_interpolate(self, points, values, method='nearest'):
         """ Interpolate values of 2D points to all cells on the Raster object
+
         2D interpolate
+
         points: ndarray of floats, shape (n, 2)
             Data point coordinates. Can either be an array of shape (n, 2), 
             or a tuple of ndim arrays.
+
         values: ndarray of float or complex, shape (n, )
             Data values.
+
         method: {‘linear’, ‘nearest’, ‘cubic’}, optional
             Method of interpolation.
+
         Alias: Interpolate_to
+
         """
         grid_x, grid_y = self.to_points()
         array_interp = interpolate.griddata(points, values, (grid_x, grid_y),
@@ -255,10 +314,14 @@ class Raster(object):
     
     def grid_interpolate(self, value_grid, method='nearest'):
         """ Interpolate values of a grid to all cells on the Raster object
+
         2D interpolate
+
         value_grid: a grid file string or Raster object 
+
         method: {‘linear’, ‘nearest’, ‘cubic’}, optional
             Method of interpolation.
+
         Return: 
             a numpy array with the same size of the self object
         """
@@ -305,8 +368,10 @@ class Raster(object):
     
     def assign_to(self, new_header):
         """ Assign_to the object to a new grid defined by new_header 
+
         If cellsize are not equal, the origin Raster will be firstly 
         resampled to the target grid.
+
         obj_origin, obj_target: Raster objects
         """
         rows = np.arange(0, new_header['nrows'])
@@ -324,7 +389,9 @@ class Raster(object):
 
     def to_points(self):
         """ Get X and Y coordinates of all raster cells
+
         Alias: GetXYcoordinate
+
         return xv, yv numpy array with the same size of the raster object
         """
         ny, nx = self.array.shape
@@ -340,9 +407,13 @@ class Raster(object):
     def write_asc(self, output_file, EPSG=None, compression=False):
         """
         write raster as asc format file 
+
         output_file: output file name
+
         EPSG: epsg code, if it is given, a .prj file will be written
+
         compression: logic, whether compress write the asc file as gz
+
         Alias: Write_asc
         """
         sp.arcgridwrite(output_file, self.array, self.header, compression)
@@ -362,13 +433,18 @@ class Raster(object):
         """
         convert this object to an osgeo raster object, write a tif file if 
             necessary
+
         filename: the output file name
+
         fileformat: GTiff or AAIGrid
+
         destEPSG: the EPSG projection code default: 27700 British National Grid
                 'EPSG:4326'
+
         return:
             an osgeo raster dataset
             or a tif filename if it is written
+
         Alias: To_osgeo_raster
         """
         from osgeo import gdal, osr
@@ -423,12 +499,19 @@ class Raster(object):
     def mapshow(self, **kwargs):
         """
         Display raster data without projection
+
         figname: the file name to export map
+
         figsize: the size of map
+
         dpi: The resolution in dots per inch
+
         vmin and vmax define the data range that the colormap covers
+
         cax_str: string as the title of the colorbar
+
         relocate: relocate the origin of the grid coordinates to (0, 0)
+
         scale_ratio: 1|1000, axis unit 1 m or 1000 meter
         """
         fig, ax = gs.mapshow(raster_obj=self, **kwargs)
@@ -481,7 +564,9 @@ class Raster(object):
         """
         get coordinate reference system (crs) as Well Known Text (WKT) 
             from https://epsg.io
+
         epsg_code: the epsg code of a crs, e.g. BNG:27700, WGS84:4326
+
         return wkt text
         """
         import requests
@@ -497,9 +582,11 @@ class Raster(object):
 #%%
 def merge(obj_origin, obj_target, resample_method='bilinear'):
     """Merge the obj_origin to obj_target
+
     assign grid values in the origin Raster to the cooresponding grid cells in
     the target object. If cellsize are not equal, the origin Raster will be
     firstly resampled to the target object.
+    
     obj_origin, obj_target: Raster objects
     """
     if obj_origin.header['cellsize'] != obj_target.header['cellsize']:

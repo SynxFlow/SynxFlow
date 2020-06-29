@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-summary
+Summary
+=======
+
 To do:
     To generate, store, write, and read summary information of a flood model
------------------    
+
 Created on Fri Jun  5 15:44:18 2020
 
 @author: Xiaodong Ming
+
+-----------------
+
 """
 #%%
 import os
@@ -17,20 +22,35 @@ import json
 from . import rainfall_processing as rp
 class Summary:
     """ Summary information of a flood case
+
     Attributes:
+
         grid_attr
+
         model_attr
+
         boundary_attr
+
         rain_attr
+
         params_attr
+
         initial_attr
+
     Methods:
+
         set_grid_attr
+
         set_model_attr
+
         set_boundary_attr
+
         set_rain_attr
+
         set_params_attr
+
         set_initial_attr
+        
         display
         
     """

@@ -1,0 +1,2 @@
+.. automodule :: IO.Raster
+   :members:

@@ -2,11 +2,17 @@
 # -*- coding: utf-8 -*-
 """
 Boundary
+========
+
 To do:
     Define boundary conditions for hipims model
+
 Created on Tue Mar 31 16:05:27 2020
 
 @author: Xiaodong Ming
+
+-----------
+
 """
 import warnings
 import numpy as np
@@ -15,30 +21,47 @@ import matplotlib.patches as mplP
 from . import spatial_analysis as sp
 #%% boundary class definition
 class Boundary(object):
-    """Class for boundary conditions
+    """
+    Class for boundary conditions
+
     Public Properties:
+
         num_of_bound: number of boundaries
+
         data_table (data_frame) including attributes:
+
             type: a list of string 'open', 'rigid', 'fall'
                     input-output boundary is open boundary with given water
                     depth and/or velocities
+
             extent: (2-col numpy array) poly points to define the extent of a
                     IO boundary. If extent is not given, then the boundary is
                     the domain outline
+
             hSources: a two-col numpy array. The 1st col is time(s). The 2nd
                     col is water depth(m)
+
             hUSources: a two-col numpy array. The 1st col is time(s). The 2nd
                     col is discharge(m3/s) or a three-col numpy array, the 2nd
                     col and the 3rd col are velocities(m/s) in x and y
                     direction, respectively.
+
             h_code: 3-element int to define the type of depth boundary
+
             hU_code: 3-element int to define th type of velocity boundary
+
             description: (str) description of a boundary
+
     Private Properties:
+
         code: 3-element row vector for each boundary cell
-    Methods
+
+    Methods:
+    
         print_summary: print the summary information of a boundary object
+
         Gen3Code: Generate 3-element boundary codes
+
         CellLocate: fine boundary cells with given extent
     """
     def __init__(self, boundary_list=None, outline_boundary='fall'):

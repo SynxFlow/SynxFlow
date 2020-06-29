@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
--------------------------------------------------------------------------------
 InputHipims
+===========
+
 Generate input files for a hipims flood model
--------------------------------------------------------------------------------
+
 @author: Xiaodong Ming
 Created on Tue Mar 31 16:03:57 2020
--------------------------------------------------------------------------------
+
 Assumptions:
+
 - Input DEM is a regular DEM file
 - its map unit is meter
 - its cellsize is the same in both x and y direction
 - its reference position is on the lower left corner of the southwest cell
 - All the other grid-based input files must be consistent with the DEM file
+
 To do:
+
 - generate input (including sub-folder mesh and field) and output folders
 - generate mesh file (DEM.txt) and field files
 - divide model domain into small sections if multiple GPU is used
+
 Structure:
    class InputHipims
        - Initialize an object: __init__
@@ -25,6 +30,9 @@ Structure:
            set_boundary_condition, set_parameter, set_rainfall, 
            set_gauges_position, set_case_folder, set_runtime, set_device_no,
            add_user_defined_parameter, set_num_of_sections
+
+------------
+
 """
 __author__ = "Xiaodong Ming"
 import os
@@ -42,82 +50,100 @@ from . import indep_functions as indep_f
 from . import rainfall_processing as rp
 #%% definition of class InputHipims
 class InputHipims:
-    """To define input files for a HiPIMS flood model case
+    """
+    To define input files for a HiPIMS flood model case
     Read data, process data, write input files, and save data of a model case.
+
     Properties (public):
+
         case_folder: (str) the absolute path of the case folder
+
         data_folders: (dict) paths for data folders(input, output, mesh, field)
+
         num_of_sections: (scalar) number of GPUs to run the model
+
         shape: shape of the DEM array
+
         header: (dict) header of the DEM grid
+
         __attributes_default: (dict) default model attribute names and values
+
         attributes: (dict) model attribute names and values
+
         times:  (list/numpy array) of four values reprenting model run time in
-                seconds: start, end, output interval, backup interval
+                    seconds: start, end, output interval, backup interval
+
         device_no: (int) the gpu device id(s) to run model
-        param_per_landcover: dict, argument to set grid parameters using Landcover
-            object. Keys are grid parameter names. Value is a dict with three
-            keys: param_value, land_value, default_value. Refer to Landcover
-            for more details.
-        -------
-        Objects
-        -------
+
+        param_per_landcover: dict, argument to set grid parameters using Landcover object. Keys are grid parameter names. Value is a dict with three keys: param_value, land_value, default_value. Refer to Landcover for more details.
+        
+    Objects:
+
         Sections: a list of objects of child-class InputHipimsSub
+
         Boundary: To create a Boundary object for boundary conditions
-            The object contains
-                  outline_boundary, a dataframe of boundary type, extent,
-                  source data, code, ect..., and a boundary subscrpits
-                  tuple (cell_subs).For multi-GPU case, a boundary subscrpits
-                  tuple (cell_subs_l) based on sub-grids will be created for 
-                  each section
-            outline_boundary: (str) 'open'|'rigid', default outline boundary is
-                open and both h and hU are set as zero
-            boundary_list: (list of dicts), each dict contain keys (polyPoints,
-                type, h, hU) to define a IO boundary's position, type, and
-                Input-Output (IO) sources timeseries. Keys including:
-                1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
-                    coordinates of points to define the position of a boundary.
-                    An empty polyPoints means outline boundary.
-                2.type: 'open'(flow out flatly), 'rigid'(no outlet),
-                        'fall'(water flow out like a fall)
-                3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
-                     is water depth(m)
-                4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
-                    col is discharge(m3/s) or a three-col numpy array, the 2nd
-                    col and the 3rd col are velocities(m/s) in x and y
-                    direction, respectively.
-            cell_subs: (list of tuple) subsripts of cells for each boundary
-            cell_id: (list of vector) valid id of cells for each boundary
+                The object contains outline_boundary, a dataframe of boundary type, extent, source data, code, ect..., and a boundary subscrpits tuple (cell_subs). For multi-GPU case, a boundary subscrpits tuple (cell_subs_l) based on sub-grids will be created for each section
+
+        outline_boundary: (str) 'open'|'rigid', default outline boundary is open and both h and hU are set as zero
+
+        boundary_list: (list of dicts), each dict contain keys (polyPoints, type, h, hU) to define a IO boundary's position, type, and Input-Output (IO) sources timeseries. Keys including:
+
+            1. polyPoints is a numpy array giving X(1st col) and Y(2nd col) coordinates of points to define the position of a boundary. An empty polyPoints means outline boundary.
+
+            2. type: 'open'(flow out flatly), 'rigid'(no outlet), 'fall'(water flow out like a fall)
+
+            3. h: a two-col numpy array. The 1st col is time(s). The 2nd col is water depth(m)
+
+            4. hU: a two-col numpy array. The 1st col is time(s). The 2nd col is discharge(m3/s) or a three-col numpy array, the 2nd col and the 3rd col are velocities(m/s) in x and y
+                direction, respectively.
+                
+        cell_subs: (list of tuple) subsripts of cells for each boundary
+
+        cell_id: (list of vector) valid id of cells for each boundary
+        
         DEM: a Raster object to provide DEM data [alias: Raster].
+
         Rainfall: a Rainfall object to provide rainfall data
-        Landcover: a Landcover object to provide landcover data for setting
-            gridded parameters
             
+        Landcover: a Landcover object to provide landcover data for setting gridded parameters
+                
         Summary: a Summary object to record model information
+    
     Properties (Private):
-        _valid_cell_subs: (tuple, int numpy) two numpy array indicating rows
-            and cols of valid cells on the DEM array and sorted based on the
-            valid_cell_id, starting from the bottom-left valid cell towards
-            right and up on the DEM array.
-        _outline_cell_subs: (tuple, int numpy) two numpy array indicating rows
-            and cols of outline cells on the DEM array and sorted based on the
-            valid_cell_id from small to large
+
+        _valid_cell_subs: (tuple, int numpy) two numpy array indicating rows and cols of valid cells on the DEM array and sorted based on the valid_cell_id, starting from the bottom-left valid cell towards right and up on the DEM array.
+
+        _outline_cell_subs: (tuple, int numpy) two numpy array indicating rows and cols of outline cells on the DEM array and sorted based on the valid_cell_id from small to large
+
     Methods (public):
+
         set_parameter: set grid-based parameters
+
         set_boundary_condition: set boundary condition with a boundary list
+
         set_rainfall: set rainfall mask and sources
+
         set_gauges_position: set X-Y coordinates of monitoring  gauges
+
         write_input_files: write all input files or a specific file
+
         write_grid_files: write grid-based data files
-        write_boundary_conditions: write boundary sources, if flow time series
-            is given, it will be converted to velocities in x and y directions
+
+        write_boundary_conditions: write boundary sources, if flow time series is given, it will be converted to velocities in x and y directions
+
         write_gauges_position: write coordinates of monitoring gauges
+
         write_halo_file: write overlayed cell ID for multiple GPU cases
+
     Classes:
-        InputHipimsSub: child class of InputHiPIMS, provide information
-            of each sub-domain
+        InputHipimsSub: child class of InputHiPIMS, provide information of each sub-domain
+
         Boundary: provide information of boundary conditions
+
         ModelSummary: record basic information of an object of InputHiPIMS
+
+    ----------------
+    
     """
 #%%****************************************************************************
 #***************************initialize an object*******************************
@@ -142,9 +168,8 @@ class InputHipims:
                  data_path=None):
         """
         dem_data: (Raster object) or (str) provides file name of the DEM data
-        data_folder: a path contain at least a DEM file named as 'DEM' with a
-            suffix .gz|.asc|.tif. 'landcover' and 'rain_mask' can also be read if
-            these files were given with one of the three suffix
+
+        data_folder: a path contain at least a DEM file named as 'DEM' with a suffix .gz|.asc|.tif. 'landcover' and 'rain_mask' can also be read if these files were given with one of the three suffix
         """
         self.attributes = InputHipims.__attributes_default.copy()
         self.num_of_sections = num_of_sections
@@ -223,8 +248,10 @@ class InputHipims:
 
     def set_initial_condition(self, parameter_name, parameter_value):
         """ Set initial condition for h0, hU0x, hU0y
-        parameter_name: (str) h0, hU0x, hU0y
-        parameter_value: scalar or numpy array with the same size of DEM.
+
+        **parameter_name**: (str) h0, hU0x, hU0y
+        
+        **parameter_value**: scalar or numpy array with the same size of DEM.
         """
         if parameter_name not in ['h0', 'hU0x', 'hU0y']:
             raise ValueError('Parameter is not recognized: '+parameter_name)
@@ -241,11 +268,19 @@ class InputHipims:
     
     def set_grid_parameter(self, **kwargs):
         """ Set grid parameter with Landcover object as name=value
+
         kwargs: Keyword Arguments Specified by a Dictionary
+
         keyword: name, from grid_parameter_keys
-        value:  1. scalar, a uniform parameter value
-                2. array, gridded parameter value with the same size of DEM
-                3. dict, contain param_value, land_value, default_value=0
+
+        value:  
+        
+            1. scalar, a uniform parameter value
+
+            2. array, gridded parameter value with the same size of DEM
+
+            3. dict, contain param_value, land_value, default_value=0
+
         Return: save a parameter dictionary
         """
         if not hasattr(self, 'param_per_landcover'):
@@ -272,12 +307,10 @@ class InputHipims:
 
     def set_rainfall(self, rain_mask=None, rain_source=None):
         """ Set rainfall mask and rainfall source
-        rain_mask: str [filename of a Raster endswith .gz/asc/tif]
-                   numpy int array with the same shape with DEM array
-                   a Raster object
-        rain_source: numpy array the 1st column is time in seconds, 2nd to
-             the end columns are rainfall rates in m/s.
-                     str [filename of a csv file for rainfall source data]
+        
+        rain_mask: str [filename of a Raster endswith .gz/asc/tif] numpy int array with the same shape with DEM array a Raster object
+        
+        rain_source: numpy array the 1st column is time in seconds, 2nd to the end columns are rainfall rates in m/s. str [filename of a csv file for rainfall source data]
         """
         if not hasattr(self, 'Rainfall'):
             self.Rainfall = Rainfall(self.attributes['precipitation_mask'], 
@@ -324,7 +357,9 @@ class InputHipims:
 
     def set_case_folder(self, new_folder=None, make_dir=False):
         """ Initialize, renew, or create case and data folders
+
         new_folder: (str) renew case and data folder if it is given
+
         make_dir: True|False create folders if it is True
         """
         # to change case_folder
@@ -343,7 +378,9 @@ class InputHipims:
 
     def set_runtime(self, runtime=None):
         """set runtime of the model
+
         runtime: a list of four values representing start, end, output interval
+
         and backup interval respectively
         """
         if runtime is None:
@@ -360,6 +397,7 @@ class InputHipims:
 
     def set_device_no(self, device_no=None):
         """set device no of the model
+
         device_no: int or a list of int corresponding to the number of sections 
         """
         if device_no is None:
@@ -374,7 +412,9 @@ class InputHipims:
 
     def add_user_defined_parameter(self, param_name, param_value):
         """ Add a grid-based user-defined parameter to the model
+
         param_name: (str) name the parameter and the input file name as well
+
         param_value: (scalar) or (numpy arary) with the same size of DEM array
         """
         if param_name not in InputHipims.__grid_files:
@@ -384,6 +424,7 @@ class InputHipims:
     
     def set_num_of_sections(self, num_of_sections):
         """ set the number of divided sections to run a case
+
         can transfer single-gpu to multi-gpu and the opposite way
         """
         self.num_of_sections = num_of_sections
@@ -421,8 +462,8 @@ class InputHipims:
 #************************Write input files*************************************
     def write_input_files(self, file_tag=None):
         """ Write input files
-        To classify the input files and call functions needed to write each
-            input files
+        To classify the input files and call functions needed to write each input files
+
         file_tag: str or list of str including
         """
         self._make_data_dirs()
@@ -461,7 +502,9 @@ class InputHipims:
 
     def write_grid_files(self, file_tag, is_single_gpu=False):
         """Write grid-based files
+
         Public version for both single and multiple GPUs
+
         file_tag: the pure name of a grid-based file
         """
         self._make_data_dirs()
@@ -479,8 +522,8 @@ class InputHipims:
 
     def write_boundary_conditions(self):
         """ Write boundary condtion files
-        if there are multiple domains, write in the first folder
-            and copy to others
+
+        if there are multiple domains, write in the first folder and copy to others
         """
         self._make_data_dirs()
         if self.num_of_sections > 1:  # multiple-GPU
@@ -496,6 +539,7 @@ class InputHipims:
 
     def write_rainfall_source(self):
         """Write rainfall source data
+
         rainfall mask can be written by function write_grid_files
         """
         self._make_data_dirs()
@@ -511,6 +555,7 @@ class InputHipims:
 
     def write_gauges_position(self, gauges_pos=None):
         """ Write the gauges position file
+
         Public version for both single and multiple GPUs
         """
         self._make_data_dirs()
@@ -552,8 +597,7 @@ class InputHipims:
         print('halo.dat created')
 
     def write_mesh_file(self, is_single_gpu=False):
-        """ Write mesh file DEM.txt, compatoble for both single and multiple
-        GPU model
+        """ Write mesh file DEM.txt, compatoble for both single and multiple GPU model
         """
         self._make_data_dirs()
         if is_single_gpu is True or self.num_of_sections == 1:
@@ -632,9 +676,8 @@ class InputHipims:
 
     def plot_rainfall_curve(self, start_date=None, method='mean', **kw):
         """ Plot time series of average rainfall rate inside the model domain
-        start_date: a datetime object to give the initial date and time of rain
-        method: 'mean'|'max','min','mean'method to calculate gridded rainfall 
-        over the model domain
+
+        start_date: a datetime object to give the initial date and time of rain method: 'mean'|'max','min','mean'method to calculate gridded rainfall over the model domain
         """
         rain_source = self.attributes['precipitation_source']
         rain_mask = self.attributes['precipitation_mask']
@@ -649,9 +692,13 @@ class InputHipims:
 #*************************** Protected methods ********************************
     def _get_cell_subs(self, dem_array=None):
         """ To get valid_cell_subs and outline_cell_subs for the object
+
         To get the subscripts of each valid cell on grid
+
         Input arguments are for sub Hipims objects
+
         _valid_cell_subs
+
         _outline_cell_subs
         """
         if dem_array is None:
@@ -672,6 +719,7 @@ class InputHipims:
     def __divide_grid(self):
         """
         Divide DEM grid to sub grids
+
         Create objects based on sub-class InputHipimsSub
         """
         if isinstance(self, InputHipimsSub):
@@ -733,12 +781,13 @@ class InputHipims:
 
     def _get_vector_value(self, attribute_name, is_multi_gpu=True,
                           add_initial_water=True):
-        """ Generate a single vector for values in each grid cell sorted based
-        on cell IDs
+        """ Generate a single vector for values in each grid cell sorted based on cell IDs
+
         attribute_name: attribute names based on a grid
+
         Return:
-            output_vector: a vector of values in global valid grid cells
-                            or a list of vectors for each sub domain
+
+            output_vector: a vector of values in global valid grid cells or a list of vectors for each sub domain
         """
         # get grid value
         dem_shape = self.shape
@@ -859,6 +908,7 @@ class InputHipims:
     def _write_grid_files(self, file_tag, is_multi_gpu=True):
         """ Write input files consistent with the DEM grid
         Private function called by public function write_grid_files
+
         file_name: includes ['h','hU','precipitation_mask',
                              'manning','sewer_sink',
                              'cumulative_depth', 'hydraulic_conductivity',
@@ -914,11 +964,14 @@ class InputHipims:
 #*************** Private methods only for the parent class ********************
 #------------------------------------------------------------------------------
     def __write_boundary_conditions(self, field_dir, file_tag='both'):
-        """ Write boundary condition source files,if hU is given as flow
-        timeseries, convert flow to hUx and hUy.
+        """ Write boundary condition source files,if hU is given as flow timeseries, convert flow to hUx and hUy.
+        
         Private function to call by public function write_boundary_conditions
+        
         file_tag: 'h', 'hU', 'both'
+        
         h_BC_[N].dat, hU_BC_[N].dat
+        
         if hU is given as flow timeseries, convert flow to hUx and hUy
         """
         obj_boundary = self.Boundary
@@ -965,8 +1018,11 @@ class InputHipims:
 
     def __write_gauge_pos(self, file_folder):
         """write monitoring gauges
-        gauges_pos.dat
+        
+            gauges_pos.dat
+        
         file_folder: folder to write file
+        
         gauges_pos: 2-col numpy array of X and Y coordinates
         """
         gauges_pos = self.attributes['gauges_pos']
@@ -980,8 +1036,11 @@ class InputHipims:
 
     def __write_gauge_ind(self, file_folder):
         """write monitoring gauges index for mult-GPU sections
-        gauges_ind.dat
+
+            gauges_ind.dat
+        
         file_folder: folder to write file
+        
         gauges_ind: 1-col numpy array of index values
         """
         gauges_ind = self.attributes['gauges_ind']
@@ -995,9 +1054,13 @@ class InputHipims:
 
     def __copy_to_all_sections(self, file_names):
         """ Copy files that are the same in each sections
+        
         file_names: (str) files written in the first seciton [0]
+        
         boundary source files: h_BC_[N].dat, hU_BC_[N].dat
+        
         rainfall source files: precipitation_source_all.dat
+        
         gauges position file: gauges_pos.dat
         """
         if type(file_names) is not list:
@@ -1009,7 +1072,9 @@ class InputHipims:
     
     def _setup_by_files(self, data_path):
         """Read files to setup hipims input object
+        
         DEM, landcover, rain_mask, endswith '.gz', '.asc', or '.tif'
+        
         rain_source.csv
         """
         data_path = self.data_path
@@ -1036,16 +1101,23 @@ class InputHipims:
 #************************sub-class definition**********************************
 class InputHipimsSub(InputHipims):
     """object for each section, child class of InputHipims
+
     Attributes:
+
         sectionNO: the serial number of each section
-        _valid_cell_subs: (tuple, int) two numpy array indicating rows and cols
-        of valid cells on the local grid
-        valid_cell_subsOnGlobal: (tuple, int) two numpy array indicating rows
-        and cols of valid cells on the global grid
+
+        _valid_cell_subs: (tuple, int) two numpy array indicating rows and cols of valid cells on the local grid
+
+        valid_cell_subsOnGlobal: (tuple, int) two numpy array indicating rows and cols of valid cells on the global grid
+
         shared_cells_id: 2-row shared Cells id on a local grid
+
         case_folder: input folder of each section
-        _outline_cell_subs: (tuple, int) two numpy array indicating rows and 
-        cols of valid cells on a local grid
+
+        _outline_cell_subs: (tuple, int) two numpy array indicating rows and cols of valid cells on a local grid
+    
+    ---------
+
     """
     section_id = 0
     def __init__(self, dem_array, header, case_folder, num_of_sections):

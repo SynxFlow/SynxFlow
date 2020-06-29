@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-indep_functions
+Independent functions
+=====================
+
 To do:
     non-object-based independent functions to support hipims IO
------------------    
+    
 Created on Thu Apr 23 11:45:24 2020
 
 @author: Xiaodong Ming
+
+-----------------
+
 """
 import copy
 import gzip
@@ -76,10 +81,10 @@ def clean_output(case_folder, num_of_sections, file_tag='*'):
 # *************************Public functions************************************
 def write_times_setup(case_folder=None, num_of_sections=1, time_values=None):
     """
-    Generate a times_setup.dat file. The file contains numbers representing
-    the start time, end time, output interval, and backup interval in seconds
-    time_values: array or list of int/float, representing time in seconds,
-        default values are [0, 3600, 1800, 3600]
+    Generate a times_setup.dat file. The file contains numbers representing the start time, end time, output interval, and backup interval in seconds
+
+    time_values: array or list of int/float, representing time in seconds, default values are [0, 3600, 1800, 3600]
+
     """
     case_folder = _check_case_folder(case_folder)
     if time_values is None:
@@ -95,10 +100,12 @@ def write_times_setup(case_folder=None, num_of_sections=1, time_values=None):
 def write_device_setup(case_folder=None,
                        num_of_sections=1, device_values=None):
     """
-    Generate a device_setup.dat file. The file contains numbers representing
-    the GPU number for each section
+    Generate a device_setup.dat file. The file contains numbers representing the GPU number for each section
+
     case_folder: string, the path of model
+
     num_of_sections: int, the number of GPUs to use
+
     device_values: array or list of int, representing the GPU number
     """
     case_folder = _check_case_folder(case_folder)
@@ -115,11 +122,11 @@ def write_device_setup(case_folder=None,
 
 def write_rain_source(rain_source, case_folder=None, num_of_sections=1):
     """ Write rainfall sources [Independent function from hipims class]
-    rain_source: numpy array, The 1st column is time in seconds, the 2nd
-        towards the end columns are rainfall rate in m/s for each source ID in
-        rainfall mask array
-    if for multiple GPU, then copy the rain source file to all domain folders
+
+    rain_source: numpy array, The 1st column is time in seconds, the 2nd towards the end columns are rainfall rate in m/s for each source ID in rainfall mask array if for multiple GPU, then copy the rain source file to all domain folders
+
     case_folder: string, the path of model
+
     """
     rain_source = np.array(rain_source)
     # check rainfall source value to avoid very large raifall rates
@@ -145,12 +152,15 @@ def write_rain_source(rain_source, case_folder=None, num_of_sections=1):
 
 def _write_two_arrays(file_name, id_values, bound_id_code=None):
     """Write two arrays: cell_id-value pairs and bound_id-bound_code pairs
+
     Inputs:
+
         file_name :  the full file name including path
+
         id_values: valid cell ID - value pair
-        bound_id_code: boundary cell ID - codes pair. If bound_id_code is not
-            given, then the second part of the file won't be written (only
-            the case for precipitatin_mask.dat)
+
+        bound_id_code: boundary cell ID - codes pair. If bound_id_code is not given, then the second part of the file won't be written (only the case for precipitatin_mask.dat)
+
     """
     if not file_name.endswith('.dat'):
         file_name = file_name+'.dat'
@@ -203,11 +213,17 @@ def _create_io_folders(case_folder, make_dir=False):
 
 def _split_array_by_rows(input_array, header, split_rows, overlayed_rows=2):
     """ Clip an array into small ones according to the seperating rows
+
     input_array : the DEM array
+
     header : the DEM header
+
     split_rows : a list of row subscripts to split the array
+
     Split from bottom to top
+
     Return array_local, header_local: lists to store local DEM array and header
+
     """
     header_global = header
     end_row = header_global['nrows']-1
@@ -259,9 +275,11 @@ def _get_split_rows(input_array, num_of_sections):
 
 def _get_cell_id_array(dem_array):
     """ to generate two arrays with the same size of dem_array:
-    1. valid_id: to store valid cell id values (sequence number )
-        starting from 0, from bottom, left to right, top
+
+    1. valid_id: to store valid cell id values (sequence number) starting from 0, from bottom, left to right, top
+
     2. outline_id: to store valid cell id on the boundary cells
+
     valid_id, outline_id = __get_cell_id_array(dem_array)
     """
     # convert DEM to a two-value array: NaNs and Ones
@@ -298,13 +316,16 @@ def _get_cell_id_array(dem_array):
 def _cell_subs_convertor(input_cell_subs, header_global,
                          header_local, to_global=True):
     """
-    Convert global cell subs to divided local cell subs or the otherwise
-    and return output_cell_subs, only rows need to be changed
+    Convert global cell subs to divided local cell subs or the otherwise and return output_cell_subs, only rows need to be changed
+
     input_cell_subs : (tuple) input rows and cols of a grid
+
     header_global : head information of the global grid
+
     header_local : head information of the local grid
-    to_global : logical values, True (local to global) or
-                                False(global to local)
+
+    to_global : logical values, True (local to global) or False(global to local)
+
     Return:
         output_cell_subs: (tuple) output rows and cols of a grid
     """

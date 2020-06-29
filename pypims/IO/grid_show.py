@@ -1,20 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-grid_show.py
+grid_show
+============
+
 To do:
+
     To visulize grid data, e.g. raster objec(s)
+
     static map functions:
+
     1. mapshow: general map of the grid values
+
     2. rankshow: show grid values in ranks
+
     3. hillshade: show a hillshade map of a grid
-    4. vectorshow: show a vector map of two grids       
-    animation functions:
+
+    4. vectorshow: show a vector map of two grids animation functions:
+
     5. make_gif: create a gif file to show values of a series of grids
+
     6. make_mp4: create a video file to show values of a series of grids
+
 Created on Tue Mar 10 15:37:28 2020
 
 @author: Xiaodong Ming
+
+------------------
+
 """
 import os
 import copy
@@ -35,14 +48,21 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None,
             cax=True, cax_str=None, relocate=False, scale_ratio=1, **kwargs):
     """
     Display raster data without projection
+
     raster_obj: a Raster object
+
     array, header: to make Raster object if raster_obj is not given
-    figname: the file name to export map, if figname is empty, then
-        the figure will not be saved
+
+    figname: the file name to export map, if figname is empty, then the figure will not be saved
+
     figsize: the size of map
+
     dpi: The resolution in dots per inch
+
     vmin and vmax define the data range that the colormap covers
+
     **kwargs: keywords argument of function imshow
+
     """
     if raster_obj is not None:
         array = raster_obj.array
@@ -83,10 +103,13 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
              colorbar_kw=None, legend_kw=None,
              relocate=False, scale_ratio=1, alpha=1, **kwargs):
     """ Display water depth map in ranks defined by breaks
-    breaks: list of values to define rank. Array values lower than the first
-        break value are set as nodata.
+
+    breaks: list of values to define rank. Array values lower than the first break value are set as nodata.
+
     color: color series of the ranks
+
     colorbar_kw: dict, keyword arguments to set colorbar
+
     legend_kw: dict, keyword arguments to set legend
     
     """
@@ -137,8 +160,8 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
 
 def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, **kwargs):
     """
-    plot velocity map of U and V, whose values stored in two raster
-    objects seperately
+    plot velocity map of U and V, whose values stored in two raster objects seperately
+
     """
     X, Y = obj_x.to_points()        
     U = obj_x.array
@@ -160,11 +183,16 @@ def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, **kwargs):
 def make_gif(output_file, obj_list=None, header=None, array_3d=None, 
                      time_str=None, breaks=None, fig_names=None,
                      duration=0.5, delete=False, **kwargs):
-    """ Create animation of gridded data    
+    """ Create animation of gridded data
+
     mask_header: (dict) header file provide georeference of rainfall mask
+
     start_date: a datetime object to give the initial date and time of rain
+
     duration: duration for each frame (seconds)
+
     cellsize: sclar (meter) the size of rainfall grid cells
+
     """
     if fig_names is None:
         fig_names = _plot_temp_figs(obj_list, header, array_3d, breaks,
@@ -183,12 +211,15 @@ def make_mp4(output_file, obj_list=None, header=None, array_3d=None,
                time_str=None, breaks=None, fig_names=None, delete=False,
                fps=10, **kwargs):
     """ Create a video file based on a series of grids
+
     obj_list: a list of Raster objects
-    header: a header dict providing georeference the grid [not necessary if 
-                                                           obj_list was given]
-    array_3d: a 3D numpy array storing grid values for each timestep 
-                (in 1st dimension), [not necessary if obj_list was given]
+
+    header: a header dict providing georeference the grid [not necessary if obj_list was given]
+
+    array_3d: a 3D numpy array storing grid values for each timestep (in 1st dimension), [not necessary if obj_list was given]
+
     time_str: a list of string to show time information for each frame
+
     """
     if fig_names is None:
         fig_names = _plot_temp_figs(obj_list, header, array_3d, breaks,
@@ -235,7 +266,9 @@ def plot_shape_file(shp_file, figsize=None, ax=None, color='r', linewidth=0.5,
 def _plot_temp_figs(obj_list=None, header=None, array_3d=None,
                     breaks=None, time_str=None, **kwargs):
     """plot a series of temp pictures and save to make animation
+
     plot_fun: the function to plot
+
     """
     """ Create a video file based on a series of grids
     """
@@ -297,8 +330,9 @@ def _set_rank_colorbar(ax, img, norm):
 
 def _set_color_legend(ax, norm, cmp, legend_kw):
     """ Set color legend attributes
-    legend_kw: dict, keyword arguments to set legend, eg:
-        {loc:'lower right', bbox_to_anchor:(1,0), facecolor:None}
+
+    legend_kw: dict, keyword arguments to set legend, eg: {loc:'lower right', bbox_to_anchor:(1,0), facecolor:None}
+
     """
     category_names = [(str(norm.boundaries[ii-1])+'~'+
                        str(norm.boundaries[ii]))
@@ -319,8 +353,11 @@ def _set_continous_colorbar(ax, img, cax_str=None,
                             loc='right', size='3%', pad=0.05,
                             fontsize='small'):
     """ Set a continous color bar
+
     cbar = _set_continous_colorbar(ax, img, cax_str=None)
+
     cax_str: title of color bar
+
     """
     divider = make_axes_locatable(ax)
     cax = divider.append_axes(loc, size=size, pad=pad)
@@ -334,9 +371,11 @@ def _set_continous_colorbar(ax, img, cax_str=None,
 def _adjust_axis_tick(ax, relocate=True, scale_ratio=1):
     """
     Adjust the axis tick to a new staring point and/or new unit 
+
     Example:
-        if scale_ratio = 1000, and the original extent unit is meter,
-        then the unit is converted to km, and the extent is divided by 1000
+
+        if scale_ratio = 1000, and the original extent unit is meter, then the unit is converted to km, and the extent is divided by 1000
+        
     """
     xticks = ax.get_xticks()
     x_space = xticks[1]-xticks[0]

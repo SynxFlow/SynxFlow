@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-output_setup
+OutputHipims
+============
+
 To do:
     Process output files from HiPIMS
+
 Created on Wed Apr  1 23:46:54 2020
 
 @author: Xiaodong Ming
+
+----------------------
+
 """
 import os
 import datetime
@@ -18,34 +24,51 @@ from .Raster import Raster
 from .indep_functions import save_object, _create_io_folders
 class OutputHipims:
     """To read and analyze otuput files from a HiPIMS flood model
+
     Properties (public):
+
         case_folder: (str) the absolute path of the case folder
+
         input_folder: (str|list of strings) the absolute path of the 
             input folder(s)
+
         output_folder: (str|list of strings) the absolute path of the 
             output folder(s)
+
         number_of_sections: (int) the number of subdomains of the model
+
         header: (dict or list of dict) provide the header information
+
         header_list: a list of sub headers [only for multi-gpu model]
         ref_datetime: 
+
         times_simu: (dataframe) with variable 'times' (simulated time in 
                     seconds) and 'date_times' if ref_datetime is defined.
+
         gauge_values_all: (dict) 'h', 'eta', 'hU', array with values of all 
             gauge positions, not time column
+
         gauge_values: gauge timeseries summarized from a series of gauge points
+
         grid_results: a list of Raster objects for gridded results
         
     Methods (public):
+
         read_gauges_file: Read time seires of values at monitored gauges and
             return gauges_pos, times, values
+
         read_grid_file: read grid file(s) and return a grid object
+
         add_gauge_results: add simulated value to the object gauge by gauge
+
         add_grid_results: Read and return Raster object to attribute 
             'grid_results'
+
         add_all_gauge: add all gauges as seperate records when each gauge
             position individually represent one gauge
-        gauge
+
     Methods (private):
+
     """  
     def __init__(self, input_obj=None, case_folder=None,
                  num_of_sections=None, header_file_tag=None):
@@ -86,12 +109,18 @@ class OutputHipims:
 
     def read_gauges_file(self, file_tag='h', compressed=False):
         """ Read gauges files for time seires of values at the monitored gauges
+
         file_tag: h, hU, eta, corresponding to h_gauges.dat, hU_gauges.dat,
             and eta_gauges.dat, respectively
+
         Return:
+
             gauges_pos: the coordinates of gauges within the model domain
+
             time_series: time in seconds
+
             values: gauge values corresponding to the gauges position
+
         """
         if self.num_of_sections==1:
             output_folder = self.output_folder
@@ -128,9 +157,13 @@ class OutputHipims:
     
     def read_grid_file(self, file_tag='h_0', compressed=False):
         """Read asc grid files from output
-        Return
+
+        Return:
+
             grid_array: a numpy array provides the cell values in grid
+
             header: a dict provide the header information of the grid
+
         """
         if not file_tag.endswith('.asc'):
             file_tag = file_tag+'.asc'
@@ -147,8 +180,11 @@ class OutputHipims:
     def add_gauge_results(self, var_name, gauge_name='All', gauge_ind=None,  
                           compressed=False):
         """ add simulated value to the object gauge by gauge
+
         var_name: 'h', 'hU', 'eta'
+
         gauge_name: 'All' add all gauges, then gauge_ind not needed
+
         """
         # read all gauge data in all positions
         if not hasattr(self, 'gauge_values_all'):
@@ -186,7 +222,9 @@ class OutputHipims:
     
     def add_grid_results(self, result_names, compressed=False):
         """Read and return Raster object to attribute 'grid_results'
+
         result_names: string or list of string, gives the name of grid file
+
         """
         if not hasattr(self, 'grid_results'):
             self.grid_results = {}
@@ -209,6 +247,7 @@ class OutputHipims:
     
     def _combine_multi_gpu_grid_data(self, asc_file_name):
         """Combine multi-gpu grid files into a single file
+
         asc_file_name: string endswith '.asc'
         """
         header_global = self.header
@@ -225,6 +264,7 @@ class OutputHipims:
     
     def _set_IO_folders(self):
         """ Set input and output folder/folders
+
         case_folder, num_of_sections are required
         """
         case_folder = self.case_folder
@@ -246,8 +286,11 @@ class OutputHipims:
     
     def _set_grid_header(self, asc_file=None):
         """set header for the grid of the output object
+
         num_of_sections, input_folder, output_folder are required
+
         asc_file: the file to get grid header, default is DEM.txt
+
         """
         
         num_of_sections = self.num_of_sections
@@ -292,9 +335,13 @@ class OutputHipims:
 #%% =======================Supporting functions===============================
 def _combine_gauges_data_via_ind(case_folder, num_section, file_tag):
     """Combine gauges outputs from multi-gpu models according to gauges
+
     position index.
+
     gauge_ind.dat
+
     gauge_pos.dat in each subdoamin input/field folder
+
     """
     # read index
     ind_list =[]
@@ -342,8 +389,11 @@ def _combine_gauges_data_via_ind(case_folder, num_section, file_tag):
     
 def _combine_multi_gpu_gauges_data(header_list, case_folder, file_tag):
     """ Combine gauges outputs from multi-gpu models according to gauges
+
     position data.
+
     gauges_pos.dat for each domain must be available
+
     """
     gauges_array = []
     value_array = []
@@ -371,9 +421,13 @@ def _combine_multi_gpu_gauges_data(header_list, case_folder, file_tag):
 
 def _find_gauges_inside_domain(domain_header, gauge_xy):
     """ Find the gauges inside a domain
+
     domain_header: (dict) header of the domain DEM
+
     gauge_xy: xy coordinate of the gauges
+
     Return: (numpy array) index of gauges inside the model domain
+
     """
     extent = sp.header2extent(domain_header)
     ind_x = np.logical_and(gauge_xy[:, 0] > extent[0],
@@ -387,7 +441,9 @@ def _find_gauges_inside_domain(domain_header, gauge_xy):
 def _read_one_gauge_file(file_name, gauge_ind=None):
     """ Read a gauge file and return time series and values with outside gauges
     removed
+
     Supporting function to read_gauges_file
+
     """
     t_value = np.loadtxt(file_name, dtype='float64', ndmin=2)
     times = t_value[:, 0]
@@ -403,9 +459,13 @@ def _read_one_gauge_file(file_name, gauge_ind=None):
 
 def _header2row_numbers(local_header, global_header):
     """Calculate local grid starting and ending rows in global grid
+
     Return:
+
         ind_top: the index of the top row
+
         ind_bottom: the index of the bottom row
+        
     """
     y_bottom_gap = local_header['yllcorner']-global_header['yllcorner']
     row_gap = round(y_bottom_gap/local_header['cellsize'])
