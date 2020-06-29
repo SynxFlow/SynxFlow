@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+#Created on Fri Jun  5 15:44:18 2020
+
 """
 Summary
 =======
 
 To do:
     To generate, store, write, and read summary information of a flood model
-
-Created on Fri Jun  5 15:44:18 2020
-
-@author: Xiaodong Ming
 
 -----------------
 
