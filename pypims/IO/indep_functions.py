@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Created on Thu Apr 23 11:45:24 2020
+# Author: Xiaodong Ming
 
 """
 Independent functions
@@ -78,10 +79,10 @@ def clean_output(case_folder, num_of_sections, file_tag='*'):
 #%% ***************************************************************************
 # *************************Public functions************************************
 def write_times_setup(case_folder=None, num_of_sections=1, time_values=None):
-    """
-    Generate a times_setup.dat file. The file contains numbers representing the start time, end time, output interval, and backup interval in seconds
+    """Generate a times_setup.dat file. The file contains numbers representing the start time, end time, output interval, and backup interval in seconds
 
-    time_values: array or list of int/float, representing time in seconds, default values are [0, 3600, 1800, 3600]
+    Args:
+        time_values: array or list of int/float, representing time in seconds, default values are [0, 3600, 1800, 3600]
 
     """
     case_folder = _check_case_folder(case_folder)
@@ -97,14 +98,12 @@ def write_times_setup(case_folder=None, num_of_sections=1, time_values=None):
 
 def write_device_setup(case_folder=None,
                        num_of_sections=1, device_values=None):
-    """
-    Generate a device_setup.dat file. The file contains numbers representing the GPU number for each section
+    """Generate a device_setup.dat file. The file contains numbers representing the GPU number for each section
 
-    case_folder: string, the path of model
-
-    num_of_sections: int, the number of GPUs to use
-
-    device_values: array or list of int, representing the GPU number
+    Args:
+        case_folder: string, the path of model
+        num_of_sections: int, the number of GPUs to use
+        device_values: array or list of int, representing the GPU number
     """
     case_folder = _check_case_folder(case_folder)
     if device_values is None:
@@ -121,9 +120,9 @@ def write_device_setup(case_folder=None,
 def write_rain_source(rain_source, case_folder=None, num_of_sections=1):
     """ Write rainfall sources [Independent function from hipims class]
 
-    rain_source: numpy array, The 1st column is time in seconds, the 2nd towards the end columns are rainfall rate in m/s for each source ID in rainfall mask array if for multiple GPU, then copy the rain source file to all domain folders
-
-    case_folder: string, the path of model
+    Args:
+        rain_source: numpy array, The 1st column is time in seconds, the 2nd towards the end columns are rainfall rate in m/s for each source ID in rainfall mask array if for multiple GPU, then copy the rain source file to all domain folders
+        case_folder: string, the path of model
 
     """
     rain_source = np.array(rain_source)

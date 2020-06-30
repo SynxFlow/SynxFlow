@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Author: Xiaodong Ming
+
 """
 Boundary
 ========
 
 To do:
-    Define boundary conditions for hipims model
+    * Define boundary conditions for hipims model
 
 -----------
 
@@ -21,52 +23,58 @@ class Boundary(object):
     """
     Class for boundary conditions
 
-    Public Properties:
+    Attributes:
 
         num_of_bound: number of boundaries
 
-        data_table (data_frame) including attributes:
+        type: a list of string 'open', 'rigid', 'fall'
+                input-output boundary is open boundary with given water
+                depth and/or velocities
 
-            type: a list of string 'open', 'rigid', 'fall'
-                    input-output boundary is open boundary with given water
-                    depth and/or velocities
+        extent: (2-col numpy array) poly points to define the extent of a
+                IO boundary. If extent is not given, then the boundary is
+                the domain outline
 
-            extent: (2-col numpy array) poly points to define the extent of a
-                    IO boundary. If extent is not given, then the boundary is
-                    the domain outline
+        hSources: a two-col numpy array. The 1st col is time(s). The 2nd
+                col is water depth(m)
 
-            hSources: a two-col numpy array. The 1st col is time(s). The 2nd
-                    col is water depth(m)
+        hUSources: a two-col numpy array. The 1st col is time(s). The 2nd
+                col is discharge(m3/s) or a three-col numpy array, the 2nd
+                col and the 3rd col are velocities(m/s) in x and y
+                direction, respectively.
 
-            hUSources: a two-col numpy array. The 1st col is time(s). The 2nd
+        h_code: 3-element int to define the type of depth boundary
+
+        hU_code: 3-element int to define th type of velocity boundary
+
+        description: (str) description of a boundary
+
+    """
+    def __init__(self, boundary_list=None, outline_boundary='fall'):
+        """Initialise the object
+
+        Args:
+            boundary_list: (list of dicts), each dict contain keys (polyPoints,
+                type, h, hU) to define a IO boundary's position, type, and
+                Input-Output (IO) sources timeseries. Keys including:
+
+                1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
+                    coordinates of points to define the position of a boundary.
+                    An empty polyPoints means outline boundary.
+
+                2.type: 'open'(flow out flatly), 'rigid'(no outlet),
+                        'fall'(water flow out like a fall)
+
+                3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
+                     is water depth(m)
+
+                4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
                     col is discharge(m3/s) or a three-col numpy array, the 2nd
                     col and the 3rd col are velocities(m/s) in x and y
                     direction, respectively.
 
-            h_code: 3-element int to define the type of depth boundary
-
-            hU_code: 3-element int to define th type of velocity boundary
-
-            description: (str) description of a boundary
-
-    Private Properties:
-
-        code: 3-element row vector for each boundary cell
-
-    Methods:
-    
-        print_summary: print the summary information of a boundary object
-
-        Gen3Code: Generate 3-element boundary codes
-
-        CellLocate: fine boundary cells with given extent
-    """
-    def __init__(self, boundary_list=None, outline_boundary='fall'):
-        """default outline boundary: IO, h and Q are given as constant 0 values
-        1. setup data_table including attributtes:
-            type, extent, hSources, hUSources
-        2. add boundary code 'h_code', 'hU_code' and 'description' to
-            the data_table
+            outline_boundary: (str) 'open'|'rigid', default outline boundary is
+                open and both h and hU are set as zero
         """
         data_table = _setup_boundary_data_table(boundary_list, outline_boundary)
         data_table = _get_boundary_code(data_table)
@@ -81,6 +89,8 @@ class Boundary(object):
         self.cell_id = None
 
     def print_summary(self):
+        """Print the summary information
+        """
         print('Number of boundaries: '+str(self.num_of_bound))
         for n in range(self.num_of_bound):
             if self.cell_subs is not None:

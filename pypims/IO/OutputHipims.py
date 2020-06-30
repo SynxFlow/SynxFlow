@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Created on Wed Apr  1 23:46:54 2020
-
+# Author: Xiaodong Ming
 """
 OutputHipims
 ============
@@ -24,56 +24,31 @@ from .indep_functions import save_object, _create_io_folders
 class OutputHipims:
     """To read and analyze otuput files from a HiPIMS flood model
 
-    Properties (public):
-
+    Attributes:
         case_folder: (str) the absolute path of the case folder
-
         input_folder: (str|list of strings) the absolute path of the 
             input folder(s)
-
         output_folder: (str|list of strings) the absolute path of the 
             output folder(s)
-
         number_of_sections: (int) the number of subdomains of the model
-
         header: (dict or list of dict) provide the header information
-
         header_list: a list of sub headers [only for multi-gpu model]
         ref_datetime: 
-
         times_simu: (dataframe) with variable 'times' (simulated time in 
                     seconds) and 'date_times' if ref_datetime is defined.
-
         gauge_values_all: (dict) 'h', 'eta', 'hU', array with values of all 
             gauge positions, not time column
-
         gauge_values: gauge timeseries summarized from a series of gauge points
-
         grid_results: a list of Raster objects for gridded results
-        
-    Methods (public):
-
-        read_gauges_file: Read time seires of values at monitored gauges and
-            return gauges_pos, times, values
-
-        read_grid_file: read grid file(s) and return a grid object
-
-        add_gauge_results: add simulated value to the object gauge by gauge
-
-        add_grid_results: Read and return Raster object to attribute 
-            'grid_results'
-
-        add_all_gauge: add all gauges as seperate records when each gauge
-            position individually represent one gauge
-
-    Methods (private):
 
     """  
     def __init__(self, input_obj=None, case_folder=None,
                  num_of_sections=None, header_file_tag=None):
         """Initialize the object with a InputHiPIMS object or a case folder and
-        the number of sections
-        header_file_tag: the output file to read grid header, e.g. 'h_0'
+            the number of sections
+
+        Args:
+            header_file_tag: the output file to read grid header, e.g. 'h_0'
         """
         # pass argument values
         if input_obj is None:
@@ -109,16 +84,17 @@ class OutputHipims:
     def read_gauges_file(self, file_tag='h', compressed=False):
         """ Read gauges files for time seires of values at the monitored gauges
 
-        file_tag: h, hU, eta, corresponding to h_gauges.dat, hU_gauges.dat,
-            and eta_gauges.dat, respectively
+        Args:
+            file_tag: h, hU, eta, corresponding to h_gauges.dat, hU_gauges.dat,
+                and eta_gauges.dat, respectively
 
         Return:
+            gauges_pos, the coordinates of gauges within the model domain
 
-            gauges_pos: the coordinates of gauges within the model domain
+            times, time in seconds
 
-            time_series: time in seconds
+            values, gauge values corresponding to the gauges position
 
-            values: gauge values corresponding to the gauges position
 
         """
         if self.num_of_sections==1:
@@ -158,10 +134,7 @@ class OutputHipims:
         """Read asc grid files from output
 
         Return:
-
-            grid_array: a numpy array provides the cell values in grid
-
-            header: a dict provide the header information of the grid
+            Raster: a raster object of the grid
 
         """
         if not file_tag.endswith('.asc'):
@@ -180,9 +153,9 @@ class OutputHipims:
                           compressed=False):
         """ add simulated value to the object gauge by gauge
 
-        var_name: 'h', 'hU', 'eta'
-
-        gauge_name: 'All' add all gauges, then gauge_ind not needed
+        Args:
+            var_name: 'h', 'hU', 'eta'
+            gauge_name: 'All' add all gauges, then gauge_ind not needed
 
         """
         # read all gauge data in all positions
@@ -222,7 +195,8 @@ class OutputHipims:
     def add_grid_results(self, result_names, compressed=False):
         """Read and return Raster object to attribute 'grid_results'
 
-        result_names: string or list of string, gives the name of grid file
+        Args:
+            result_names: string or list of string, gives the name of grid file
 
         """
         if not hasattr(self, 'grid_results'):

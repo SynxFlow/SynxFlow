@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Created on Tue Mar 10 15:37:28 2020
+# Author: Xiaodong Ming
 
 """
 grid_show
@@ -9,21 +10,6 @@ grid_show
 To do:
 
     To visulize grid data, e.g. raster objec(s)
-
-    static map functions:
-
-    1. mapshow: general map of the grid values
-
-    2. rankshow: show grid values in ranks
-
-    3. hillshade: show a hillshade map of a grid
-
-    4. vectorshow: show a vector map of two grids animation functions:
-
-    5. make_gif: create a gif file to show values of a series of grids
-
-    6. make_mp4: create a video file to show values of a series of grids
-
 
 ------------------
 
@@ -45,22 +31,16 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 def mapshow(raster_obj=None, array=None, header=None, ax=None,
             figname=None, figsize=None, dpi=300, title=None,
             cax=True, cax_str=None, relocate=False, scale_ratio=1, **kwargs):
-    """
-    Display raster data without projection
+    """Display raster data without projection
 
-    raster_obj: a Raster object
-
-    array, header: to make Raster object if raster_obj is not given
-
-    figname: the file name to export map, if figname is empty, then the figure will not be saved
-
-    figsize: the size of map
-
-    dpi: The resolution in dots per inch
-
-    vmin and vmax define the data range that the colormap covers
-
-    **kwargs: keywords argument of function imshow
+    Args:
+        raster_obj: a Raster object
+        array, header: to make Raster object if raster_obj is not given
+        figname: the file name to export map, if figname is empty, then the figure will not be saved
+        figsize: the size of map
+        dpi: The resolution in dots per inch
+        vmin and vmax define the data range that the colormap covers
+        **kwargs: keywords argument of function imshow
 
     """
     if raster_obj is not None:
@@ -103,13 +83,11 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
              relocate=False, scale_ratio=1, alpha=1, **kwargs):
     """ Display water depth map in ranks defined by breaks
 
-    breaks: list of values to define rank. Array values lower than the first break value are set as nodata.
-
-    color: color series of the ranks
-
-    colorbar_kw: dict, keyword arguments to set colorbar
-
-    legend_kw: dict, keyword arguments to set legend
+    Args:
+        breaks: list of values to define rank. Array values lower than the first break value are set as nodata.
+        color: color series of the ranks
+        colorbar_kw: dict, keyword arguments to set colorbar
+        legend_kw: dict, keyword arguments to set legend
     
     """
     if raster_obj is not None:
@@ -158,8 +136,7 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
     return fig, ax
 
 def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, **kwargs):
-    """
-    plot velocity map of U and V, whose values stored in two raster objects seperately
+    """plot velocity map of U and V, whose values stored in two raster objects seperately
 
     """
     X, Y = obj_x.to_points()        
@@ -184,13 +161,11 @@ def make_gif(output_file, obj_list=None, header=None, array_3d=None,
                      duration=0.5, delete=False, **kwargs):
     """ Create animation of gridded data
 
-    mask_header: (dict) header file provide georeference of rainfall mask
-
-    start_date: a datetime object to give the initial date and time of rain
-
-    duration: duration for each frame (seconds)
-
-    cellsize: sclar (meter) the size of rainfall grid cells
+    Args:
+        mask_header: (dict) header file provide georeference of rainfall mask
+        start_date: a datetime object to give the initial date and time of rain
+        duration: duration for each frame (seconds)
+        cellsize: sclar (meter) the size of rainfall grid cells
 
     """
     if fig_names is None:
@@ -211,13 +186,11 @@ def make_mp4(output_file, obj_list=None, header=None, array_3d=None,
                fps=10, **kwargs):
     """ Create a video file based on a series of grids
 
-    obj_list: a list of Raster objects
-
-    header: a header dict providing georeference the grid [not necessary if obj_list was given]
-
-    array_3d: a 3D numpy array storing grid values for each timestep (in 1st dimension), [not necessary if obj_list was given]
-
-    time_str: a list of string to show time information for each frame
+    Args:
+        obj_list: a list of Raster objects
+        header: a header dict providing georeference the grid [not necessary if obj_list was given]
+        array_3d: a 3D numpy array storing grid values for each timestep (in 1st dimension), [not necessary if obj_list was given]
+        time_str: a list of string to show time information for each frame
 
     """
     if fig_names is None:
@@ -265,11 +238,6 @@ def plot_shape_file(shp_file, figsize=None, ax=None, color='r', linewidth=0.5,
 def _plot_temp_figs(obj_list=None, header=None, array_3d=None,
                     breaks=None, time_str=None, **kwargs):
     """plot a series of temp pictures and save to make animation
-
-    plot_fun: the function to plot
-
-    """
-    """ Create a video file based on a series of grids
     """
     if obj_list is not None:
         header = obj_list[0].header

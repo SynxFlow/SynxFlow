@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Created on Wed Dec  4 14:26:04 2019
+# Author: Xiaodong Ming
 
 """
 rainfall_processing
@@ -8,6 +9,18 @@ rainfall_processing
 
 To do:
     Processing rainfall
+
+
+Explaination of general parameters
+
+    rain_source: (numpy array) rainfall source array
+        The 1st column is usually time series in seconds, from the 2nd column towards end columns are rainfall rate in m/s
+
+    rain_mask: (numpy array) provide sequnce number of each gridded rainfall source
+
+    start_date: a datetime object to give the initial date and time of rain
+
+
 
 ----------------
 
@@ -22,24 +35,13 @@ import matplotlib.dates as mdates
 from datetime import datetime
 from datetime import timedelta
 from .Raster import Raster
-"""
-Explaination of general parameters
-
-rain_source: (numpy array) rainfall source array
-
-    The 1st column is usually time series in seconds, from the 2nd column towards end columns are rainfall rate in m/s
-
-rain_mask: (numpy array) provide sequnce number of each gridded rainfall source
-
-start_date: a datetime object to give the initial date and time of rain
-
-"""
 #%%
 def get_time_series(rain_source, rain_mask=None, 
                      start_date=None, method='mean'):
     """ Plot time series of average rainfall rate inside the model domain
 
-    method: 'mean'|'max','min','mean'method to calculate gridded rainfall over the model domain
+    Args:
+        method: 'mean'|'max','min','mean'method to calculate gridded rainfall over the model domain
 
     """
     if rain_mask is not None:
@@ -77,11 +79,10 @@ def get_spatial_map(rain_source, rain_mask_obj, figname=None,
                     shp_file=None, dpi=200, title=None, **kwargs):
     """Get spatial rainfall map
 
-    rain_mask_obj: asc file name or Raster object for rain mask
-
-    cellsize: resample the rain_mask to a new grid (with larger cellsize)
-
-    method: sum|mean caculate method for each cell, sum by time or mean by time
+    Args:
+        rain_mask_obj: asc file name or Raster object for rain mask
+        cellsize: resample the rain_mask to a new grid (with larger cellsize)
+        method: sum|mean caculate method for each cell, sum by time or mean by time
 
     """
     # caculate rain source
@@ -142,7 +143,8 @@ def plot_time_series(plot_data=None, rain_source=None, rain_mask=None,
                      **kwargs):
     """ Plot time series of average rainfall rate inside the model domain
 
-    method: 'mean'|'max','min','mean'method to calculate gridded rainfall over the model domain
+    Args:
+        method: 'mean'|'max','min','mean'method to calculate gridded rainfall over the model domain
 
     """
     if plot_data is None:
@@ -167,13 +169,11 @@ def create_animation(output_file, rain_source, mask_file,
                      duration=0.5, **kwargs):
     """ Create animation of gridded rainfall rate
 
-    mask_header: (dict) header file provide georeference of rainfall mask
-
-    start_date: a datetime object to give the initial date and time of rain
-
-    duration: duration for each frame (seconds)
-
-    cellsize: sclar (meter) the size of rainfall grid cells
+    Args:
+        mask_header: (dict) header file provide georeference of rainfall mask
+        start_date: a datetime object to give the initial date and time of rain
+        duration: duration for each frame (seconds)
+        cellsize: sclar (meter) the size of rainfall grid cells
 
     """
     fig_names = create_pictures(rain_source, mask_file, **kwargs)
@@ -202,9 +202,9 @@ def create_pictures(rain_source, mask_file, cellsize=1000,
                     start_date=None, dpi=100, shp_file=None, **kwargs):
     """ create rainfall rate images
 
-    rain_source
-
-    mask_file: a arc grid or a Raster object
+    Args:
+        rain_source: a numpy array of rainfall time series, 1st column is time in seconds, other columns are rainfall intensity in m/s
+        mask_file: a arc grid or a Raster object
 
     """
     time_series = rain_source[:,0]
@@ -229,13 +229,12 @@ def create_pictures(rain_source, mask_file, cellsize=1000,
 def _check_rainfall_rate_values(rain_source, times_in_1st_col=True):
     """ Check the rainfall rate values in rain source array
 
-    times_in_1st_col: indicate whether the first column is times
+    Args:
+        times_in_1st_col: True|False indicate whether the first column is times
 
     Return:
-
-        values_max: maximum rainfall rate in mm/h
-
-        values_mean: average rainfall rate in mm/h
+        float: maximum rainfall rate in mm/h
+        float: average rainfall rate in mm/h
         
     """
     # get the pure rainfall rate values

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #Created on Fri Jun  5 15:44:18 2020
+#Author: Xiaodong Ming
 
 """
 Summary
@@ -24,33 +25,12 @@ class Summary:
 
     Attributes:
 
-        grid_attr
-
-        model_attr
-
-        boundary_attr
-
-        rain_attr
-
-        params_attr
-
-        initial_attr
-
-    Methods:
-
-        set_grid_attr
-
-        set_model_attr
-
-        set_boundary_attr
-
-        set_rain_attr
-
-        set_params_attr
-
-        set_initial_attr
-        
-        display
+        grid_attr:
+        model_attr:
+        boundary_attr:
+        rain_attr:
+        params_attr:
+        initial_attr:
         
     """
     # default parameters
@@ -269,7 +249,7 @@ class Summary:
         print_dict(self.params_attr)
         
     def to_json(self, file_name=None):
-        """ write to json file
+        """ Write to json file
         """
         summary_dict = self.to_dict()
         if file_name is None:

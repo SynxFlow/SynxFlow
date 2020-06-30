@@ -15,11 +15,14 @@ The module is based on the following assumptions:
     * its reference position is on the lower left corner of the southwest cell
     * All the other grid-based input files must be consistent with the DEM file
 
-The module does the following:
+To do:
 
     * generate input (including sub-folder mesh and field) and output folders
     * generate mesh file (DEM.txt) and field files
     * divide model domain into small sections if multiple GPU is used
+
+-----------------
+
 """
 
 # Structure:

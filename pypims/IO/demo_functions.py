@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Created on Wed Apr  1 14:56:15 2020
+# Author: Xiaoding Ming
 
 """
 
@@ -8,7 +9,7 @@ Demo functions
 ==============
 
 To do:
-    Create the demo
+    * Create the demo
 
 ---------------
 
@@ -24,9 +25,10 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
                figname=None, dpi=200, **kwargs):
     """ A demonstration to generate a hipims input object
     
-    set_example_inputs: (True|False) if True, initial condition, boundary condition, rainfall source, and gauge postion will be set to the input object according to sample data.
-    
-    figname: (string) if given, a domain map will saved
+    Args:
+        set_example_inputs: (True|False) if True, initial condition, boundary condition, 
+            rainfall source, and gauge postion will be set to the input object according to sample data.
+        figname: (string) if given, a domain map will saved
 
     """
     dem_file = pkg_resources.resource_filename(__name__,
@@ -44,7 +46,13 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
 
 def demo_output(case_folder, num_of_sections=1):
     """ A demonstration to generate a hipims output object
-    a input folder and files must be created before using this function
+
+    Args:
+        case_folder: (string) path to case folder
+        num_of_sections: (int) number of domains
+    
+    Note:
+        a input folder and files must be created before using this function
     """
     obj_out = OutputHipims(case_folder=case_folder,
                            num_of_sections=num_of_sections)
@@ -52,7 +60,9 @@ def demo_output(case_folder, num_of_sections=1):
 
 def demo_raster(figname=None):
     """ A demonstration to read and show raster files
-    figname: the file name to save the figure
+
+    Args:
+        figname: (string) the file name to save the figure
     """
     dem_file = pkg_resources.resource_filename(__name__,
                                              'sample/Example_DEM.asc')
@@ -64,9 +74,8 @@ def demo_raster(figname=None):
 def get_sample_data(return_path=False):
     """ Get sample data for demonstartion
 
-    Return:
-        obj_ras: a DEM raster object
-        demo_data: a dictionary with boundary_condition, rain_source, and gauges_pos data
+    Returns:
+        A DEM raster object and a dictionary with boundary_condition, rain_source, and gauges_pos data
     """
     dem_file = pkg_resources.resource_filename(__name__,
                                              'sample/DEM.gz')

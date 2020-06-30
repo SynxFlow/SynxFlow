@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # Created on Tue Jun 23 21:32:54 2020
+# Author: Xiaodong Ming
 
 """
 Rainfall
-=======
+========
 
 To do:
     To read, compute, and show rainfall data
@@ -23,60 +24,33 @@ from . import indep_functions as indep_f
 class Rainfall:
     """ a class to set rainfall data for hipims
 
-    Essential attrs:
+    Attributes:
 
         time_s: 1-col array, time in seconds
-
         mask_header: dictionary showing mask georeference
-
         mask_dict: dict with two keys:'value' and 'index', providing int array
                 showing rain source number and their index respectively
-
         rain_rate: numpy array m/s
-
         attrs: summary of the object
-
-    Optional attrs:
-
         subs_in: tuple of row and col number, provide subs of the mask array values
             inside the model domain. Only available when dem_ras is given
-
         start_date: start date and time of time zero in time_s
-
         time_dt: datetime format of time_s
-
-    Methods:
-
-        set_mask
-
-        set_source
-
-        set_start_date
-
-        get_time_series
-
-        get_spatial_map
-
-        get_valid_rain_rate
-
-        get_attrs
 
     """
     def __init__(self, rain_mask, rain_source, source_sep=',', dem_ras=None):
         """initialize rainfall object with source file and mask file
 
-        rain_mask: str [filename of a Raster endswith .gz/asc/tif]
-                   numpy int array with the same shape with DEM array
-                   a Raster object.
-                   if rain_mask is a scalar or array, dem_ras must be provided.
-                   
-        rain_source: numpy array the 1st column is time in seconds, 2nd to
-             the end columns are rainfall rates in m/s.
-                     str [filename of a csv file for rainfall source data]
-
-        dem_ras:  a Raster object for DEM
-
-        source_sep: delimeter of the rain source file
+        Args:
+            rain_mask: str [filename of a Raster endswith .gz/asc/tif]
+                    numpy int array with the same shape with DEM array
+                    a Raster object.
+                    if rain_mask is a scalar or array, dem_ras must be provided.           
+            rain_source: numpy array the 1st column is time in seconds, 2nd to
+                the end columns are rainfall rates in m/s.
+                        str [filename of a csv file for rainfall source data]
+            dem_ras:  a Raster object for DEM
+            source_sep: delimeter of the rain source file
 
         """
         self.set_mask(rain_mask, dem_ras)
@@ -130,8 +104,9 @@ class Rainfall:
     def get_time_series(self, method='mean', rain_rate_valid=None):
         """ Plot time series of average rainfall rate inside the model domain   
 
-        method: 'mean'|'max','min','mean'method to calculate gridded rainfall 
-        over the model domain
+        Args:
+            method: 'mean'|'max','min','mean'method to calculate gridded rainfall 
+                over the model domain
         """
         start = time.perf_counter()
         if rain_rate_valid is None:
@@ -157,11 +132,10 @@ class Rainfall:
     def get_spatial_map(self, method='sum'):
         """Get spatial rainfall map over time series
 
-        rain_mask_obj: asc file name or Raster object for rain mask
-
-        cellsize: resample the rain_mask to a new grid (with larger cellsize)
-
-        method: sum|mean caculate method for each cell, sum by time or mean by time 
+        Args:
+            rain_mask_obj: asc file name or Raster object for rain mask
+            cellsize: resample the rain_mask to a new grid (with larger cellsize)
+            method: sum|mean caculate method for each cell, sum by time or mean by time 
 
         """
         # caculate rain source
