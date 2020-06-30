@@ -31,7 +31,14 @@ release = '0.0.1.6'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 
-            'recommonmark']
+            'recommonmark', 'sphinx.ext.napoleon']
+
+# Napoleon settings
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+
+#extensions.append('rst2pdf.pdfbuilder')
+#pdf_documents = [('index', u'pypims_doc', u'Pypims documentation', u'Xilin Xia, Xiaodong Ming'),]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
