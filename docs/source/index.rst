@@ -6,31 +6,16 @@
 Welcome to pypims's documentation
 =================================
 
-Pypims: Python APIs for `hipims <https://github.com/HEMLab/hipims>`_.
+Pypims: Python APIs for `hipims-cuda <https://github.com/HEMLab/hipims>`_.
 
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Getting started:
+   :caption: Table of Content:
 
+   about
    quickstart
 
-.. toctree::
-   :maxdepth: 3
-   :caption: List of modules:
-
-   Modules/demo_functions
-   Modules/InputHipims
-   Modules/OutputHipims
-   Modules/Boundary
-   Modules/Landcover
-   Modules/Raster
-   Modules/Rainfall
-   Modules/Summary
-   Modules/rainfall_processing
-   Modules/grid_show
-   Modules/spatial_analysis
-   Modules/indep_functions
+   Modules/index
    
 
 Indices and tables

@@ -1,4 +1,6 @@
-## Installing
+## Getting started
+
+### Installing
 
 Before installing pypims, you need to install [Cmake](https://cmake.org/download/), NVIDIA CUDA Toolkit and the C++ compiler. Cmake can be simply installed by
 
@@ -23,7 +25,7 @@ Once the aforementioned dependencies have been properly installed. Installing py
 pip install pypims
 ```
 
-## Running a simulation with the example
+### Running a simulation with the example
 
 The flood simulation engine can be imported by
 

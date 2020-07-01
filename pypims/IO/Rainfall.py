@@ -42,16 +42,13 @@ class Rainfall:
         """initialize rainfall object with source file and mask file
 
         Args:
-            rain_mask: str [filename of a Raster endswith .gz/asc/tif]
-                    numpy int array with the same shape with DEM array
-                    a Raster object.
-                    if rain_mask is a scalar or array, dem_ras must be provided.           
-            rain_source: numpy array the 1st column is time in seconds, 2nd to
-                the end columns are rainfall rates in m/s.
-                        str [filename of a csv file for rainfall source data]
-            dem_ras:  a Raster object for DEM
+            rain_mask: str [filename of a Raster endswith .gz/asc/tif] numpy int array with the same shape with DEM array
+                 a Raster object. If rain_mask is a scalar or array, dem_ras must be provided.           
+            rain_source: numpy array the 1st column is time in seconds, 2nd to the end columns are rainfall rates in m/s. 
+                str [filename of a csv file for rainfall source data]
+            dem_ras: a Raster object for DEM
             source_sep: delimeter of the rain source file
-
+            
         """
         self.set_mask(rain_mask, dem_ras)
         self.set_source(rain_source, source_sep)
