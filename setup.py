@@ -96,6 +96,12 @@ setup(
         'Programming Language :: C++',
         'Intended Audience :: Science/Research'
     ],
+    install_requires=['numpy',
+                        'scipy',
+                        'matplotlib',
+                        'imageio',
+                        'pandas',
+                        'pyshp'],
     package_data={'pypims.IO': ['sample/Example_DEM.asc',
                             'sample/DEM.gz',
                             'sample/landcover.gz',

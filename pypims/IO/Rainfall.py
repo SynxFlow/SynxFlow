@@ -16,6 +16,8 @@ To do:
 """
 import time
 import numpy as np
+import matplotlib.pyplot as plt	
+import matplotlib.dates as mdates
 from scipy import stats
 from datetime import datetime
 from datetime import timedelta
@@ -210,6 +212,7 @@ class Rainfall:
         attrs['spatial_res'] = [spatial_res.round(), 'm']
         attrs['temporal_res'] = [temporal_res.round(), 's']
         self.attrs = attrs
+        return attrs
     
     def get_source_array(self):
         """Return a source array, first column is time_s, then continue with
@@ -225,3 +228,37 @@ class Rainfall:
         mask_array = indep_f._dict2grid(self.mask_dict, array_shape)
         return mask_array
     
+#%% Visualization	
+    def plot_time_series(self, method='mean', dt_interval=24, 	
+                         dt_format='%m-%d', title_str=None,	
+                         **kwargs):	
+        """ Plot time series of average rainfall rate inside the model domain   	
+        method: 'mean'|'max','min','mean'method to calculate gridded rainfall 	
+        over the model domain	
+        """	
+        value_y = self.get_time_series(method=method)	
+        fig, ax = plt.subplots()        	
+        if hasattr(self, 'time_dt'):	
+            time_x = self.time_dt	
+            ax.xaxis.set_major_locator(	
+                    mdates.HourLocator(interval=dt_interval))	
+            ax.xaxis.set_major_formatter(mdates.DateFormatter(dt_format))	
+        else:	
+            time_x = self.time_s	
+        ax.plot(time_x, value_y, **kwargs)	
+        ax.set_ylabel(method+' rainfall rate (mm/h)')	
+        ax.grid(True)	
+        if title_str is None:	
+            title_str = method+' precipitation in the model domain'	
+        ax.set_title(title_str)	
+        plt.show()	
+        return fig, ax
+
+    def plot_rainfall_map(self, method='sum',cmap='YlGnBu', **kw):	
+        """plot rainfall map within model domain	
+        method: the way to calculate time series rainfall rate	
+        """	
+        rain_array, unit_str = self.get_spatial_map(method)	
+        grid_obj = Raster(array=rain_array, header=self.mask_header)	
+        fig, ax = grid_obj.mapshow(cax_str=unit_str, cmap=cmap, **kw)	
+        return fig, ax	

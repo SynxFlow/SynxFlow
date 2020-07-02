@@ -1,4 +1,4 @@
-# PYPIMS
+# Python APIs for hipims
 
 This package provides python APIs for running the open source hydraulic model [hipims-cuda](https://github.com/HEMLab/hipims). It also includes the [hipims-io](https://pypi.org/project/hipims-io/) package for pre-processing and result visualisation. The full documentation is at [https://pypims.readthedocs.io/en/latest/](https://pypims.readthedocs.io/en/latest/).
 

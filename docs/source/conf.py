@@ -31,7 +31,8 @@ release = '0.0.1.6'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 
-            'recommonmark', 'sphinx.ext.napoleon']
+            'recommonmark', 'sphinx.ext.napoleon',
+            'sphinx_rtd_theme',]
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -54,8 +55,9 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
 #html_theme = 'classic'
+html_theme = 'sphinx_rtd_theme'
 
 master_doc = 'index'
 

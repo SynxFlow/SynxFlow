@@ -52,7 +52,6 @@ from .Landcover import Landcover
 from .Summary import Summary
 from .spatial_analysis import sub2map
 from . import indep_functions as indep_f
-from . import rainfall_processing as rp
 #%% definition of class InputHipims
 class InputHipims:
     """To define input files for a HiPIMS flood model case
@@ -60,8 +59,6 @@ class InputHipims:
     Read data, process data, write input files, and save data of a model case.
 
     Attributes:
-        case_folder: (str) the absolute path of the case folder
-        data_folders: (dict) paths for data folders(input, output, mesh, field)
         num_of_sections: (scalar) number of GPUs to run the model
         shape: shape of the DEM array
         header: (dict) header of the DEM grid
@@ -95,6 +92,12 @@ class InputHipims:
                           'cumulative_depth':0, 'hydraulic_conductivity':0,
                           'capillary_head':0, 'water_content_diff':0,
                           'gauges_pos':np.array([[0, 0], [1, 1]])}
+    _file_tag_list = ['z', 'h', 'hU', 'precipitation',
+                      'manning', 'sewer_sink',
+                      'cumulative_depth', 'hydraulic_conductivity',
+                      'capillary_head', 'water_content_diff',
+                      'precipitation_mask', 'precipitation_source',
+                      'boundary_condition', 'gauges_pos']
     __grid_files = ['z', 'h', 'hU', 'precipitation_mask',
                   'manning', 'sewer_sink', 'precipitation',
                   'cumulative_depth', 'hydraulic_conductivity',
@@ -156,7 +159,7 @@ class InputHipims:
 #******************************************************************************
 #%%**********************Get object attributes**************************************
     def get_case_folder(self):
-        """Get the directory of the case
+        """Get the directory of the case.
 
         Return: 
             string: The directory of the case
@@ -164,12 +167,21 @@ class InputHipims:
         return self._case_folder
 
     def get_data_folders(self):
-        """Get the directory of the data
+        """Get the directories and subdirectories of the input and output data.
         
         Return:
-            string: The directory of the case
+            string: a dict with four keys ('input', 'output', 'mesh', 'field')
+                providing their absolute paths
         """
         return self._data_folders
+    
+    def get_input_filenames(self):
+        """Get the input file names.
+        
+        Return:
+            list: a list of string giving all input filenames without 
+        """
+        return self._file_tag_list
 
 #%%**********************Setup the object**************************************
     def set_boundary_condition(self, boundary_list=None,
@@ -447,31 +459,27 @@ class InputHipims:
             input files
         
         Args:
-            file_tag: (str or list of str) including all the names of files
+            file_tag: a string or list of string giving the name(s) of input
+                files without suffix
         """
         self._make_data_dirs()
         grid_files = InputHipims.__grid_files
         if file_tag is None or file_tag == 'all': # write all files
-            file_tag_list = ['z', 'h', 'hU', 'precipitation',
-                             'manning', 'sewer_sink',
-                             'cumulative_depth', 'hydraulic_conductivity',
-                             'capillary_head', 'water_content_diff',
-                             'precipitation_mask', 'precipitation_source',
-                             'boundary_condition', 'gauges_pos']
+            write_list = self._file_tag_list
             if self.num_of_sections > 1:
                 self.write_halo_file()
             self.write_mesh_file()
             self.write_runtime_file()
             self.write_device_file()
         elif type(file_tag) is str:
-            file_tag_list = [file_tag]
+            write_list = [file_tag]
         elif type(file_tag) is list:
-            file_tag_list = file_tag
+            write_list = file_tag
         else:
-            print(file_tag_list)
+            print(self._file_tag_list)
             raise ValueError(('file_tag should be a string or a list of string'
                              'from the above list'))
-        for one_file in file_tag_list:
+        for one_file in write_list:
             if one_file in grid_files: # grid-based files
                 self.write_grid_files(one_file)
             elif one_file == 'boundary_condition':
@@ -629,11 +637,11 @@ class InputHipims:
                     **kwargs):
         """Show domain map of the object
         """
-        obj_dem = copy.copy(self.DEM)
-        if hasattr(self, 'Sections'):
-            for obj_sub in self.Sections:
-                overlayed_subs = obj_sub.overlayed_cell_subs_global
-                obj_dem.array[overlayed_subs] = np.nan            
+        obj_dem = copy.deepcopy(self.DEM)
+#        if hasattr(self, 'Sections'):
+#            for obj_sub in self.Sections:
+#                overlayed_subs = obj_sub.overlayed_cell_subs_global
+#                obj_dem.array[overlayed_subs] = np.nan            
         fig, ax = obj_dem.mapshow(title=title, cax_str='DEM(m)', **kwargs)
         cell_subs = self.Boundary.cell_subs
         legends = []
@@ -1087,6 +1095,61 @@ class InputHipimsSub(InputHipims):
 
 #%%****************************************************************************
 #********************************Static method*********************************
+def load_object(filename):
+    """load object from a dictionary and return as an InputHipims object
+    Args:
+        filename: a string giving the object file name
+    Return: 
+        An object of InputHipims
+    """
+    obj_dict = indep_f.load_object(filename)
+    
+    if 'DEM' in obj_dict:
+        dem_dict = obj_dict['DEM']
+        obj_dem = Raster(array=dem_dict['array'],
+                                header=dem_dict['header'])
+        obj_dict.pop('DEM')
+    else:
+        raise ValueError(filename+' has no key: DEM')
+    obj_in = InputHipims(dem_data=obj_dem,
+                         num_of_sections=obj_dict['num_of_sections'],
+                         case_folder=obj_dict['_case_folder'])
+    
+    if 'Landcover' in obj_dict:
+        ld_dict = obj_dict['Landcover']
+        mask_header = ld_dict['mask_header']
+        mask_dict = ld_dict['mask_dict']
+        array_shape = (mask_header['nrows'], mask_header['ncols'])
+        mask_array = indep_f._dict2grid(mask_dict, array_shape)
+        ras_landcover = Raster(array=mask_array, header=mask_header)
+        obj_in.set_landcover(ras_landcover)
+        obj_dict.pop('Landcover')
+    
+    if 'Rainfall' in obj_dict:
+        rain_dict = obj_dict['Rainfall']
+        mask_header = rain_dict['mask_header']
+        mask_dict = rain_dict['mask_dict']
+        array_shape = (mask_header['nrows'], mask_header['ncols'])
+        mask_array = indep_f._dict2grid(mask_dict, array_shape)
+        rain_mask = Raster(array=mask_array, header=mask_header)
+        rain_source = np.c_[rain_dict['time_s'], rain_dict['rain_rate']]
+        obj_in.set_rainfall(rain_mask, rain_source)
+        obj_dict.pop('Rainfall')
+    
+    bound_dict = obj_dict['Boundary']
+    for key, value in bound_dict.items():
+        obj_in.Boundary.__dict__[key] = value
+    obj_dict.pop('Boundary')
+    
+    summ_dict = obj_dict['Summary']
+    for key, value in summ_dict.items():
+        obj_in.Summary.__dict__[key] = value
+    obj_dict.pop('Summary')
+    
+    for key, value in obj_dict.items():
+        obj_in.__dict__[key] = value
+    
+    return obj_in
 
 def main():
     print('Class to setup input data')
