@@ -50,25 +50,28 @@ A quick demonstration to prepare input files with attached sample data contaning
 
 ```python
 import os
-from IO.demo_functions import get_sample_data
+from pypims.IO.demo_functions import get_sample_data
 data_path = get_sample_data(return_path=True) # get the path of sample data
 case_folder = os.path.join(os.getcwd(), 'model_case') # define a case folder in the current directory
-obj_in = IO.InputHipims(case_folder=case_folder, num_of_sections=1, 
+num_of_devices = 1
+obj_in = IO.InputHipims(case_folder=case_folder, num_of_sections=num_of_devices, 
                         data_path=data_path) # create input object
 obj_in.domain_show() # show domain map
 print(obj_in) # show case information
 obj_in.write_input_files() # create all input files
 ```
-Once the inputs have all been prepared, the simulations  can be started by
+
+Once the inputs have all been prepared, the simulations can be started by
+
 
 ```python
-flood.run('path to your inputs')
+flood.run(case_folder)
 ```
 
 or
 
 ```python
-flood.run_mgpus('path to your inputs')
+flood.run_mgpus(case_folder) # using this if num_of_devices > 1
 ```
 
 for multiple GPUs.
