@@ -90,7 +90,18 @@ int run(const char* work_dir){
     printf("The working directory does not exist!/n");
   }
 
-  deviceQuery();
+	//set up GPU device number
+  //unsigned int device_list;
+  std::ifstream device_setup_file("input/device_setup.dat");
+  int device_id;
+  if (device_setup_file.is_open()){
+    device_setup_file >> device_id;
+	  checkCuda(cudaSetDevice(device_id));
+	  std::cout << "GPU " << device_id << " is choosen as the model device"<< std::endl;
+  }
+  else{
+    deviceQuery();
+  }
 
   Scalar dt_out = 0.5;
   Scalar backup_interval = 0.0;
