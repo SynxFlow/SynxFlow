@@ -171,7 +171,7 @@ class InputHipims:
         
         Return:
             string: a dict with four keys ('input', 'output', 'mesh', 'field')
-                providing their absolute paths
+            providing their absolute paths
         """
         return self._data_folders
     
@@ -193,20 +193,21 @@ class InputHipims:
                 type, h, hU) to define a IO boundary's position, type, and
                 Input-Output (IO) sources timeseries. Keys including:
 
-                1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
-                    coordinates of points to define the position of a boundary.
-                    An empty polyPoints means outline boundary.
+                1. polyPoints: a numpy array giving X(1st col) and Y(2nd col)
+                coordinates of points to define the position of a boundary.
+                An empty polyPoints means outline boundary.
 
-                2.type: 'open'(flow out flatly), 'rigid'(no outlet),
-                        'fall'(water flow out like a fall)
+                2. type: 'open'(flow out flatly), 'rigid'(no outlet),
+                'fall'(water flow out like a fall)
 
-                3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
-                     is water depth(m)
+                3. h: a two-col numpy array. The 1st col is time(s). The 2nd col
+                is water depth(m)
 
-                4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
-                    col is discharge(m3/s) or a three-col numpy array, the 2nd
-                    col and the 3rd col are velocities(m/s) in x and y
-                    direction, respectively.
+                4. hU: a two-col numpy array. The 1st col is time(s). The 2nd
+                col is discharge(m3/s) or a three-col numpy array, the 2nd
+                col and the 3rd col are velocities(m/s) in x and y
+                direction, respectively.
+
             outline_boundary: (str) 'open'|'rigid', default outline boundary is
                 open and both h and hU are set as zero
 
@@ -251,12 +252,13 @@ class InputHipims:
         """ Set grid parameter with Landcover object as name=value
 
         Args:
-            kwargs: Keyword Arguments Specified by a Dictionary
+            kwargs: 
+                Keyword Arguments Specified by a Dictionary
                 keyword: name, from grid_parameter_keys
-
-                value:  1. scalar, a uniform parameter value
-                        2. array, gridded parameter value with the same size of DEM
-                        3. dict, contain param_value, land_value, default_value=0
+                value:  
+                    1. scalar, a uniform parameter value
+                    2. array, gridded parameter value with the same size of DEM
+                    3. dict, contain param_value, land_value, default_value=0
         """
         if not hasattr(self, 'param_per_landcover'):
             # save arguments to call Landcover.to_grid_parameter()
@@ -456,11 +458,10 @@ class InputHipims:
         """ Write input files
 
         To classify the input files and call functions needed to write each
-            input files
+        input files
         
         Args:
-            file_tag: a string or list of string giving the name(s) of input
-                files without suffix
+            file_tag: a string or list of string giving the name(s) of input files without suffix
         """
         self._make_data_dirs()
         grid_files = InputHipims.__grid_files
@@ -515,8 +516,7 @@ class InputHipims:
     def write_boundary_conditions(self):
         """ Write boundary condtion files
 
-        if there are multiple domains, write in the first folder
-            and copy to others
+        if there are multiple domains, write in the first folder and copy to others
         """
         self._make_data_dirs()
         if self.num_of_sections > 1:  # multiple-GPU

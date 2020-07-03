@@ -172,36 +172,36 @@ class Raster(object):
             cellsize_n: cellsize of the new raster
             method: Resampling method to use. Available methods are:
 
-                near: nearest neighbour resampling (default, fastest algorithm, 
+                    near: nearest neighbour resampling (default, fastest algorithm, 
                     worst interpolation quality). 
 
-                bilinear: bilinear resampling.        
+                    bilinear: bilinear resampling.  
 
-                cubic: cubic resampling.        
+                    cubic: cubic resampling.    
 
-                cubicspline: cubic spline resampling.     
+                    cubicspline: cubic spline resampling.
 
-                lanczos: Lanczos windowed sinc resampling.
+                    lanczos: Lanczos windowed sinc resampling.
 
-                average: average resampling, computes the average of all 
+                    average: average resampling, computes the average of all 
                     non-NODATA contributing pixels.
 
-                mode: mode resampling, selects the value which appears 
+                    mode: mode resampling, selects the value which appears 
                     most often of all the sampled points.
 
-                max: maximum resampling, selects the maximum value from 
+                    max: maximum resampling, selects the maximum value from 
                     all non-NODATA contributing pixels.
 
-                min: minimum resampling, selects the minimum value from 
+                    min: minimum resampling, selects the minimum value from 
                     all non-NODATA contributing pixels.
 
-                med: median resampling, selects the median value of all 
+                    med: median resampling, selects the median value of all 
                     non-NODATA contributing pixels.
 
-                q1: first quartile resampling, selects the first quartile 
+                    q1: first quartile resampling, selects the first quartile 
                     value of all non-NODATA contributing pixels.
 
-                q3: third quartile resampling, selects the third quartile 
+                    q3: third quartile resampling, selects the third quartile 
                     value of all non-NODATA contributing pixels
 
         """

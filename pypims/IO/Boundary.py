@@ -59,19 +59,19 @@ class Boundary(object):
                 Input-Output (IO) sources timeseries. Keys including:
 
                 1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
-                    coordinates of points to define the position of a boundary.
-                    An empty polyPoints means outline boundary.
+                coordinates of points to define the position of a boundary.
+                An empty polyPoints means outline boundary.
 
                 2.type: 'open'(flow out flatly), 'rigid'(no outlet),
-                        'fall'(water flow out like a fall)
+                'fall'(water flow out like a fall)
 
                 3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
-                     is water depth(m)
+                is water depth(m)
 
                 4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
-                    col is discharge(m3/s) or a three-col numpy array, the 2nd
-                    col and the 3rd col are velocities(m/s) in x and y
-                    direction, respectively.
+                col is discharge(m3/s) or a three-col numpy array, the 2nd
+                col and the 3rd col are velocities(m/s) in x and y
+                direction, respectively.
 
             outline_boundary: (str) 'open'|'rigid', default outline boundary is
                 open and both h and hU are set as zero

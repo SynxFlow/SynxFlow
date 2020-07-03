@@ -45,7 +45,7 @@ class OutputHipims:
     def __init__(self, input_obj=None, case_folder=None,
                  num_of_sections=None, header_file_tag=None):
         """Initialize the object with a InputHiPIMS object or a case folder and
-            the number of sections
+        the number of sections
 
         Args:
             header_file_tag: the output file to read grid header, e.g. 'h_0'
