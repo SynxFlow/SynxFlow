@@ -38,8 +38,8 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
         __set_defaul_input(obj_in)
     # show model summary print(obj_in)
     obj_in.Summary.display()
-    fig, ax = obj_in.domain_show(relocate=True, scale_ratio=1000, **kwargs)
-    ax.set_title('The Upper Lee catchment')
+    fig, ax = obj_in.domain_show(**kwargs)
+    ax.set_title('Domain map')
     if figname is not None:
         fig.savefig(figname, dpi=dpi)
     return obj_in
@@ -71,7 +71,7 @@ def demo_raster(figname=None):
     ax.set_title('The Upper Lee catchment DEM (mAOD)')
     return obj_ras
 
-def get_sample_data(return_path=False):
+def get_sample_data():
     """ Get sample data for demonstartion
 
     Returns:
@@ -79,26 +79,32 @@ def get_sample_data(return_path=False):
     """
     dem_file = pkg_resources.resource_filename(__name__,
                                              'sample/DEM.gz')
-    if return_path:
-        sample_path = os.path.dirname(dem_file)
-        return sample_path
-    else:
-        obj_ras = Raster(dem_file)
-        demo_data_file = pkg_resources.resource_filename(__name__,
-                                                 'sample/Example_data.npy')
-        demo_data = np.load(demo_data_file, allow_pickle='TRUE').item()
-        return obj_ras, demo_data
+    demo_data = {
+        'boundary_condition': [
+            {'polyPoints': np.array([[2000, 2500],
+                                 [2200, 2200]]),
+             'type': 'open',
+             'h': [[0, 10], [60, 10]]},
+            {'polyPoints': np.array([[80, 1150],
+                                 [200, 1100]]),
+             'type': 'open',
+             'hU': [[0, 1000], [60, 2000]]}],
+        'rain_source': np.array([[0, 2.77777778e-06],
+                                 [1800, 2.77777778e-05],
+                                 [3600, 0]]),
+        'gauges_pos': np.array([[300, 1600],
+                                [400, 1200]])
+    }
+    return dem_file, demo_data
     
 # =============private functions==================
 def __set_defaul_input(obj_in):
     """Set some default values for an InputHipims object
     """
     # load data for the demo
-    demo_data_file = pkg_resources.resource_filename(__name__,
-                                             'sample/Example_data.npy')
-    demo_data = np.load(demo_data_file, allow_pickle='TRUE').item()
+    _, demo_data = get_sample_data()
     # define initial condition
-    h0 = obj_in.Raster.array+0
+    h0 = obj_in.DEM.array+0
     h0[np.isnan(h0)] = 0
     h0[h0 < 50] = 0
     h0[h0 >= 50] = 1
