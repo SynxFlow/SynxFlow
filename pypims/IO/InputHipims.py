@@ -883,8 +883,13 @@ class InputHipims:
         # if it is a sub section object, there should be attributes:
         # overlayed_id, and section_id
         if hasattr(self, 'overlayed_id'):
-            cell_id = list(self.overlayed_id.values())
-            cell_id = np.concatenate(cell_id, axis=0)
+            cell_id = []
+            if 'top_high' in self.overlayed_id:
+                cell_id += self.overlayed_id['top_high'].tolist()
+            if 'bottom_low' in self.overlayed_id:
+                cell_id += self.overlayed_id['bottom_low'].tolist()
+            #cell_id = list(self.overlayed_id.values())
+            cell_id = np.array(cell_id)
             bound_code = np.array([[4, 0, 0]]) # shape (1, 3)
             bound_code_array = np.repeat(bound_code, cell_id.size, axis=0)
             id_code_array = np.c_[cell_id, bound_code_array]
