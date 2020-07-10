@@ -259,6 +259,16 @@ class InputHipims:
                     1. scalar, a uniform parameter value
                     2. array, gridded parameter value with the same size of DEM
                     3. dict, contain param_value, land_value, default_value=0
+
+        Example:
+            Using landcover to set up parameters
+            
+            .. code-block:: python
+
+                obj_in.set_landcover(landcover)
+                obj_in.set_grid_parameter(manning={'param_value':[0.025, 0.055],
+                                    'land_value':[[0,1], [2,3]], # 0.025 corresponds to landcover type of 0,1
+                                    'default_value':0.035}
         """
         if not hasattr(self, 'param_per_landcover'):
             # save arguments to call Landcover.to_grid_parameter()
