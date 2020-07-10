@@ -32,7 +32,7 @@ release = '0.0.1.6'
 # ones.
 extensions = ['sphinx.ext.autodoc', 
             'recommonmark', 'sphinx.ext.napoleon',
-            'sphinx_rtd_theme',]
+            'sphinx_rtd_theme','nbsphinx',]
 
 # Napoleon settings
 napoleon_google_docstring = True

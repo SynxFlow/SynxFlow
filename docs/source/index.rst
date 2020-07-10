@@ -15,8 +15,8 @@ Pypims: Python APIs for `hipims-cuda <https://github.com/HEMLab/hipims>`_.
    about
    quickstart
 
+   Tutorials/index
    Modules/index
-   
 
 Indices and tables
 ==================
