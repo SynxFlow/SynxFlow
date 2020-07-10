@@ -14,7 +14,7 @@ To do:
 ---------------
 
 """
-import os
+# import os
 import pkg_resources
 import numpy as np
 from .InputHipims import InputHipims
@@ -26,8 +26,9 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
     """ A demonstration to generate a hipims input object
     
     Args:
-        set_example_inputs: (True|False) if True, initial condition, boundary condition, 
-            rainfall source, and gauge postion will be set to the input object according to sample data.
+        set_example_inputs: (True|False) if True, initial condition, boundary 
+            condition, rainfall source, and gauge postion will be set to the 
+            input object according to sample data.
         figname: (string) if given, a domain map will saved
 
     """
@@ -75,20 +76,21 @@ def get_sample_data():
     """ Get sample data for demonstartion
 
     Returns:
-        A DEM raster object and a dictionary with boundary_condition, rain_source, and gauges_pos data
+        A DEM raster object and a dictionary with boundary_condition,
+        rain_source, and gauges_pos data
     """
     dem_file = pkg_resources.resource_filename(__name__,
                                              'sample/DEM.gz')
     demo_data = {
         'boundary_condition': [
-            {'polyPoints': np.array([[2000, 2500],
-                                 [2200, 2200]]),
+            {'polyPoints': np.array([[1427, 195],
+                                 [1446, 243]]),
              'type': 'open',
-             'h': [[0, 10], [60, 10]]},
-            {'polyPoints': np.array([[80, 1150],
-                                 [200, 1100]]),
+             'hU': [[0, 30], [60, 20]]},
+            {'polyPoints': np.array([[58, 1645],
+                                 [72, 1170]]),
              'type': 'open',
-             'hU': [[0, 1000], [60, 2000]]}],
+             'h': [[0, 12.5], [60, 12.5]]}],
         'rain_source': np.array([[0, 2.77777778e-06],
                                  [1800, 2.77777778e-05],
                                  [3600, 0]]),

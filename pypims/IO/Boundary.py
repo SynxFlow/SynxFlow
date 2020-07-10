@@ -28,8 +28,12 @@ class Boundary(object):
         num_of_bound: number of boundaries
 
         type: a list of string 'open', 'rigid', 'fall'
-                input-output boundary is open boundary with given water
-                depth and/or velocities
+                'open': timeseries of boundary depth/discharge/velocity can 
+                    be given for this type. If no given timeseries data,
+                    water will flow out flatly
+                'rigid': no outlet
+                'fall': water flow out like a fall, a fix zero water depth and
+                    velocities will be given
 
         extent: (2-col numpy array) poly points to define the extent of a
                 IO boundary. If extent is not given, then the boundary is
@@ -59,19 +63,24 @@ class Boundary(object):
                 Input-Output (IO) sources timeseries. Keys including:
 
                 1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
-                coordinates of points to define the position of a boundary.
-                An empty polyPoints means outline boundary.
+                    coordinates of points to define the position of a boundary.
+                    An empty polyPoints means outline boundary.
 
-                2.type: 'open'(flow out flatly), 'rigid'(no outlet),
-                'fall'(water flow out like a fall)
+                2.type: string, type of the boundary
+                    'open': timeseries of boundary depth/discharge/velocity
+                            can be given for this type. If no given timeseries
+                            data, water will flow out flatly
+                    'rigid': water cannot flow in or out
+                    'fall': water flow out like a fall, a fix zero water depth
+                            and velocities will be given
 
                 3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
-                is water depth(m)
+                     is water depth(m)
 
                 4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
-                col is discharge(m3/s) or a three-col numpy array, the 2nd
-                col and the 3rd col are velocities(m/s) in x and y
-                direction, respectively.
+                    col is discharge(m3/s) or a three-col numpy array, the 2nd
+                    col and the 3rd col are velocities(m/s) in x and y
+                    direction, respectively.
 
             outline_boundary: (str) 'open'|'rigid', default outline boundary is
                 open and both h and hU are set as zero
@@ -90,6 +99,7 @@ class Boundary(object):
 
     def print_summary(self):
         """Print the summary information
+        
         """
         print('Number of boundaries: '+str(self.num_of_bound))
         for n in range(self.num_of_bound):
@@ -101,6 +111,7 @@ class Boundary(object):
 
     def get_summary(self):
         """ Get summary information strings
+        
         """
         summary_dict = {}
         summary_dict['Number of boundaries'] = str(self.num_of_bound)
@@ -116,6 +127,7 @@ class Boundary(object):
 
     def _fetch_boundary_cells(self, valid_subs, outline_subs, dem_header):
         """ To get the subsripts and id of boundary cells on the domain grid
+        
         valid_subs, outline_subs, dem_header are from hipims object
             _valid_cell_subs, _outline_cell_subs
         cell_subs: (tuple)subscripts of outline boundary cells
@@ -164,6 +176,7 @@ class Boundary(object):
 
     def _divide_domain(self, hipims_obj):
         """ Create Boundary objects for each sub-domain
+        
         IF hipims_obj has sub sections
         """
         boundary_list = hipims_obj.Boundary.boundary_list
@@ -223,20 +236,26 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
                (type(one_bound['polyPoints']) is np.ndarray):
             data_table = data_table.append(
                 {'extent':one_bound['polyPoints'], }, ignore_index=True)
-            data_table.type[bound_ind] = one_bound['type']
+        else:
+            raise ValueError('polyPoints is missing in boundary_list')
+        data_table.type[bound_ind] = one_bound['type']
+        data_table.hSources[bound_ind] = None
+        data_table.hUSources[bound_ind] = None
+        if one_bound['type'] == 'open':
             if 'h' in one_bound.keys():
                 data_table.hSources[bound_ind] = np.array(one_bound['h'])
-            else:
-                data_table.hSources[bound_ind] = None
             if 'hU' in one_bound.keys():
                 data_table.hUSources[bound_ind] = np.array(one_bound['hU'])
-            else:
-                data_table.hUSources[bound_ind] = None
-            bound_ind = bound_ind+1
+        elif one_bound['type'] == 'fall':
+            data_table.hSources[bound_ind] = np.array([[0, 0], [1, 0]])
+            data_table.hUSources[bound_ind] = np.array([[0, 0, 0], [1, 0, 0]])
+        elif one_bound['type'] == 'rigid':
+            pass
         else:
-            warning_str = ('The boundary without polyPoints is ignored: '+
-                           str(bound_ind-1))
-            warnings.warn(warning_str)
+            raise ValueError('unrecognised boundary type in boundary_list: '
+                             'must be one from rigid, open, fall')
+        bound_ind = bound_ind+1
+
     return data_table
 
 # private function called by Class Boundary

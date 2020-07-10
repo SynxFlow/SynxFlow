@@ -16,8 +16,8 @@ To do:
 """
 import copy
 import math
+import fiona
 import numpy as np
-#from osgeo import gdal, ogr, osr
 from scipy import interpolate
 from . import spatial_analysis as sp
 from . import grid_show as gs
@@ -31,23 +31,26 @@ class Raster(object):
         source_file: file name to read grid data 
         output_file: file name to write a raster object 
         array: a numpy array storing grid cell values 
-        header: a dict storing reference information of the grid 
+        header: a dict storing reference information of the grid, with keys:
+            nrows, ncols, xllcorner, yllcorner, cellsize, NODATA_value
         extent: a tuple storing outline limits of the raster (left, right, 
             bottom, top)
-        shape: shape of the Raster value array  
+        shape: shape of the Raster value array
+        cellsize: the length of each square cell
         extent_dict: a dictionary storing outline limits of the raster  
         projection: (string) the Well-Known_Text (wkt) projection information  
         
     """
 #%%======================== initialization function ===========================   
     def __init__(self, source_file=None, array=None, header=None, 
+                 xllcorner=0, yllcorner=0, cellsize=100, NODATA_value=-9999,
                  epsg=None, projection=None, num_header_rows=6):
         """Initialise the object
 
         Args:
             source_file: name of a asc/tif file if a file read is needed
             array: values in each raster cell [a numpy array]
-            header: georeference of the raster [a dictionary containing 6 keys]:
+            header: georeference of the raster [a dictionary containing 6 keys]
                 nrows, nclos [int]
                 cellsize, xllcorner, yllcorner
                 NODATA_value
@@ -59,18 +62,23 @@ class Raster(object):
             projection = self.__set_wkt_projection(epsg)
         if type(source_file) is str:
             if source_file.endswith('.tif'):
-                array, header, projection = sp.tif_read(source_file) # only read the first band
+                array, header, projection = sp.tif_read(source_file) 
+                # only read the first band
             else:
                 array, header, projection = sp.arcgridread(source_file,
                                                     num_header_rows)
             self.source_file = source_file
         elif type(source_file) is bytes:  # try a binary file-like object
             array, header = sp.byte_file_read(source_file)
+        if header is None:
+            header = {'ncols':array.shape[1], 'nrows':array.shape[0],
+                      'xllcorner':xllcorner, 'yllcorner':yllcorner,
+                      'cellsize':cellsize, 'NODATA_value':NODATA_value}
+        self.header = header
         extent = sp.header2extent(header)
         self.source_file = source_file
         self.projection = projection
         self.array = array
-        self.header = header
         self.shape = array.shape
         if array.shape != (header['nrows'], header['ncols']):
             raise ValueError(('shape of array is not consistent with '
@@ -106,142 +114,103 @@ class Raster(object):
                          projection=self.projection)
         return new_obj
     
-    def clip(self, mask=None):
+    def clip(self, clip_mask=None):
         """clip raster according to a mask
 
         Args:
-            mask: 1. string name of a shapefile or 2. numpy vector giving X and Y coords of the mask points
+            mask: 1. string name of a shapefile or 2. 2-col numpy array giving
+                X and Y coords in each column to shape the mask polygon
         
         Return:
             Raster: a new raster object
         """
-        if isinstance(mask, str):
-            shpName =  mask
-        # Open shapefile datasets  
-        from osgeo import ogr
-        shpDriver = ogr.GetDriverByName('ESRI Shapefile')
-        shpDataset = shpDriver.Open(shpName, 0) # 0=Read-only, 1=Read-Write
-        layer = shpDataset.GetLayer()
-        shpExtent = np.array(layer.GetExtent()) #(minX, maxY, maxX, minY)           
-        # 1. rectangle clip raster
-        new_obj = self.rect_clip(shpExtent)
-        new_raster = copy.deepcopy(new_obj)                
-        indexArray = new_raster.rasterize(shpDataset)
-        arrayClip = new_raster.array
-        arrayClip[indexArray==0]=new_raster.header['NODATA_value']
-        new_raster.array = arrayClip        
-        shpDataset.Destroy()
-        return new_raster
+        from rasterio import mask
+        ds_rio = self.to_rasterio()
+        if type(clip_mask) is str:
+            with fiona.open(clip_mask, 'r') as shapefile:
+                shapes = [feature['geometry'] for feature in shapefile]
+        elif type(clip_mask) is np.ndarray:
+            shape = {'type':'Polygon', 'coordinates':[clip_mask]}
+            shapes = [shape]
+        else:
+            raise IOError('mask must be either a string or a numpy array')
+        
+        out_image, out_transform = mask.mask(ds_rio, shapes, crop=True) # 
+        array = out_image[0]
+        cellsize = out_transform[0]
+        xllcorner = out_transform[2]
+        yllcorner = out_transform[5]- cellsize*array.shape[0]
+        obj_clipped = Raster(array=array, xllcorner=xllcorner,
+                             yllcorner=yllcorner, NODATA_value=ds_rio.nodata,
+                             cellsize=cellsize)
+        return obj_clipped
     
-    def rasterize(self, shpDSName, rasterDS=None):
+    def rasterize(self, shp_filename):
         """
         rasterize the shapefile to the raster object and return a bool array
             with Ture value in and on the polygon/polyline
 
         Args:
-            shpDSName: string for shapefilename, dataset for ogr('ESRI Shapefile')
-                object
+            shp_filename: string for shapefile name, or a list of shapefile
+                geometry with attributes 'type' and 'coordinates'
 
         Return:
-            numpy array: an array of True|False values that marks the shape
+            index_array: an array of True|False values masking the shapefile
 
         """
-        from osgeo import gdal, ogr
-        if isinstance(shpDSName, str):
-            shpDataset = ogr.Open(shpDSName)
+        from rasterio import mask
+        ds_rio = self.to_rasterio()
+        if type(shp_filename) is str:
+            with fiona.open(shp_filename, 'r') as shapefile:
+                shapes = [feature['geometry'] for feature in shapefile]
         else:
-            shpDataset = shpDSName
-        layer = shpDataset.GetLayer()
-        if rasterDS is None:
-            obj_raster = copy.deepcopy(self)
-            obj_raster.array = np.zeros(obj_raster.array.shape)
-            target_ds = obj_raster.to_osgeo_raster()
-        else:
-            target_ds = rasterDS
-        gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[-1])
-        rasterized_array = target_ds.ReadAsArray()
-        indexArray = np.full(rasterized_array.shape, False)
-        indexArray[rasterized_array==-1] = True
-        target_ds=None
-        return indexArray
-    
-    def resample(self, cellsize_n, method='bilinear'):
-        """resample the raster to a new cellsize
-
+            shapes = shp_filename
+        out_image, _ = mask.mask(ds_rio, shapes) #, crop=True
+        rasterized_array = out_image[0]
+        rasterized_array[np.isnan(rasterized_array)] = ds_rio.nodata
+        index_array = np.full(rasterized_array.shape, True)
+        index_array[rasterized_array == ds_rio.nodata] = False
+#        ds_rio.close()
+        return index_array
+        
+    def resample(self, new_cellsize, method='bilinear'):
+        """ Resample the raster object to a new resolution
+        
         Args:
-            cellsize_n: cellsize of the new raster
-            method: Resampling method to use. Available methods are:
-
-                    near: nearest neighbour resampling (default, fastest algorithm, 
-                    worst interpolation quality). 
-
-                    bilinear: bilinear resampling.  
-
-                    cubic: cubic resampling.    
-
-                    cubicspline: cubic spline resampling.
-
-                    lanczos: Lanczos windowed sinc resampling.
-
-                    average: average resampling, computes the average of all 
-                    non-NODATA contributing pixels.
-
-                    mode: mode resampling, selects the value which appears 
-                    most often of all the sampled points.
-
-                    max: maximum resampling, selects the maximum value from 
-                    all non-NODATA contributing pixels.
-
-                    min: minimum resampling, selects the minimum value from 
-                    all non-NODATA contributing pixels.
-
-                    med: median resampling, selects the median value of all 
-                    non-NODATA contributing pixels.
-
-                    q1: first quartile resampling, selects the first quartile 
-                    value of all non-NODATA contributing pixels.
-
-                    q3: third quartile resampling, selects the third quartile 
-                    value of all non-NODATA contributing pixels
-
+            new_cellsize: scalar, the resoltion of the new raster object
+            method: string, one of the values including 'nearest', 'bilinear',
+            'cubic', 'cubic_spline', 'lanczos', 'average', 'mode', 'gauss',
+            'max', 'min', 'med', 'q1', 'q3' 
+        
+        Return:
+            Raster object
         """
-        from osgeo import gdal
-        cellSize = self.header['cellsize']
-        ras_x_size = self.header['ncols']
-        newras_x_size = int(ras_x_size*cellSize/cellsize_n)
-        rasterYSize = self.header['nrows']
-        newRasterYSize = int(rasterYSize*cellSize/cellsize_n)
+        from rasterio.enums import Resampling
+        method_list = ['nearest', 'bilinear', 'cubic', 'cubic_spline',
+                       'lanczos', 'average', 'mode', 'gauss', 'max', 'min',
+                       'med', 'q1', 'q3']
+        ind = method_list.index(method)
+        upscale_factor = self.cellsize/new_cellsize
+        ds_rio = self.to_rasterio()
+        new_shape = (1, int(ds_rio.height * upscale_factor),
+                        int(ds_rio.width * upscale_factor))
+        resampling_method = Resampling(ind)
+        data = ds_rio.read(out_shape=new_shape, resampling=resampling_method)
+        data = data[0]
+        # scale image transform
+        transform = ds_rio.transform * ds_rio.transform.scale(
+                    (ds_rio.width / data.shape[-1]),
+                    (ds_rio.height / data.shape[-2]))
+        new_header = copy.deepcopy(self.header)
+        new_header['cellsize'] = new_cellsize
+        new_header['nrows'] = data.shape[0]
+        new_header['ncols'] = data.shape[1]
+        new_header['xllcorner'] = transform[2]
+        new_header['yllcorner'] = transform[5]-data.shape[0]*new_cellsize
+        obj_new = Raster(array=data, header=new_header)
+#        ds_rio.close()
+        return obj_new
         
-        g = self.to_osgeo_raster() # get original gdal dataset
-        total_obs = g.RasterCount
-        drv = gdal.GetDriverByName( "MEM" )
-        dst_ds = drv.Create('', g.RasterXSize, g.RasterYSize, 1,
-                            eType=gdal.GDT_Float32)
-        dst_ds.SetGeoTransform( g.GetGeoTransform())
-        dst_ds.SetProjection ( g.GetProjectionRef() )
-        hires_data = self.array
-        dst_ds.GetRasterBand(1).WriteArray ( hires_data )
-        
-        geo_trans_v = g.GetGeoTransform()
-        drv = gdal.GetDriverByName( "MEM" )
-        resampled_ds = drv.Create('', newras_x_size, newRasterYSize, 1, 
-                                  eType=gdal.GDT_Float32)
-
-        geo_trans_v_new = (geo_trans_v[0], cellsize_n, geo_trans_v[2],
-                           geo_trans_v[3], geo_trans_v[3], -cellsize_n)
-        resampled_ds.SetGeoTransform(geo_trans_v_new )
-        resampled_ds.SetProjection (g.GetProjectionRef() )
-        resampled_ds.SetMetadata ({"TotalNObs":"%d" % total_obs})
-
-        gdal.RegenerateOverviews(dst_ds.GetRasterBand(1),
-                                 [resampled_ds.GetRasterBand(1)], method)
-    
-        resampled_ds.GetRasterBand(1).SetNoDataValue(self.header['NODATA_value'])
-        
-        new_obj = self.__osgeo2raster(resampled_ds)
-        resampled_ds = None
-
-        return new_obj
     
     def point_interpolate(self, points, values, method='nearest'):
         """ Interpolate values of 2D points to all cells on the Raster object
@@ -254,7 +223,7 @@ class Raster(object):
                 or a tuple of ndim arrays.
             values: ndarray of float or complex, shape (n, )
                 Data values.
-            method: {‘linear’, ‘nearest’, ‘cubic’}, optional
+            method: {'linear', 'nearest', 'cubic'}, optional
                 Method of interpolation.
 
         """
@@ -273,11 +242,12 @@ class Raster(object):
 
         Args:
             value_grid: a grid file string or Raster object 
-            method: {‘linear’, ‘nearest’, ‘cubic’}, optional
+            method: {'linear', 'nearest', 'cubic'}, optional
                 Method of interpolation.
 
         Return: 
-            numpy array: the interpolated grid with the same size of the self object
+            numpy array: the interpolated grid with the same size of the self 
+                object
         """
         if type(value_grid) is str:
             value_grid = Raster(value_grid)
@@ -286,8 +256,9 @@ class Raster(object):
         values = value_grid.array.flatten()
         ind_nan = ~np.isnan(values)
         grid_x, grid_y = self.to_points()
-        array_interp = interpolate.griddata(points[ind_nan, :], values[ind_nan],
-                                            (grid_x, grid_y), method=method)
+        array_interp = interpolate.griddata(points[ind_nan, :],
+                                            values[ind_nan], (grid_x, grid_y),
+                                            method=method)
         return array_interp
     
     def grid_resample_nearest(self, newsize):
@@ -382,16 +353,18 @@ class Raster(object):
     
     def to_osgeo_raster(self, filename=None, fileformat = 'GTiff',
                         srcEPSG=27700, destEPSG=None):        
-        """convert this object to an osgeo raster object, write a tif file if necessary
+        """convert this object to an osgeo raster object, write a tif file if 
+        necessary
 
         Args:
             filename: the output file name
             fileformat: GTiff or AAIGrid
-            destEPSG: the EPSG projection code default: 27700 British National Grid
-                    'EPSG:4326'
+            destEPSG: the EPSG projection code default: 27700 British National
+                Grid 'EPSG:4326'
 
         Returns:
-            osgeo raster: The converted raster dataset, or a tif filename if it is written
+            osgeo raster: The converted raster dataset, or a tif filename if 
+                it is written
 
         Alias: To_osgeo_raster
         """
@@ -443,6 +416,83 @@ class Raster(object):
             return dst_filename
         else:
             return dataset
+    
+    def to_rasterio(self, output_file=None, src_epsg=27700):
+        """ Convert to a rasterio dataset
+        
+        Args:
+            output_file: a string to give output file name
+            src_epsg: int scalar to give EPSG code of the coordinate reference
+                system of the original dataset, default is 27700 for BNG
+        Return:
+            ds_rio: a rasterio dataset
+        """
+        import rasterio
+        from rasterio.transform import Affine
+        cellsize = self.cellsize
+        x00 = self.extent_dict['left'] # upper-left corner of the first pixel
+        y00 = self.extent_dict['top']
+        transform = Affine.translation(x00, y00)*Affine.scale(
+                                                       cellsize, -cellsize)
+        if output_file is None:
+            filename = '/tmp/new.tif'
+        else:
+            if output_file.endswith('.tif'):
+                filename = output_file
+            else:
+                filename = output_file+'.tif'
+        src_crs = rasterio.crs.CRS.from_epsg(src_epsg)
+        ds_rio = rasterio.open(filename, 'w+', driver='GTiff',
+                               height=self.shape[0], width=self.shape[1],
+                               count=1,
+                               dtype=self.array.dtype,
+                               crs=src_crs,
+                               transform=transform,
+                               nodata=self.header['NODATA_value'])
+        ds_rio.write(self.array, 1)
+        if output_file is not None:
+            ds_rio.close()
+        return ds_rio
+    
+    def reproject(self, dst_epsg, output_file=None):
+        """Reproject the raster to a different coordinate referenece system
+        
+        Args:
+            output_file: a string to give output file name
+            src_epsg: int scalar to give EPSG code of the coordinate reference
+                system of the original dataset, default is 27700 for BNG
+        Return:
+            dst_rio: destination rasterio dataset
+        
+        """
+        import rasterio
+        from rasterio.warp import calculate_default_transform as cal_tsf
+        from rasterio.warp import reproject, Resampling
+        src_rio = self.to_rasterio()
+        dst_crs = rasterio.crs.CRS.from_epsg(dst_epsg)
+        transform, width, height = cal_tsf(src_rio.crs, dst_crs, src_rio.width, 
+                                           src_rio.height, *src_rio.bounds)
+        kwargs = src_rio.meta.copy()
+        kwargs.update({'crs': dst_crs, 'transform': transform, 'width': width,
+                       'height': height, 'nodata':self.header['NODATA_value']})
+        if output_file is None:
+            filename = '/tmp/new.tif'
+        else:
+            if output_file.endswith('.tif'):
+                filename = output_file
+            else:
+                filename = output_file+'.tif'
+        dst_rio = rasterio.open(filename, 'w+', **kwargs)
+        reproject(source=rasterio.band(src_rio, 1),
+                  destination=rasterio.band(dst_rio, 1),
+                  src_transform=src_rio.transform,
+                  src_crs=src_rio.crs,
+                  dst_transform=transform,
+                  dst_crs=dst_crs,
+                  resampling=Resampling.nearest)
+        if output_file is not None:
+            dst_rio.close()
+        return dst_rio
 #%%=============================Visualization==================================
     def mapshow(self, **kwargs):
         """Display raster data without projection
