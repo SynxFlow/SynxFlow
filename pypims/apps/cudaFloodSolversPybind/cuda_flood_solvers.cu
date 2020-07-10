@@ -219,13 +219,16 @@ int run(const char* work_dir){
   hU.update_time(time_controller.current(), 0.0);
   hU.update_boundary_values();
 
-  //write the initial profile
-  cuSimpleWriterLowPrecision(z, "z",time_controller.current());
-  cuSimpleWriterLowPrecision(h, "h", time_controller.current());
-  cuSimpleWriterLowPrecision(hU, "hU", time_controller.current());
-
   //ascii raster writer
   cuGisAsciiWriter raster_writer("input/mesh/DEM.txt");
+
+  //write the initial profile
+  fv::cuUnary(hU, hUx, [] __device__(Vector& a) -> Scalar{ return a.x; });
+  fv::cuUnary(hU, hUy, [] __device__(Vector& a) -> Scalar{ return a.y; });
+  raster_writer.write(h, "h", t_out);
+  raster_writer.write(hUx, "hUx", t_out);
+  raster_writer.write(hUy, "hUy", t_out);
+  t_out += dt_out;
   
   //write initial depth
   raster_writer.write(h, "h", time_controller.current());
@@ -303,7 +306,7 @@ int run(const char* work_dir){
     time_controller.updateByCFL(gravity, h, hU);
 
     //-----------Fuse for extremely small dt------------ There is a bug to be resolved herein
-    if (time_controller.dt()<0.0001) {
+/*     if (time_controller.dt()<0.0001) {
       fv::cuUnary(hU, hUx, [] __device__(Vector& a) -> Scalar{ return a.x; });
       fv::cuUnary(hU, hUy, [] __device__(Vector& a) -> Scalar{ return a.y; });
       raster_writer.write(h, "h", t_out);
@@ -311,7 +314,7 @@ int run(const char* work_dir){
       raster_writer.write(hUy, "hUy", t_out);
       printf("Fuse!!!\n");
       break;
-    }
+    } */
 
     if (time_controller.current() + time_controller.dt() > t_out){
       Scalar dt = t_out - time_controller.current();
@@ -498,11 +501,12 @@ void single_run(cuDataBank& bank, std::vector<int> device_list, unsigned int dom
   //ascii raster writer
   cuGisAsciiWriter raster_writer(DEM_file_name.c_str());
 
-  //write initial files
-  cuSimpleWriterLowPrecision(z, "z", time_controller.current(), output_directory.c_str());
-  cuSimpleWriterLowPrecision(h, "h", time_controller.current(), output_directory.c_str());
-  cuSimpleWriterLowPrecision(hU, "hU", time_controller.current(), output_directory.c_str());
+  //write the initial profile
+  fv::cuUnary(hU, hUx, [] __device__(Vector& a) -> Scalar{ return a.x; });
+  fv::cuUnary(hU, hUy, [] __device__(Vector& a) -> Scalar{ return a.y; });
   raster_writer.write(h, "h", time_controller.current(), output_directory.c_str());
+  raster_writer.write(hUx, "hUx", time_controller.current(), output_directory.c_str());
+  raster_writer.write(hUy, "hUy", time_controller.current(), output_directory.c_str());
 
   int cnt = 0;
   
