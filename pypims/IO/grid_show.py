@@ -122,6 +122,8 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
     """ Draw a hillshade map
     """
     array = raster_obj.array+0
+    if 'NODATA_value' in raster_obj.header:
+            array[array == raster_obj.header['NODATA_value']] = np.nan
     array[np.isnan(array)] = np.nanmax(array)
     ls = LightSource(azdeg=azdeg, altdeg=altdeg)
     if cmap is None:
