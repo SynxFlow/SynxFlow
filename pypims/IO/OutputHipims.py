@@ -20,7 +20,8 @@ import numpy as np
 import pandas as pd
 from . import spatial_analysis as sp
 from .Raster import Raster
-from .indep_functions import save_object, _create_io_folders
+from .Summary import Summary
+from .indep_functions import save_as_dict, _create_io_folders, load_object
 class OutputHipims:
     """To read and analyze otuput files from a HiPIMS flood model
 
@@ -43,9 +44,9 @@ class OutputHipims:
 
     """  
     def __init__(self, input_obj=None, case_folder=None,
-                 num_of_sections=None, header_file_tag=None):
+                 num_of_sections=1, header_file_tag=None):
         """Initialize the object with a InputHiPIMS object or a case folder and
-        the number of sections
+            the number of sections
 
         Args:
             header_file_tag: the output file to read grid header, e.g. 'h_0'
@@ -56,6 +57,12 @@ class OutputHipims:
             self.num_of_sections = num_of_sections
             self._set_IO_folders()
             self._set_grid_header(asc_file=header_file_tag)
+        elif type(input_obj) is dict: # load from a dict
+            for key, value in input_obj.items():
+                if key=='Summary':
+                    self.Summary = Summary(value)
+                else:
+                    self.__dict__[key] = value
         elif hasattr(input_obj, 'DEM'):
             # get information from the input object
             # case_folder, num_of_sections, header
@@ -165,6 +172,7 @@ class OutputHipims:
             if var_name not in self.gauge_values_all.keys():
                 self.read_gauges_file(var_name, compressed)
         if gauge_ind is not None:
+            gauge_ind = np.array(gauge_ind, ndmin=2)
             # add position data for a gauge
             values = self.gauge_values_all[var_name]+0
             values_pd = self.times_simu.copy()
@@ -180,7 +188,7 @@ class OutputHipims:
                 values_pd['values_x'] = one_gauge_v[0]
                 values_pd['values_y'] = one_gauge_v[1]
             elif var_name == 'eta':
-                if gauge_ind.size == 1:
+                if gauge_ind.size > 1:
                     raise ValueError('gauge_ind for eta must be a scalar')
                 else:
                     one_gauge_v = values[:, gauge_ind]
@@ -303,9 +311,28 @@ class OutputHipims:
     def save_object(self, file_name):
         """Save the object to a pickle file
         """
-        save_object(self, file_name, compression=True)
+#        save_object(self, file_name, compression=True)
+        save_as_dict(self, file_name)
     
 #%% =======================Supporting functions===============================
+def load_output_object(filename):
+    """load object from a dictionary and return as an OutputHipims object
+    
+    Args:
+        filename: a string giving the object file name
+    Return: 
+        An object of OutputHipims
+    """
+    obj_dict = load_object(filename)
+    if type(obj_dict) is OutputHipims:
+        obj_out = obj_dict
+    elif type(obj_dict) is dict:
+        obj_out = OutputHipims(obj_dict)
+    else:
+        raise ValueError(filename+' should store either a dict or OutputHipims'
+                         ' object')
+    return obj_out
+    
 def _combine_gauges_data_via_ind(case_folder, num_section, file_tag):
     """Combine gauges outputs from multi-gpu models according to gauges
 
