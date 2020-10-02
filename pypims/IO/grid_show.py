@@ -87,7 +87,9 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
         breaks: list of values to define rank. Array values lower than the first break value are set as nodata.
         color: color series of the ranks
         colorbar_kw: dict, keyword arguments to set colorbar
-        legend_kw: dict, keyword arguments to set legend
+        legend_kw: dict, keyword arguments to set legend, e.g.
+            legend_kw = {'loc':'upper left','facecolor':None, 'fontsize':'small',
+             'title':'depth(m)', 'labelspacing':0.1}
     
     """
     if raster_obj is not None:
@@ -137,7 +139,8 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
     _adjust_axis_tick(ax, relocate, scale_ratio)
     return fig, ax
 
-def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, **kwargs):
+def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, ax=None,
+               relocate=False, scale_ratio=1, **kwargs):
     """plot velocity map of U and V, whose values stored in two raster objects seperately
 
     """
@@ -150,10 +153,14 @@ def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, **kwargs):
         figsize = kwargs['figsize']
     else:
         figsize = None
-    fig, ax = plt.subplots(1, figsize=figsize)
-    plt.quiver(X, Y, U, V)
+    if ax is None:
+        fig, ax = plt.subplots(1, figsize=figsize)
+    else:
+        fig = ax.get_figure()
+    # fig, ax = plt.subplots(1, figsize=figsize)
+    ax.quiver(X, Y, U, V, **kwargs)
     ax.set_aspect('equal', 'box')
-    ax.tick_params(axis='y', labelrotation=90)
+    _adjust_axis_tick(ax, relocate, scale_ratio)
     if figname is not None:
         fig.savefig(figname, dpi=dpi)
     return fig, ax
@@ -374,6 +381,7 @@ def _adjust_axis_tick(ax, relocate=True, scale_ratio=1):
     ax.set_yticklabels(yticks_label)
     ax.set_xlabel(label_tag+' towards east')
     ax.set_ylabel(label_tag+' towards north')
+    ax.tick_params(axis='y', labelrotation=90)
     return None
 
 def main():
