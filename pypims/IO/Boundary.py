@@ -64,7 +64,7 @@ class Boundary(object):
 
                 1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
                     coordinates of points to define the position of a boundary.
-                    An empty polyPoints means outline boundary.
+                    A bound without polyPoints is regarded as the outline_boundary.
 
                 2.type: string, type of the boundary
                     'open': timeseries of boundary depth/discharge/velocity
@@ -84,6 +84,8 @@ class Boundary(object):
 
             outline_boundary: (str) 'open'|'rigid', default outline boundary is
                 open and both h and hU are set as zero
+            if h or hU is given, then the boundary type is set as 'open' in 
+                function _setup_boundary_data_table
         """
         data_table = _setup_boundary_data_table(boundary_list, outline_boundary)
         data_table = _get_boundary_code(data_table)
@@ -204,10 +206,13 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
     Add attributes type, extent, hSources, hUSources
     boundary_list: (list) of dict with keys polyPoints, h, hU
     outline_boundary: (str) 'open', 'rigid', 'fall'
+    A bound without polyPoints is regarded as the outline_boundary
+    If h or hU is given, then the boundary type is set as 'open', which means
+     'h' and 'hU' have priority to 'type'
     """
     data_table = pd.DataFrame(columns=['type', 'extent',
                                        'hSources', 'hUSources',
-                                       'h_code', 'hU_code'])
+                                       'h_code', 'hU_code', 'name'])
     # set default outline boundary [0]
     if outline_boundary == 'fall':
         hSources = np.array([[0, 0], [1, 0]])
@@ -225,36 +230,44 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
                                         'hSources':None, 'hUSources':None},
                                        ignore_index=True)
     else:
-        raise ValueError("outline_boundary must be fal, open or rigid!")
+        raise ValueError("outline_boundary must be fall, open or rigid!")
+    data_table.name[0] = 'Outline boundary'
     # convert boundary_list to a dataframe
-    bound_ind = 1  # bound index
     if boundary_list is None:
         boundary_list = []
     for one_bound in boundary_list:
         # Only a bound with polyPoints can be regarded as a boundary
-        if ('polyPoints' in one_bound.keys()) and \
-               (type(one_bound['polyPoints']) is np.ndarray):
-            data_table = data_table.append(
-                {'extent':one_bound['polyPoints'], }, ignore_index=True)
+        # Otherwise it will be treated as the outline boundary
+        bound_ind = data_table.shape[0]  # bound index
+            # set extent
+        if 'polyPoints' in one_bound.keys():
+            bound_extent = np.array(one_bound['polyPoints'])
+            data_table = data_table.append({'extent':bound_extent, }, 
+                                           ignore_index=True)
         else:
-            raise ValueError('polyPoints is missing in boundary_list')
-        data_table.type[bound_ind] = one_bound['type']
-        data_table.hSources[bound_ind] = None
-        data_table.hUSources[bound_ind] = None
-        if one_bound['type'] == 'open':
-            if 'h' in one_bound.keys():
-                data_table.hSources[bound_ind] = np.array(one_bound['h'])
-            if 'hU' in one_bound.keys():
-                data_table.hUSources[bound_ind] = np.array(one_bound['hU'])
-        elif one_bound['type'] == 'fall':
-            data_table.hSources[bound_ind] = np.array([[0, 0], [1, 0]])
-            data_table.hUSources[bound_ind] = np.array([[0, 0, 0], [1, 0, 0]])
-        elif one_bound['type'] == 'rigid':
-            pass
+            bound_ind = 0
+            print('polyPoints is not given in boundary_list[0],'
+                  'set as outline boundary')
+        if 'type' in one_bound.keys():
+            bound_type = one_bound['type']
         else:
-            raise ValueError('unrecognised boundary type in boundary_list: '
-                             'must be one from rigid, open, fall')
-        bound_ind = bound_ind+1
+            bound_type = 'open' # defaul type is open
+
+        if 'h' in one_bound.keys():
+            data_table.hSources[bound_ind] = np.array(one_bound['h'])
+            bound_type = 'open'
+        else:
+            data_table.hSources[bound_ind] = None
+        
+        if 'hU' in one_bound.keys():
+            data_table.hUSources[bound_ind] = np.array(one_bound['hU'])
+            bound_type = 'open'
+        else:
+            data_table.hUSources[bound_ind] = None
+        
+        data_table.type[bound_ind] = bound_type
+        if 'name' in one_bound.keys():
+            data_table.name[bound_ind] = one_bound['name']
 
     return data_table
 
