@@ -191,7 +191,7 @@ class OutputHipims:
                 if gauge_ind.size > 1:
                     raise ValueError('gauge_ind for eta must be a scalar')
                 else:
-                    one_gauge_v = values[:, gauge_ind]
+                    one_gauge_v = values[:, gauge_ind[0]]
                     values_pd['values'] = one_gauge_v
             if gauge_name in self.gauge_values.keys():
                 gauge_dict = self.gauge_values[gauge_name]
