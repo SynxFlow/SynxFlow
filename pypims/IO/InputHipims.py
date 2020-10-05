@@ -43,6 +43,7 @@ __author__ = "Xiaodong Ming"
 import os
 import shutil
 import copy
+import warnings
 import numpy as np
 from datetime import datetime
 from .Raster import Raster
@@ -67,14 +68,14 @@ class InputHipims:
         times:  (list/numpy array) of four values reprenting model run time in
                 seconds: start, end, output interval, backup interval
         device_no: (int) the gpu device id(s) to run model
-        param_per_landcover: dict, argument to set grid parameters using Landcover
-            object. Keys are grid parameter names. Value is a dict with three
-            keys: param_value, land_value, default_value. Refer to Landcover
-            for more details.
+        param_per_landcover: dict, argument to set grid parameters using the
+            Landcover object. Keys are grid parameter names. Each Value is a 
+            dict with three keys: param_value, land_value, default_value. 
+            Refer to Landcover for more details.
         Sections: a list of objects of child-class InputHipimsSub
         Boundary: A boundary object for boundary conditions
         DEM: a Raster object to provide DEM data [alias: Raster].
-        Rainfall: a Rainfall object to provide rainfall data
+        Rainfall: a Rainfall object to process rainfall data
         Landcover: a Landcover object to provide landcover data for setting
             gridded parameters        
         Summary: a Summary object to record model information
@@ -171,7 +172,7 @@ class InputHipims:
         
         Return:
             string: a dict with four keys ('input', 'output', 'mesh', 'field')
-            providing their absolute paths
+                providing their absolute paths
         """
         return self._data_folders
     
@@ -193,21 +194,20 @@ class InputHipims:
                 type, h, hU) to define a IO boundary's position, type, and
                 Input-Output (IO) sources timeseries. Keys including:
 
-                1. polyPoints: a numpy array giving X(1st col) and Y(2nd col)
-                coordinates of points to define the position of a boundary.
-                An empty polyPoints means outline boundary.
+                1.polyPoints is a numpy array giving X(1st col) and Y(2nd col)
+                    coordinates of points to define the position of a boundary.
+                    An empty polyPoints means outline boundary.
 
-                2. type: 'open'(flow out flatly), 'rigid'(no outlet),
-                'fall'(water flow out like a fall)
+                2.type: 'open'(flow out flatly), 'rigid'(no outlet),
+                        'fall'(water flow out like a fall)
 
-                3. h: a two-col numpy array. The 1st col is time(s). The 2nd col
-                is water depth(m)
+                3.h: a two-col numpy array. The 1st col is time(s). The 2nd col
+                     is water depth(m)
 
-                4. hU: a two-col numpy array. The 1st col is time(s). The 2nd
-                col is discharge(m3/s) or a three-col numpy array, the 2nd
-                col and the 3rd col are velocities(m/s) in x and y
-                direction, respectively.
-
+                4.hU: a two-col numpy array. The 1st col is time(s). The 2nd
+                    col is discharge(m3/s) or a three-col numpy array, the 2nd
+                    col and the 3rd col are velocities(m/s) in x and y
+                    direction, respectively.
             outline_boundary: (str) 'open'|'rigid', default outline boundary is
                 open and both h and hU are set as zero
 
@@ -252,23 +252,14 @@ class InputHipims:
         """ Set grid parameter with Landcover object as name=value
 
         Args:
-            kwargs: 
-                Keyword Arguments Specified by a Dictionary
+            kwargs: Keyword Arguments Specified by a Dictionary
                 keyword: name, from grid_parameter_keys
-                value:  
-                    1. scalar, a uniform parameter value
-                    2. array, gridded parameter value with the same size of DEM
-                    3. dict, contain param_value, land_value, default_value=0
 
-        Example:
-            Using landcover to set up parameters
-            
-            .. code-block:: python
-
-                obj_in.set_landcover(landcover)
-                obj_in.set_grid_parameter(manning={'param_value':[0.025, 0.055],
-                                    'land_value':[[0,1], [2,3]], # 0.025 corresponds to landcover type of 0,1
-                                    'default_value':0.035}
+                value:  1. scalar, a uniform parameter value
+                        2. array, gridded parameter value with the same shape
+                            of the DEM array
+                        3. dict, contains param_value, land_value,  and 
+                            default_value=0
         """
         if not hasattr(self, 'param_per_landcover'):
             # save arguments to call Landcover.to_grid_parameter()
@@ -324,7 +315,8 @@ class InputHipims:
         """Set coordinates of monitoring gauges
 
         Args:
-            gauges_pos: (numpy array) the 1st column is X coordinates, 2nd column is the Y coordinates
+            gauges_pos: (numpy array) the 1st column is X coordinates, 
+                2nd column is the Y coordinates
         """
         if gauges_pos is None:
             gauges_pos = self.attributes['gauges_pos']
@@ -374,8 +366,8 @@ class InputHipims:
         """set runtime of the model
 
         Args:
-            runtime: a list of four values representing start, end, output interval
-            and backup interval respectively
+            runtime: a list of four values representing start, end, output 
+                interval and backup interval respectively
         """
         if runtime is None:
             runtime = [0, 3600, 3600, 3600]
@@ -393,7 +385,8 @@ class InputHipims:
         """set device no of the model
 
         Args:
-            device_no: int or a list of int corresponding to the number of sections 
+            device_no: int or a list of int corresponding to the number of 
+                sections 
         """
         if device_no is None:
             device_no = np.arange(self.num_of_sections)
@@ -404,7 +397,8 @@ class InputHipims:
         """ Set Landcover object with a Raster object or file
 
         Args:
-            landcover_data: (string or Raster) A Raster file or its file name of land cover data
+            landcover_data: (string or Raster) A Raster file or its file name 
+                of land cover data
         """
         self.Landcover = Landcover(landcover_data, self.DEM)
 
@@ -412,8 +406,9 @@ class InputHipims:
         """ Add a grid-based user-defined parameter to the model
 
         Args:
-            param_name: (str) name the parameter and the input file name as well
-            param_value: (scalar) or (numpy arary) with the same size of DEM array
+            param_name: (str) name the parameter and the input file name too
+            param_value: (scalar) or (numpy arary) with the same shape of the 
+                DEM array
         """
         if param_name not in InputHipims.__grid_files:
             InputHipims.__grid_files.append(param_name)
@@ -444,23 +439,23 @@ class InputHipims:
         self.Summary.set_model_attr(num_GPU=self.num_of_sections)
 #        time_str = self.birthday.strftime('%Y-%m-%d %H:%M:%S')
 
-    def decomposite_domain(self, num_of_sections):
-        """ divide a single-gpu case into a multi-gpu case
-
-        Args:
-            num_of_sections: (int) number of domains
-        """
-        obj_mg = copy.deepcopy(self)
-        obj_mg.num_of_sections = num_of_sections
-        obj_mg.set_device_no()
-        obj_mg.__divide_grid()
-        obj_mg.set_case_folder() # set data_folders
-        outline_boundary = obj_mg.Boundary.outline_boundary
-        obj_mg.set_boundary_condition(outline_boundary=outline_boundary)
-        obj_mg.set_gauges_position()
-        obj_mg.Boundary._divide_domain(obj_mg)
-        obj_mg.birthday = datetime.now()
-        return obj_mg
+#    def decomposite_domain(self, num_of_sections):
+#        """ divide a single-gpu case into a multi-gpu case
+#
+#        Args:
+#            num_of_sections: (int) number of domains
+#        """
+#        obj_mg = copy.deepcopy(self)
+#        obj_mg.num_of_sections = num_of_sections
+#        obj_mg.set_device_no()
+#        obj_mg.__divide_grid()
+#        obj_mg.set_case_folder() # set data_folders
+#        outline_boundary = obj_mg.Boundary.outline_boundary
+#        obj_mg.set_boundary_condition(outline_boundary=outline_boundary)
+#        obj_mg.set_gauges_position()
+#        obj_mg.Boundary._divide_domain(obj_mg)
+#        obj_mg.birthday = datetime.now()
+#        return obj_mg
 
 #%%****************************************************************************
 #************************Write input files*************************************
@@ -468,10 +463,11 @@ class InputHipims:
         """ Write input files
 
         To classify the input files and call functions needed to write each
-        input files
+            input files
         
         Args:
-            file_tag: a string or list of string giving the name(s) of input files without suffix
+            file_tag: a string or list of string giving the name(s) of input
+                files without suffix
         """
         self._make_data_dirs()
         grid_files = InputHipims.__grid_files
@@ -526,7 +522,8 @@ class InputHipims:
     def write_boundary_conditions(self):
         """ Write boundary condtion files
 
-        if there are multiple domains, write in the first folder and copy to others
+        if there are multiple domains, write in the first folder
+            and copy to others
         """
         self._make_data_dirs()
         if self.num_of_sections > 1:  # multiple-GPU
@@ -643,31 +640,50 @@ class InputHipims:
 
 #%%****************************************************************************
 #******************************* Visualization ********************************
-    def domain_show(self, figname=None, dpi=None, title='Domain Map',
-                    **kwargs):
+    def domain_show(self, title='Domain Map', show_split=False, **kwargs):
         """Show domain map of the object
+        
+        Args:
+            title: string to set the figure titile, 'Domain Map' is the defualt
+            show_split: logical, show split lines for multi-gpu division 
+        
+        Retrun:
+            fig: figure handle
+            ax: axis handle
         """
         obj_dem = copy.deepcopy(self.DEM)
-#        if hasattr(self, 'Sections'):
-#            for obj_sub in self.Sections:
-#                overlayed_subs = obj_sub.overlayed_cell_subs_global
-#                obj_dem.array[overlayed_subs] = np.nan            
         fig, ax = obj_dem.mapshow(title=title, cax_str='DEM(m)', **kwargs)
         cell_subs = self.Boundary.cell_subs
         legends = []
+        if show_split:            
+            if hasattr(self, 'Sections'):
+                x_overlayed = []
+                y_overlayed = []
+                for obj_sub in self.Sections:
+                    overlayed_subs = obj_sub.overlayed_cell_subs_global
+                    rows = overlayed_subs[0]
+                    cols = overlayed_subs[1]
+                    X, Y = sub2map(rows, cols, self.DEM.header)
+                    x_overlayed = np.append(x_overlayed, X)
+                    y_overlayed = np.append(y_overlayed, Y)
+                ax.plot(x_overlayed, y_overlayed, '.k')
+                legends.append('Splitting cells')
+            else:
+                warnings.warn("show_split is only for multi-gpu model")
         num = 0
         for cell_sub in cell_subs:
             rows = cell_sub[0]
             cols = cell_sub[1]
             X, Y = sub2map(rows, cols, self.DEM.header)
             ax.plot(X, Y, '.')
-            legends.append('Boundary '+str(num))
+            if num==0:
+                legends.append('Outline cells')
+            else:
+                legends.append('Boundary '+str(num))
             num = num+1
-        legends[0] = 'Outline boundary'
+        
         ax.legend(legends, edgecolor=None, facecolor=None, loc='best',
                   fontsize='x-small')
-        if figname is not None:
-            fig.savefig(figname, dpi=dpi)
         return fig, ax
     
     def plot_rainfall_map(self, figname=None, method='sum', **kw):
@@ -685,9 +701,9 @@ class InputHipims:
         """ Plot time series of average rainfall rate inside the model domain
 
         Args:
-            start_date: a datetime object to give the initial date and time of rain
-            method: 'mean'|'max','min','mean'method to calculate gridded rainfall 
-                over the model domain
+            start_date: a datetime object to give the initial datetime of rain
+            method: 'mean'|'max','min','mean', method to calculate gridded
+                rainfall over the model domain
         """
         fig, ax = self.Rainfall.plot_time_series(method, **kw)
         return fig, ax
@@ -785,8 +801,8 @@ class InputHipims:
             attribute_name: attribute names based on a grid
 
         Return:
-            vector or a list vectors: a vector of values in global valid grid cells
-                            or a list of vectors for each sub domain
+            output_vector: a vector or list vectors, giving values on valid 
+                global cells or sub-domain cells
         """
         # get grid value
         dem_shape = self.shape
@@ -888,7 +904,6 @@ class InputHipims:
                 cell_id += self.overlayed_id['top_high'].tolist()
             if 'bottom_low' in self.overlayed_id:
                 cell_id += self.overlayed_id['bottom_low'].tolist()
-            #cell_id = list(self.overlayed_id.values())
             cell_id = np.array(cell_id)
             bound_code = np.array([[4, 0, 0]]) # shape (1, 3)
             bound_code_array = np.repeat(bound_code, cell_id.size, axis=0)
@@ -985,7 +1000,8 @@ class InputHipims:
             for i in np.arange(obj_boundary.num_of_bound):
                 h_source = h_sources[i]
                 if h_source is not None:
-                    file_name = os.path.join(field_dir, 'h_BC_'+str(ind_num)+'.dat')
+                    file_name = os.path.join(field_dir,
+                                             'h_BC_'+str(ind_num)+'.dat')
                     np.savetxt(file_name, h_source, fmt=fmt_h, delimiter=' ')
                     ind_num = ind_num+1
                     file_names_list.append(file_name)
@@ -995,22 +1011,28 @@ class InputHipims:
             ind_num = 0
             for i in np.arange(obj_boundary.num_of_bound):
                 hU_source = hU_sources[i]
-                cell_subs = obj_boundary.cell_subs[i]
+                cell_subs = obj_boundary.cell_subs[i] # row and col
                 if hU_source is not None:
-                    file_name = os.path.join(field_dir, 'hU_BC_'+str(ind_num)+'.dat')
+                    file_name = os.path.join(field_dir,
+                                             'hU_BC_'+str(ind_num)+'.dat')
                     if hU_source.shape[1] == 2:
                         # flow is given rather than speed
-                        boundary_slope = np.polyfit(cell_subs[0],
-                                                    cell_subs[1], 1)
-                        theta = np.arctan(boundary_slope[0])
+                        if np.unique(cell_subs[1]).size==1: # vertical line
+                            theta = np.pi*0.5
+                        elif np.unique(cell_subs[0]).size==1: # horizontal line
+                            theta = 0
+                        else:
+                            boundary_slope = np.polyfit(cell_subs[1],
+                                                        cell_subs[0], 1)
+                            theta = np.arctan(boundary_slope[0])
                         boundary_length = cell_subs[0].size* \
                                           self.DEM.header['cellsize']
-                        hUx = hU_source[:, 1]*np.cos(theta)/boundary_length
-                        hUy = hU_source[:, 1]*np.sin(theta)/boundary_length
+                        hUx = hU_source[:, 1]*np.sin(theta)/boundary_length
+                        hUy = hU_source[:, 1]*np.cos(theta)/boundary_length
                         hU_source = np.c_[hU_source[:, 0], hUx, hUy]
                         print('Flow series on boundary '+str(i)+
                               ' is converted to velocities')
-                        print('Theta = '+'{:.3f}'.format(theta/np.pi)+'*pi')
+                        print('Theta = '+'{:.2f}'.format(theta/np.pi*180)+'degree')
                     np.savetxt(file_name, hU_source, fmt=fmt_hu, delimiter=' ')
                     ind_num = ind_num+1
                     file_names_list.append(file_name)
@@ -1110,7 +1132,7 @@ class InputHipimsSub(InputHipims):
 
 #%%****************************************************************************
 #********************************Static method*********************************
-def load_object(filename):
+def load_input_object(filename):
     """load object from a dictionary and return as an InputHipims object
     Args:
         filename: a string giving the object file name
