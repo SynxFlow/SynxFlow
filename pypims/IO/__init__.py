@@ -13,7 +13,7 @@ from .demo_functions import demo_input
 from .demo_functions import demo_output
 from .demo_functions import demo_raster
 from .demo_functions import get_sample_data
-from .InputHipims import InputHipims, load_object
+from .InputHipims import InputHipims
 from .OutputHipims import OutputHipims
 from .indep_functions import save_as_dict, clean_output, _dict2grid
 from .indep_functions import write_times_setup, write_device_setup, write_rain_source
