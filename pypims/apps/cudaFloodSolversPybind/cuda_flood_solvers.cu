@@ -265,6 +265,9 @@ int run(const char* work_dir){
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
 
+  h.update_boundary_source("input/field/", "h");
+  hU.update_boundary_source("input/field/", "hU");
+
   //Main loop
   do{
 
