@@ -175,6 +175,32 @@ class Boundary(object):
             cell_subs.append((row, col))
         self.cell_subs = cell_subs
         self.cell_id = cell_id
+        self.cell_subs_wet_io = _find_wet_io_cells(self, source_key='hUSources')
+    
+    def _convert_flow2velocity(self, dem_obj):
+        """ Convert 2-col flow timeseries to 3-col velocity timeseries
+        in datatable
+        """
+        hU_sources = self.data_table['hUSources']
+        for i in np.arange(self.num_of_bound):
+            hU_source = hU_sources[i]
+            cell_subs = self.cell_subs[i] # row and col
+            if hU_source is not None:
+                if hU_source.shape[1] == 2:
+                    if cell_subs[0].size == 1:
+                        warnings.warn('Only one cell on boundary '+str(i)+
+                              ', you should better convert flow to velocities by yourself')
+                # flow is given, no velocity
+                    theta = _get_bound_normal(cell_subs, dem_obj)
+                    boundary_length = cell_subs[0].size*dem_obj.header['cellsize']
+                    hUx = hU_source[:, 1]*np.cos(theta)/boundary_length
+                    hUy = hU_source[:, 1]*np.sin(theta)/boundary_length
+                    hU_source = np.c_[hU_source[:, 0], hUx, hUy]
+                    self.data_table['hUSources'][i] = hU_source
+                    print('Flow series on boundary '+str(i)+
+                              ' is converted to velocities')
+                    print('Theta = '+'{:.2f}'.format(theta/np.pi*180)+'degree')
+        self.hU_sources = self.data_table['hUSources']
 
     def _divide_domain(self, hipims_obj):
         """ Create Boundary objects for each sub-domain
@@ -354,3 +380,69 @@ def _cell_subs_convertor(input_cell_subs, header_global,
     cols = cols[ind]
     output_cell_subs = (rows, cols)
     return output_cell_subs
+
+def _find_wet_io_cells(bound_obj, source_key='hUSources'):
+    """ return subs of wet IO boundary cells
+    """
+    wet_cell_rows = []
+    wet_cell_cols = []
+    for ind_num in np.arange(bound_obj.num_of_bound):
+        bound_source = bound_obj.data_table[source_key][ind_num]
+        if bound_source is not None:
+            source_value = np.unique(bound_source[:, 1:])
+            # zero boundary conditions
+            if not (source_value.size == 1 and source_value[0] == 0):
+                cell_subs = bound_obj.cell_subs[ind_num]
+                wet_cell_rows.append(cell_subs[0])
+                wet_cell_cols.append(cell_subs[1])
+    if len(wet_cell_rows)>0:
+        wet_cell_rows = np.concatenate(wet_cell_rows, axis=0 )
+        wet_cell_cols = np.concatenate(wet_cell_cols, axis=0 )
+        cell_subs_wet_io = (wet_cell_rows, wet_cell_cols)
+    else:
+        cell_subs_wet_io = None           
+    return cell_subs_wet_io
+
+def _get_bound_normal(cell_subs, dem_obj):
+    """get the angle of the normal vector of the bound line
+    """
+    cell_xy = sp.sub2map(cell_subs[0], cell_subs[1], dem_obj.header)
+    cell_xy = np.c_[cell_xy[0], cell_xy[1]]
+    if np.unique(cell_subs[1]).size==1: # vertical bound line
+        theta = 0
+    elif np.unique(cell_subs[0]).size==1: # horizontal bound line
+        theta = np.pi*0.5
+    else:
+        boundary_slope = np.polyfit(cell_xy[:, 0], cell_xy[:, 1], 1)
+        theta = np.arctan(boundary_slope[0])+np.pi/2
+        if theta > np.pi*2:
+            theta = theta-np.pi*2
+        if theta < 0:
+            theta = theta+np.pi*2
+        start_xy = cell_xy[0]
+        unit_vec = np.array([np.cos(theta), np.sin(theta)])
+        end0_xy =  unit_vec*4*dem_obj.header['cellsize']+start_xy
+        end1_xy = -unit_vec*4*dem_obj.header['cellsize']+start_xy
+        end0_value = _get_array_value_by_rc(end0_xy, dem_obj)
+        end1_value = _get_array_value_by_rc(end1_xy, dem_obj)
+        if np.isnan(end0_value) & ~np.isnan(end1_value): # towards out
+        # reverse direction of the boundline normal
+            if theta >= np.pi:
+                theta = theta-np.pi
+            else:
+                theta = theta-np.pi
+        elif ~np.isnan(end0_value) & np.isnan(end1_value): # towards in
+            pass
+        else:
+            warnings.warn('Cannot judge flow direction, please double check your boundary condition')
+    return theta
+
+def _get_array_value_by_rc(end_xy, dem_obj):
+    rc_num = sp.map2sub(end_xy[0], end_xy[1], dem_obj.header)
+    try:
+        end_value = dem_obj.array[rc_num]
+    except:
+        end_value = np.nan
+    if end_value == dem_obj.header['NODATA_value']:
+        end_value == np.nan
+    return end_value

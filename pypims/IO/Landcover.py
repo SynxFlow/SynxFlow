@@ -52,7 +52,8 @@ class Landcover:
 
         Args:
             param_value: scalar or a list of scalar
-            land_ids: index representing landcover, scalar, list of scalar, or list of list
+            land_ids: index representing landcover, scalar, list of scalar, 
+            or list of list
         """
         mask_array = self.get_mask_array() #landcover value
         param_array = mask_array*0+default_value

@@ -14,6 +14,7 @@ To do:
 
 """
 import copy
+import pandas as pd
 import gzip
 import pickle
 import os
@@ -48,13 +49,15 @@ def save_object(obj, file_name, compression=True):
     print(file_name+' has been saved')
 
 def save_as_dict(obj, file_name):
-    """Save all attributes of an object to a pickle
+    """Save all attributes of an input/output object to a pickle
     """
     obj_dict = copy.copy(obj.__dict__)
-    
-    obj_dict['DEM'] = obj.DEM.__dict__
-    obj_dict['Summary'] = obj.Summary.to_dict()
-    obj_dict['Boundary'] = obj.Boundary.__dict__
+    if hasattr(obj, 'DEM'):
+        obj_dict['DEM'] = obj.DEM.__dict__
+    if hasattr(obj, 'Summary'):
+        obj_dict['Summary'] = obj.Summary.to_dict()
+    if hasattr(obj, 'Boundary'):
+        obj_dict['Boundary'] = obj.Boundary.__dict__
     if hasattr(obj, 'Sections'):
         obj_dict.pop('Sections')
     if hasattr(obj, 'Rainfall'):
@@ -281,7 +284,7 @@ def _get_cell_id_array(dem_array):
     """
     # convert DEM to a two-value array: NaNs and Ones
     # and flip up and down
-    dem_array_flip = np.flipud(dem_array*0+1)
+    dem_array_flip = np.flipud(dem_array*0+1).astype('float64')
     # Return the cumulative sum of array elements over a given axis
     # treating NaNs) as zero.
     nancumsum_vector = np.nancumsum(dem_array_flip)
@@ -379,11 +382,14 @@ def _mask2dict(obj_mask, new_header=None):
     if new_header is not None:
         obj_mask = obj_mask.assign_to(new_header)
     array = obj_mask.array
-    v_unique = np.unique(array[~np.isnan(array)])
-    index = []
-    for onevalue in v_unique:
-        ind = np.where(array==onevalue)
-        index.append(ind)
+    ind_rc = np.where(~np.isnan(array))
+    mask_value = array[~np.isnan(array)]
+    df = pd.DataFrame({'Row':ind_rc[0], 'Col':ind_rc[1], 'V':mask_value})
+    gb = df.groupby('V')
+    gb_list = [gb.get_group(x) for x in gb.groups]
+    v_unique = [x.V.iloc[0] for x in gb_list]
+    v_unique = np.array(v_unique)
+    index = [(np.array(x.Row), np.array(x.Col)) for x in gb_list]
     mask_dict = {'value':v_unique, 'index':index}
     return mask_dict
 

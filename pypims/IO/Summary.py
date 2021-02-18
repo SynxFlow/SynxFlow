@@ -64,6 +64,9 @@ class Summary:
     def __init__(self, data_in): 
         if type(data_in) is str: # a jason file
             self.__setup_from_file(data_in)
+        elif type(data_in) is dict: # a jason file
+            for key, value in data_in.items():
+                self.__dict__[key] = value
         elif hasattr(data_in, 'DEM'): # a case_obj or dem_obj
             self.__setup_from_object(data_in)
 
@@ -183,9 +186,14 @@ class Summary:
         """ assign case_folder, num_GPU, run_time, gauge_pos
         """
         for key, value in kw.items():
-            if type(value) is np.ndarray:
-                value = value.tolist()
-            self.model_attr[key] = value
+            if key=='gauges_pos':
+                value = np.array(value)
+                num_gauges=value.shape[0]
+                self.model_attr['num_gauges'] = num_gauges
+            else:
+                if type(value) is np.ndarray:
+                    value = value.tolist()            
+                self.model_attr[key] = value
     
     def set_rain_attr(self, rain_source, rain_mask, cellsize):
         """ define rain_attr
@@ -234,11 +242,10 @@ class Summary:
         def print_dict(one_dict):
             for key, value in one_dict.items():
                 print(key,':',value)
-        print('---------------------- Grid information ----------------------')
-        print_dict(self.grid_attr)
-#        print(self.grid_attr)
         print('---------------------- Model information ---------------------')
         print_dict(self.model_attr)
+        print('---------------------- Grid information ----------------------')
+        print_dict(self.grid_attr)
         print('---------------------- Initial condition ---------------------')
         print_dict(self.initial_attr)
         print('---------------------- Boundary condition --------------------')

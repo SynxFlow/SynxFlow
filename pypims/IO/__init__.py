@@ -13,9 +13,8 @@ from .demo_functions import demo_input
 from .demo_functions import demo_output
 from .demo_functions import demo_raster
 from .demo_functions import get_sample_data
-from .InputHipims import InputHipims
-from .OutputHipims import OutputHipims
-from .indep_functions import load_object, save_as_dict, clean_output, _dict2grid
+from .InputHipims import InputHipims, load_input_object
+from .OutputHipims import OutputHipims, load_output_object
+from .indep_functions import clean_output, _dict2grid
 from .indep_functions import write_times_setup, write_device_setup, write_rain_source
 from .Raster import Raster
-load_from_dict = load_object

@@ -14,6 +14,7 @@ To do:
 ---------------
 
 """
+import os
 import copy
 import math
 import fiona
@@ -232,7 +233,7 @@ class Raster(object):
                                             method=method)
         new_obj = copy.deepcopy(self)
         new_obj.array = array_interp
-        new_obj.source_file = 'mask_'+new_obj.source_file
+        new_obj.source_file = self.source_file
         return new_obj
     
     def grid_interpolate(self, value_grid, method='nearest'):
@@ -310,6 +311,8 @@ class Raster(object):
         cols[cols > self.header['ncols']-1] = self.header['ncols']-1
         cols[cols < 0] = 0
         new_array = self.array[rows, cols]
+        new_array = new_array+0.0
+        new_array[new_array == self.header['NODATA_value']] = np.nan
         obj_output = Raster(array=new_array, header=new_header)
         return obj_output
 
@@ -435,7 +438,7 @@ class Raster(object):
         transform = Affine.translation(x00, y00)*Affine.scale(
                                                        cellsize, -cellsize)
         if output_file is None:
-            filename = '/tmp/new.tif'
+            filename = 'temp.tif'
         else:
             if output_file.endswith('.tif'):
                 filename = output_file
@@ -476,7 +479,7 @@ class Raster(object):
         kwargs.update({'crs': dst_crs, 'transform': transform, 'width': width,
                        'height': height, 'nodata':self.header['NODATA_value']})
         if output_file is None:
-            filename = '/tmp/new.tif'
+            filename = 'temp.tif'
         else:
             if output_file.endswith('.tif'):
                 filename = output_file
@@ -498,19 +501,47 @@ class Raster(object):
         """Display raster data without projection
 
         Args:
-            figname: the file name to export map
-            figsize: the size of map
-            dpi: The resolution in dots per inch
-            vmin and vmax define the data range that the colormap covers
-            cax_str: string as the title of the colorbar
-            relocate: relocate the origin of the grid coordinates to (0, 0)
+            figname: str, the file name to export map
+            figsize: tuple, the size of map
+            dpi: scalar, The resolution in dots per inch
+            cax_str: str, the title of the colorbar
+            relocate: True|False, relocate the origin of the grid to (0, 0)
             scale_ratio: 1|1000, axis unit 1 m or 1000 meter
+            vmin: define the data range that the colormap covers
+            vmax: define the data range that the colormap covers
+            ytick_labelrotation: degree to rotate tick labels on y axis
+            
+        Example:
+             mapshow(ax=ax, figname='my_fig', figsize=(6, 8), dpi=300,
+                     title='My map', cax=True, cax_str='Meter', 
+                     relocate=False, scale_ratio=1000, 
+                     ytick_labelrotation=90)
         """
         fig, ax = gs.mapshow(raster_obj=self, **kwargs)
         return fig, ax
     
     def rankshow(self, **kwargs):
-        """ Display water depth map in a range defined by (d_min, d_max)
+        """ Display array values in ranks
+        
+        Args:
+            breaks: list of values to define rank. Array values lower than the
+                first break value are set as nodata.
+            color: color series of the ranks
+            ylabelrotation: scalar giving degree to rotate yticklabel
+            legend_kw: dict, keyword arguments to set legend. A colobar 
+                     rather than a legend be displayed  if legend_kw is None.
+            **kwargs: keywords argument of function imshow
+        
+        Example:
+            rankshow(figname=None, figsize=None, 
+                     dpi=200, ax=None, color='Blues', 
+                     breaks=[0.2, 0.3, 0.5, 1, 2],
+                     legend_kw={'loc':'upper left', 'facecolor':None, 
+                                'fontsize':'small', 'title':'depth(m)', 
+                                'labelspacing':0.1}, 
+                     ytick_labelrotation=None, relocate=False, scale_ratio=1,
+                     alpha=1)
+        
         """
         fig, ax = gs.rankshow(self, **kwargs)
         return fig, ax

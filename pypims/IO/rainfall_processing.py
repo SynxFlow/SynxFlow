@@ -88,36 +88,42 @@ def get_spatial_map(rain_source, rain_mask_obj, figname=None,
     # caculate rain source
     times = rain_source[:,0]
     rain_values = rain_source[:,1:]
-    rain_total = np.trapz(rain_values, x=times, axis=0)*1000 #mm
     cax_str = 'mm/h'
-    if method == 'sum':
-        cell_rain = rain_total #mm
-        cax_str = 'mm'
-    elif method == 'mean':
-        cell_rain = rain_total/(times.max()-times.min())*3600 #mm/h
-    elif method == 'max':
-        cell_rain = np.max(rain_values, axis=0)*1000*3600 #mm/h
-    elif method== 'min':
-        cell_rain = np.min(rain_values, axis=0)*1000*3600 #mm/h
-    elif method== 'median':
-        cell_rain = np.median(rain_values, axis=0)*1000*3600 #mm/h
+    if rain_values.shape[0] == 1:
+        rain_array = rain_values*1000*3600
+        rain_array = np.reshape(rain_array, rain_mask_obj.shape)
+        rain_array[rain_array==0] = np.nan
+        rain_map_obj = Raster(array=rain_array, header=rain_mask_obj.header)
     else:
-        raise ValueError('Cannot recognise the calculation method')    
-    # get spatial data
-    if type(rain_mask_obj) is str:
-        rain_mask_obj = Raster(rain_mask_obj)
-    mask_obj = rain_mask_obj 
-    if cellsize is not None:
-        if cellsize > rain_mask_obj.header['cellsize']:
-            mask_obj = rain_mask_obj.grid_resample_nearest(cellsize)  
-    ind_nan = np.isnan(mask_obj.array)
-    rain_mask = mask_obj.array+0
-    rain_mask[ind_nan] = 0
-    mask_ind = rain_mask.flatten(order='F').astype('int64')
-    rain_vect = cell_rain[mask_ind]
-    rain_array = np.reshape(rain_vect, mask_obj.array.shape, order='F')
-    rain_array[ind_nan] = np.nan
-    rain_map_obj = Raster(array=rain_array, header=mask_obj.header)
+        rain_total = np.trapz(rain_values, x=times, axis=0)*1000 #mm
+        if method == 'sum':
+            cell_rain = rain_total #mm
+            cax_str = 'mm'
+        elif method == 'mean':
+            cell_rain = rain_total/(times.max()-times.min())*3600 #mm/h
+        elif method == 'max':
+            cell_rain = np.max(rain_values, axis=0)*1000*3600 #mm/h
+        elif method== 'min':
+            cell_rain = np.min(rain_values, axis=0)*1000*3600 #mm/h
+        elif method== 'median':
+            cell_rain = np.median(rain_values, axis=0)*1000*3600 #mm/h
+        else:
+            raise ValueError('Cannot recognise the calculation method')    
+        # get spatial data
+        if type(rain_mask_obj) is str:
+            rain_mask_obj = Raster(rain_mask_obj)
+        mask_obj = rain_mask_obj 
+        if cellsize is not None:
+            if cellsize > rain_mask_obj.header['cellsize']:
+                mask_obj = rain_mask_obj.grid_resample_nearest(cellsize)  
+        ind_nan = np.isnan(mask_obj.array)
+        rain_mask = mask_obj.array+0
+        rain_mask[ind_nan] = 0
+        mask_ind = rain_mask.flatten(order='F').astype('int64')
+        rain_vect = cell_rain[mask_ind]
+        rain_array = np.reshape(rain_vect, mask_obj.array.shape, order='F')
+        rain_array[ind_nan] = np.nan
+        rain_map_obj = Raster(array=rain_array, header=mask_obj.header)
     fig, ax = rain_map_obj.mapshow(cax_str=cax_str, **kwargs)
     xbound = ax.get_xbound()
     ybound = ax.get_ybound()

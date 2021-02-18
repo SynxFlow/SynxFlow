@@ -28,9 +28,9 @@ from matplotlib.patches import Patch
 from matplotlib.colors import LightSource
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 #%% draw inundation map with domain outline
-def mapshow(raster_obj=None, array=None, header=None, ax=None,
-            figname=None, figsize=None, dpi=300, title=None,
-            cax=True, cax_str=None, relocate=False, scale_ratio=1, **kwargs):
+def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
+            figsize=None, dpi=300, title=None, cax=True, cax_str=None,
+            relocate=False, scale_ratio=1, ytick_labelrotation=None, **kwargs):
     """Display raster data without projection
 
     Args:
@@ -60,7 +60,7 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None,
     else:
         fig = ax.get_figure()
     img = ax.imshow(array, extent=map_extent, **kwargs)
-    _adjust_axis_tick(ax, relocate, scale_ratio)
+    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
     # add colorbar
 	# create an axes on the right side of ax. The width of cax will be 5%
     # of ax and the padding between cax and ax will be fixed at 0.05 inch.
@@ -79,25 +79,35 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None,
 def rankshow(raster_obj=None, array=None, header=None, figname=None, 
              figsize=None, dpi=200, ax=None, color='Blues',
              breaks=[0.2, 0.3, 0.5, 1, 2],
-             colorbar_kw=None, legend_kw=None,
+             legend_kw=None, ytick_labelrotation=None,
              relocate=False, scale_ratio=1, alpha=1, **kwargs):
     """ Display water depth map in ranks defined by breaks
 
-    Args:
-        breaks: list of values to define rank. Array values lower than the first break value are set as nodata.
-        color: color series of the ranks
-        colorbar_kw: dict, keyword arguments to set colorbar
-        legend_kw: dict, keyword arguments to set legend, e.g.
-            legend_kw = {'loc':'upper left','facecolor':None, 'fontsize':'small',
-             'title':'depth(m)', 'labelspacing':0.1}
-    
+        Args:
+            breaks: list of values to define rank. Array values lower than the
+                first break value are set as nodata.
+            color: color series of the ranks
+            ylabelrotation: scalar giving degree to rotate yticklabel
+            legend_kw: dict, keyword arguments to set legend. A colobar 
+                     rather than a legend be displayed  if legend_kw is None.
+            **kwargs: keywords argument of function imshow
+        
+        Example:
+            rankshow(figname=None, figsize=None, 
+                     dpi=200, ax=None, color='Blues', 
+                     breaks=[0.2, 0.3, 0.5, 1, 2],
+                     legend_kw={'loc':'upper left', 'facecolor':None, 
+                                'fontsize':'small', 'title':'depth(m)', 
+                                'labelspacing':0.1}, 
+                     ytick_labelrotation=None, relocate=False, scale_ratio=1,
+                     alpha=1)
     """
     if raster_obj is not None:
         array = raster_obj.array
         header = raster_obj.header
     np.warnings.filterwarnings('ignore')
     ind = array == header['NODATA_value']
-    array = array.astype('float32')+0
+    array = array.astype('float64')+0
     array[ind] = np.nan
     # create color ranks
     array, newcmp, norm= _set_color_rank(array, breaks, color)
@@ -106,21 +116,21 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
         fig, ax = plt.subplots(figsize=figsize)
     else:
         fig = ax.get_figure()
-    chm_plot = ax.imshow(array, extent=map_extent, 
-                         cmap=newcmp, norm=norm, alpha=alpha) 
-    _adjust_axis_tick(ax, relocate, scale_ratio)
-    # create colorbar
-    if colorbar_kw is not None:
-        _set_rank_colorbar(ax, chm_plot, norm, colorbar_kw)
+    chm_plot = ax.imshow(array, extent=map_extent, cmap=newcmp, norm=norm, 
+                         alpha=alpha, **kwargs) 
+    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
+    # create colorbar        
     if legend_kw is not None: # legend
         _set_color_legend(ax, norm, newcmp, legend_kw)
+    else:
+        _set_rank_colorbar(ax, chm_plot, norm)
     if figname is not None:
         fig.savefig(figname, dpi=dpi)
     return fig, ax
 
 def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
               cmap=None, blend_mode='overlay', alpha=1, relocate=False,
-              scale_ratio=1,):
+              scale_ratio=1, ytick_labelrotation=None):
     """ Draw a hillshade map
     """
     array = raster_obj.array+0
@@ -136,11 +146,12 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
     rgb = ls.shade(array, cmap=cmap, blend_mode=blend_mode, 
                    vert_exag=vert_exag)
     ax.imshow(rgb, extent=raster_obj.extent, alpha=alpha)
-    _adjust_axis_tick(ax, relocate, scale_ratio)
+    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
     return fig, ax
 
 def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, ax=None,
-               relocate=False, scale_ratio=1, **kwargs):
+               relocate=False, scale_ratio=1, ytick_labelrotation=None, 
+               **kwargs):
     """plot velocity map of U and V, whose values stored in two raster objects seperately
 
     """
@@ -160,7 +171,7 @@ def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, ax=None,
     # fig, ax = plt.subplots(1, figsize=figsize)
     ax.quiver(X, Y, U, V, **kwargs)
     ax.set_aspect('equal', 'box')
-    _adjust_axis_tick(ax, relocate, scale_ratio)
+    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
     if figname is not None:
         fig.savefig(figname, dpi=dpi)
     return fig, ax
@@ -344,7 +355,7 @@ def _set_continous_colorbar(ax, img, cax_str=None,
         cbar.ax.xaxis.set_label_coords(0, 1.06)
     return cbar
 
-def _adjust_axis_tick(ax, relocate=True, scale_ratio=1):
+def _adjust_axis_tick(ax, relocate=True, scale_ratio=1, labelrotation=None):
     """
     Adjust the axis tick to a new staring point and/or new unit 
 
@@ -381,7 +392,12 @@ def _adjust_axis_tick(ax, relocate=True, scale_ratio=1):
     ax.set_yticklabels(yticks_label)
     ax.set_xlabel(label_tag+' towards east')
     ax.set_ylabel(label_tag+' towards north')
-    ax.tick_params(axis='y', labelrotation=90)
+    if labelrotation is None:
+        if y_space > 1.5*x_space:
+            labelrotation = 90
+        else:
+            labelrotation = 0
+    ax.tick_params(axis='y', labelrotation=labelrotation)
     return None
 
 def main():

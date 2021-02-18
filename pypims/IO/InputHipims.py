@@ -222,6 +222,7 @@ class InputHipims:
         # add the subsripts and id of boundary cells on the domain grid
             bound_obj._fetch_boundary_cells(valid_subs,
                                             outline_subs, dem_header)
+            bound_obj._convert_flow2velocity(self.DEM)
         self.Boundary = bound_obj
         if hasattr(self, 'Sections'):
             bound_obj._divide_domain(self)       
@@ -807,37 +808,19 @@ class InputHipims:
         # get grid value
         dem_shape = self.shape
         grid_values = np.zeros(dem_shape)
-        if add_initial_water:
-            add_value = 0.0001
-        else:
-            add_value = 0
-
-        def add_water_on_io_cells(bound_obj, grid_values, source_key,
-                                  add_value):
-            """ add a small water depth/velocity to IO boundary cells
-            """
-            for ind_num in np.arange(bound_obj.num_of_bound):
-                bound_source = bound_obj.data_table[source_key][ind_num]
-                if bound_source is not None:
-                    source_value = np.unique(bound_source[:, 1:])
-                    # zero boundary conditions
-                    if not (source_value.size == 1 and source_value[0] == 0):
-                        cell_subs = bound_obj.cell_subs[ind_num]
-                        grid_values[cell_subs] = add_value
-            return grid_values
         # set grid value for the entire domain
         if attribute_name == 'z':
             grid_values = self.DEM.array
         elif attribute_name == 'h':
             grid_values = grid_values+self.attributes['h0']
             # traversal each boundary to add initial water
-            grid_values = add_water_on_io_cells(self.Boundary, grid_values,
-                                                'hSources', add_value)
+            if add_initial_water:
+                wet_cell_subs = self.Boundary.cell_subs_wet_io
+                if wet_cell_subs is not None:
+                    grid_values[wet_cell_subs] = grid_values[wet_cell_subs]+0.001
         elif attribute_name == 'hU':
             grid_values0 = grid_values+self.attributes['hU0x']
             grid_values1 = grid_values+self.attributes['hU0y']
-            grid_values1 = add_water_on_io_cells(self.Boundary, grid_values1,
-                                                 'hUSources', add_value)
             grid_values = [grid_values0, grid_values1]
         elif attribute_name == 'precipitation_mask':
             if hasattr(self, 'Rainfall'):
@@ -1011,28 +994,9 @@ class InputHipims:
             ind_num = 0
             for i in np.arange(obj_boundary.num_of_bound):
                 hU_source = hU_sources[i]
-                cell_subs = obj_boundary.cell_subs[i] # row and col
                 if hU_source is not None:
                     file_name = os.path.join(field_dir,
                                              'hU_BC_'+str(ind_num)+'.dat')
-                    if hU_source.shape[1] == 2:
-                        # flow is given rather than speed
-                        if np.unique(cell_subs[1]).size==1: # vertical line
-                            theta = np.pi*0.5
-                        elif np.unique(cell_subs[0]).size==1: # horizontal line
-                            theta = 0
-                        else:
-                            boundary_slope = np.polyfit(cell_subs[1],
-                                                        cell_subs[0], 1)
-                            theta = np.arctan(boundary_slope[0])
-                        boundary_length = cell_subs[0].size* \
-                                          self.DEM.header['cellsize']
-                        hUx = hU_source[:, 1]*np.sin(theta)/boundary_length
-                        hUy = hU_source[:, 1]*np.cos(theta)/boundary_length
-                        hU_source = np.c_[hU_source[:, 0], hUx, hUy]
-                        print('Flow series on boundary '+str(i)+
-                              ' is converted to velocities')
-                        print('Theta = '+'{:.2f}'.format(theta/np.pi*180)+'degree')
                     np.savetxt(file_name, hU_source, fmt=fmt_hu, delimiter=' ')
                     ind_num = ind_num+1
                     file_names_list.append(file_name)
