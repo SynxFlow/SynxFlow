@@ -419,22 +419,22 @@ def _get_bound_normal(cell_subs, dem_obj):
             theta = theta-np.pi*2
         if theta < 0:
             theta = theta+np.pi*2
-        start_xy = cell_xy[0]
-        unit_vec = np.array([np.cos(theta), np.sin(theta)])
-        end0_xy =  unit_vec*4*dem_obj.header['cellsize']+start_xy
-        end1_xy = -unit_vec*4*dem_obj.header['cellsize']+start_xy
-        end0_value = _get_array_value_by_rc(end0_xy, dem_obj)
-        end1_value = _get_array_value_by_rc(end1_xy, dem_obj)
-        if np.isnan(end0_value) & ~np.isnan(end1_value): # towards out
-        # reverse direction of the boundline normal
-            if theta >= np.pi:
-                theta = theta-np.pi
-            else:
-                theta = theta-np.pi
-        elif ~np.isnan(end0_value) & np.isnan(end1_value): # towards in
-            pass
+    start_xy = cell_xy[0]
+    unit_vec = np.array([np.cos(theta), np.sin(theta)])
+    end0_xy =  unit_vec*4*dem_obj.header['cellsize']+start_xy
+    end1_xy = -unit_vec*4*dem_obj.header['cellsize']+start_xy
+    end0_value = _get_array_value_by_rc(end0_xy, dem_obj)
+    end1_value = _get_array_value_by_rc(end1_xy, dem_obj)
+    if np.isnan(end0_value) & ~np.isnan(end1_value): # towards out
+    # reverse direction of the boundline normal
+        if theta >= np.pi:
+            theta = theta-np.pi
         else:
-            warnings.warn('Cannot judge flow direction, please double check your boundary condition')
+            theta = theta-np.pi
+    elif ~np.isnan(end0_value) & np.isnan(end1_value): # towards in
+        pass
+    else:
+        warnings.warn('Cannot judge flow direction, please double check your boundary condition')
     return theta
 
 def _get_array_value_by_rc(end_xy, dem_obj):
