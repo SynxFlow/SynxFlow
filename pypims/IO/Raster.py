@@ -19,6 +19,7 @@ import copy
 import math
 import fiona
 import numpy as np
+import rasterio as rio
 from scipy import interpolate
 from . import spatial_analysis as sp
 from . import grid_show as gs
@@ -39,13 +40,13 @@ class Raster(object):
         shape: shape of the Raster value array
         cellsize: the length of each square cell
         extent_dict: a dictionary storing outline limits of the raster  
-        projection: (string) the Well-Known_Text (wkt) projection information  
+        wkt: (string) the Well-Known_Text (wkt) projection information  
         
     """
 #%%======================== initialization function ===========================   
     def __init__(self, source_file=None, array=None, header=None, 
                  xllcorner=0, yllcorner=0, cellsize=100, NODATA_value=-9999,
-                 epsg=None, projection=None, num_header_rows=6):
+                 crs=None, num_header_rows=6):
         """Initialise the object
 
         Args:
@@ -55,41 +56,97 @@ class Raster(object):
                 nrows, nclos [int]
                 cellsize, xllcorner, yllcorner
                 NODATA_value
-            epsg: epsg code [int]
-            projection: WktProjection [string]
+            crs: coordinate reference system, either epsg(epsg code, int) or
+                wkt(string), or a rasterio.crs object
 
         """
-        if epsg is not None:
-            projection = self.__set_wkt_projection(epsg)
-        if type(source_file) is str:
-            if source_file.endswith('.tif'):
-                array, header, projection = sp.tif_read(source_file) 
-                # only read the first band
+        # get data from file or arguments
+        if type(source_file) is str: # tif, txt, asc, or gz file
+            if source_file.endswith('.tif'): # only read the first band
+                array, header, crs = sp.tif_read(source_file)
             else:
-                array, header, projection = sp.arcgridread(source_file,
-                                                    num_header_rows)
+                array, header, crs = sp.arcgridread(source_file,
+                                                    num_header_rows)                
             self.source_file = source_file
         elif type(source_file) is bytes:  # try a binary file-like object
             array, header = sp.byte_file_read(source_file)
+            self.source_file = None
+        
+        # projection
+        if crs is not None:
+            self.set_crs(crs)
+        # header and extent
         if header is None:
             header = {'ncols':array.shape[1], 'nrows':array.shape[0],
                       'xllcorner':xllcorner, 'yllcorner':yllcorner,
                       'cellsize':cellsize, 'NODATA_value':NODATA_value}
         self.header = header
-        extent = sp.header2extent(header)
-        self.source_file = source_file
-        self.projection = projection
-        self.array = array
-        self.shape = array.shape
+        self.extent = sp.header2extent(header)
+        self.extent_dict = {'left':self.extent[0], 'right':self.extent[1],
+                            'bottom':self.extent[2], 'top':self.extent[3]}
+        
+        # raster value array
+        
+        ind = array == header['NODATA_value']
+        if ind.sum() > 0:
+            self.array = array+0.0
+            self.array[ind] = np.nan
+        else:
+            self.array = array
+            
+        
+        # shape and cellsize
+        self.shape = self.array.shape
         if array.shape != (header['nrows'], header['ncols']):
             raise ValueError(('shape of array is not consistent with '
                               'nrows and ncols in header'))
         self.cellsize = header['cellsize']
-        self.extent = extent
-        self.extent_dict = {'left':extent[0], 'right':extent[1],
-                            'bottom':extent[2], 'top':extent[3]}
+        
+        # num_valid_cells
+        self.num_valid_cells = np.sum(np.isnan(self.array))
+        self.size = self.array.size
+        
+        # summary
+        self.get_summary()
+        
+        self.to_rasterio = self.write_tif
+
             
 #%%============================= Spatial analyst ==============================   
+    def get_summary(self):
+        """Get information summary of the object
+
+        Returns
+        -------
+        summary : dict
+            information summary of the object.
+
+        """
+        summary = copy.deepcopy(self.header)
+        summary['num_valid_cells'] = self.num_valid_cells
+        if hasattr(self, 'crs'):
+            summary['crs'] = self.crs.data
+        if hasattr(self, 'source_file'):
+            summary['source_file'] = self.source_file
+        self._summary = summary
+        return summary
+
+    def set_crs(self, crs):
+        """set reference coordinate system
+        Parameters
+        ----------
+        crs : int|string|rasterio.crs object
+            epsg code|wkt|asterio.crs object
+        """
+        if type(crs) is str:
+            self.crs = rio.crs.CRS.from_wkt(crs)
+        elif type(crs) is int:
+            self.crs = rio.crs.CRS.from_epsg(crs)
+        elif type(crs) is rio.crs.CRS:
+            self.crs = crs
+        else:
+            raise IOError('crs must be int|string|rasterio.crs object')
+
     def rect_clip(self, clip_extent):
         """clip raster according to a rectangle extent
 
@@ -106,14 +163,32 @@ class Raster(object):
         xllcorner = min(x_centre)-0.5*self.header['cellsize']
         yllcorner = min(y_centre)-0.5*self.header['cellsize']
         header_new = copy.deepcopy(self.header)
-        array_new = self.array[min(rows):max(rows), min(cols):max(cols)]
+        if max(rows) >= self.header['nrows']:
+            max_row = self.header['nrows']
+        else:
+            max_row = max(rows)+1
+        if max(cols) >= self.header['ncols']:
+            max_col = self.header['ncols']
+        else:
+            max_col = max(cols)+1
+        if min(rows) <= 0:
+            min_row = 0
+        else:
+            min_row = min(rows) 
+        if min(cols) <= 0:
+            min_col = 0
+        else:
+            min_col = min(cols) 
+        array_new = self.array[min_row:max_row,
+                               min_col:max_col]
         header_new['nrows'] = array_new.shape[0]
         header_new['ncols'] = array_new.shape[1]
         header_new['xllcorner'] = xllcorner
         header_new['yllcorner'] = yllcorner
-        new_obj = Raster(array=array_new, header=header_new,
-                         projection=self.projection)
-        return new_obj
+        obj_new = Raster(array=array_new, header=header_new)
+        if hasattr(self, 'crs'):
+            obj_new.crs = self.crs
+        return obj_new
     
     def clip(self, clip_mask=None):
         """clip raster according to a mask
@@ -126,7 +201,7 @@ class Raster(object):
             Raster: a new raster object
         """
         from rasterio import mask
-        ds_rio = self.to_rasterio()
+        ds_rio = self.to_rasterio_ds()
         if type(clip_mask) is str:
             with fiona.open(clip_mask, 'r') as shapefile:
                 shapes = [feature['geometry'] for feature in shapefile]
@@ -136,15 +211,21 @@ class Raster(object):
         else:
             raise IOError('mask must be either a string or a numpy array')
         
-        out_image, out_transform = mask.mask(ds_rio, shapes, crop=True) # 
-        array = out_image[0]
+        out_image, out_transform = mask.mask(ds_rio, shapes, crop=True) #
+        ds_rio.close()
+        array_new = out_image[0]
         cellsize = out_transform[0]
         xllcorner = out_transform[2]
-        yllcorner = out_transform[5]- cellsize*array.shape[0]
-        obj_clipped = Raster(array=array, xllcorner=xllcorner,
-                             yllcorner=yllcorner, NODATA_value=ds_rio.nodata,
-                             cellsize=cellsize)
-        return obj_clipped
+        yllcorner = out_transform[5]- cellsize*array_new.shape[0]
+        header_new = copy.deepcopy(self.header)
+        header_new['nrows'] = array_new.shape[0]
+        header_new['ncols'] = array_new.shape[1]
+        header_new['xllcorner'] = xllcorner
+        header_new['yllcorner'] = yllcorner
+        obj_new = Raster(array=array_new, header=header_new)
+        if hasattr(self, 'crs'):
+            obj_new.crs = self.crs
+        return obj_new
     
     def rasterize(self, shp_filename):
         """
@@ -160,18 +241,19 @@ class Raster(object):
 
         """
         from rasterio import mask
-        ds_rio = self.to_rasterio()
+        ds_rio = self.to_rasterio_ds()
         if type(shp_filename) is str:
             with fiona.open(shp_filename, 'r') as shapefile:
                 shapes = [feature['geometry'] for feature in shapefile]
         else:
             shapes = shp_filename
+        shapes = [x for x in shapes if x != None]
         out_image, _ = mask.mask(ds_rio, shapes) #, crop=True
         rasterized_array = out_image[0]
         rasterized_array[np.isnan(rasterized_array)] = ds_rio.nodata
         index_array = np.full(rasterized_array.shape, True)
         index_array[rasterized_array == ds_rio.nodata] = False
-#        ds_rio.close()
+        ds_rio.close()
         return index_array
         
     def resample(self, new_cellsize, method='bilinear'):
@@ -192,7 +274,7 @@ class Raster(object):
                        'med', 'q1', 'q3']
         ind = method_list.index(method)
         upscale_factor = self.cellsize/new_cellsize
-        ds_rio = self.to_rasterio()
+        ds_rio = self.to_rasterio_ds()
         new_shape = (1, int(ds_rio.height * upscale_factor),
                         int(ds_rio.width * upscale_factor))
         resampling_method = Resampling(ind)
@@ -202,6 +284,7 @@ class Raster(object):
         transform = ds_rio.transform * ds_rio.transform.scale(
                     (ds_rio.width / data.shape[-1]),
                     (ds_rio.height / data.shape[-2]))
+        ds_rio.close()
         new_header = copy.deepcopy(self.header)
         new_header['cellsize'] = new_cellsize
         new_header['nrows'] = data.shape[0]
@@ -209,7 +292,8 @@ class Raster(object):
         new_header['xllcorner'] = transform[2]
         new_header['yllcorner'] = transform[5]-data.shape[0]*new_cellsize
         obj_new = Raster(array=data, header=new_header)
-#        ds_rio.close()
+        if hasattr(self, 'crs'):
+            obj_new.crs = self.crs
         return obj_new
         
     
@@ -231,10 +315,9 @@ class Raster(object):
         grid_x, grid_y = self.to_points()
         array_interp = interpolate.griddata(points, values, (grid_x, grid_y),
                                             method=method)
-        new_obj = copy.deepcopy(self)
-        new_obj.array = array_interp
-        new_obj.source_file = self.source_file
-        return new_obj
+        obj_new = copy.deepcopy(self)
+        obj_new.array = array_interp
+        return obj_new
     
     def grid_interpolate(self, value_grid, method='nearest'):
         """ Interpolate values of a grid to all cells on the Raster object
@@ -289,13 +372,15 @@ class Raster(object):
         array = self.array[rows, cols]
         array = array.transpose()
         array = array.astype(self.array.dtype)
-        new_obj = Raster(array=array, header=header)
-        return new_obj
+        obj_new = Raster(array=array, header=header)
+        if hasattr(self, 'crs'):
+            obj_new.crs = self.crs
+        return obj_new
     
     def assign_to(self, new_header):
         """ Assign_to the object to a new grid defined by new_header 
 
-        If cellsize are not equal, the origin Raster will be firstly 
+        If their cellsizes are not equal, the original Raster will be 
         resampled to the target grid.
 
         Return:
@@ -313,8 +398,35 @@ class Raster(object):
         new_array = self.array[rows, cols]
         new_array = new_array+0.0
         new_array[new_array == self.header['NODATA_value']] = np.nan
-        obj_output = Raster(array=new_array, header=new_header)
-        return obj_output
+        obj_new = Raster(array=new_array, header=new_header)
+        if hasattr(self, 'crs'):
+            obj_new.crs = self.crs
+        return obj_new
+    
+    def paste_on(self, obj_large):
+        """ Paste the object to a larger grid defined by obj_large and
+        replace corresponding grid values with the object array
+
+        If their cellsizes MUST be equal
+        """
+        header_s = self.header
+        header_l = obj_large.header
+        x, y = self.to_points()
+        r0, c0 = sp.map2sub(self.extent[0]+self.cellsize/2, 
+                            self.extent[-1]-self.cellsize/2,
+                            header_l)
+        rows = np.arange(r0, r0+header_s['nrows'])
+        cols = np.arange(c0, c0+header_s['ncols'])
+        # cut array outside the range of the large raster grid
+        ind_r = np.logical_and(rows > 0, rows <= header_l['nrows']-1)
+        rows = rows[ind_r]
+        ind_c = np.logical_and(cols > 0, cols <= header_l['ncols']-1)
+        cols = cols[ind_c]
+        array_small = self.array[ind_r, :]
+        array_small = array_small[:, ind_c]
+        rows_grid, cols_grid = np.meshgrid(rows, cols, indexing='ij')
+        obj_large.array[rows_grid, cols_grid] = array_small
+        return obj_large
 
     def to_points(self):
         """ Get X and Y coordinates of all raster cells
@@ -332,130 +444,104 @@ class Raster(object):
         xv, yv = np.meshgrid(x, y)
         return xv, yv
     
-    def write_asc(self, output_file, EPSG=None, compression=False):
+    def write_asc(self, output_file, compression=False, export_prj=False):
         """ write raster as asc format file
 
         Alias: Write_asc
 
         Args:
             output_file: output file name
-            EPSG: epsg code, if it is given, a .prj file will be written
             compression: logic, whether compress write the asc file as gz
         """
         sp.arcgridwrite(output_file, self.array, self.header, compression)
-        if EPSG is not None:
-            self.__set_wkt_projection(EPSG)
         # if projection is defined, write .prj file for asc file
-        if output_file.endswith('.asc'):
-            if self.projection is not None:
-                prj_file=output_file[0:-4]+'.prj'
-                wkt = self.projection
-                with open(prj_file, "w") as prj:        
-                    prj.write(wkt)
+        if export_prj & hasattr(self, 'crs'):
+            prj_file = output_file[0:-4]+'.prj'
+            wkt = self.crs.to_wkt()
+            with open(prj_file, "w") as prj:        
+                prj.write(wkt)
         return None
     
-    def to_osgeo_raster(self, filename=None, fileformat = 'GTiff',
-                        srcEPSG=27700, destEPSG=None):        
-        """convert this object to an osgeo raster object, write a tif file if 
-        necessary
+    def write(self, output_file, compression=False):
+        """ Export to a file, tif, asc, txt, or gz
+        Parameters
+        ----------
+        output_file : string
+            file name, ends with tif, asc, txt, or gz.
+        compression : logical, optional
+            whether compress or not. The default is False.
 
-        Args:
-            filename: the output file name
-            fileformat: GTiff or AAIGrid
-            destEPSG: the EPSG projection code default: 27700 British National
-                Grid 'EPSG:4326'
+        Returns
+        -------
+        None.
 
-        Returns:
-            osgeo raster: The converted raster dataset, or a tif filename if 
-                it is written
-
-        Alias: To_osgeo_raster
         """
-        from osgeo import gdal, osr
-        if filename is None:
-            dst_filename = ''
-            driver_name = 'MEM'
+
+        if output_file.endswith('.gz'):
+            self.write_asc(output_file, compression=True)
+        elif output_file.endswith('.tif'):
+            self.write_tif(output_file)
         else:
-            dst_filename = filename
-            driver_name = fileformat
-        if not dst_filename.endswith('.tif'):
-            dst_filename = dst_filename+'.tif'
+            self.write_asc(output_file, compression)
+        
     
-        # You need to get those values like you did.
-        PIXEL_SIZE = self.header['cellsize']  # size of the pixel...        
-        x_min = self.extent[0] # left  
-        y_max = self.extent[3] # top
-        src_crs = osr.SpatialReference()
-        src_crs.ImportFromEPSG(srcEPSG)
-        # create dataset with driver
-        driver = gdal.GetDriverByName(driver_name)
-        ncols = int(self.header['ncols'])
-        nrows = int(self.header['nrows'])
-        dataset = driver.Create(dst_filename, 
-            xsize=ncols, 
-            ysize=nrows, 
-            bands=1, 
-            eType=gdal.GDT_Float32)
-    
-        dataset.SetGeoTransform((
-            x_min,       # 0
-            PIXEL_SIZE,  # 1
-            0,           # 2
-            y_max,       # 3
-            0,           # 4
-            -PIXEL_SIZE))  
-    
-        dataset.SetProjection(src_crs.ExportToWkt())
-        array = self.array
-        dataset.GetRasterBand(1).WriteArray(array)
-        dataset.GetRasterBand(1).SetNoDataValue(self.header['NODATA_value'])
-        if filename is not None:
-            if destEPSG is not None:
-#                dest_crs = osr.SpatialReference()
-#                dest_crs.ImportFromEPSG(destEPSG)
-                gdal.Warp(dst_filename, dataset, dstSRS=destEPSG)
-            dataset.FlushCache()  # Write to disk.
-            dataset = None
-            return dst_filename
-        else:
-            return dataset
-    
-    def to_rasterio(self, output_file=None, src_epsg=27700):
+    def write_tif(self, output_file, src_epsg=27700):
         """ Convert to a rasterio dataset
         
         Args:
             output_file: a string to give output file name
             src_epsg: int scalar to give EPSG code of the coordinate reference
                 system of the original dataset, default is 27700 for BNG
-        Return:
-            ds_rio: a rasterio dataset
+
         """
-        import rasterio
-        from rasterio.transform import Affine
-        cellsize = self.cellsize
-        x00 = self.extent_dict['left'] # upper-left corner of the first pixel
-        y00 = self.extent_dict['top']
-        transform = Affine.translation(x00, y00)*Affine.scale(
-                                                       cellsize, -cellsize)
-        if output_file is None:
-            filename = 'temp.tif'
+        
+        if output_file.endswith('.tif'):
+            filename = output_file
         else:
-            if output_file.endswith('.tif'):
-                filename = output_file
-            else:
-                filename = output_file+'.tif'
-        src_crs = rasterio.crs.CRS.from_epsg(src_epsg)
-        ds_rio = rasterio.open(filename, 'w+', driver='GTiff',
-                               height=self.shape[0], width=self.shape[1],
-                               count=1,
-                               dtype=self.array.dtype,
-                               crs=src_crs,
-                               transform=transform,
-                               nodata=self.header['NODATA_value'])
+            filename = output_file+'.tif'
+        if not hasattr(self, 'meta'):
+            self.get_meta(src_epsg)
+        meta = self.meta # dictionary
+        array_data = self.array+0
+        nomask = np.isnan(array_data)
+        array_data[nomask] = meta['nodata']
+        with rio.open(filename, 'w', **meta) as out_f:
+            out_f.write(array_data, 1)
+    
+    def to_rasterio_ds(self):
+        
+        if not hasattr(self, 'meta'):
+            self.get_meta()
+        meta = self.meta
+        filename = 'temp.tif'
+        ds_rio = rio.open(filename, 'w+', **meta)
         ds_rio.write(self.array, 1)
-        if output_file is not None:
-            ds_rio.close()
+        os.remove(filename)
         return ds_rio
+
+    
+    def get_meta(self, src_epsg=27700):
+        """ Get rasterio meta data
+        """
+        from rasterio.transform import Affine
+        dx = self.cellsize
+        x = self.extent_dict['left'] # upper-left corner of the first pixel
+        y = self.extent_dict['top']
+        transform = Affine.translation(x, y)*Affine.scale(dx, -dx)
+        if not hasattr(self, 'crs'):
+            crs = rio.crs.CRS.from_epsg(src_epsg)
+        else:
+            crs = self.crs
+        ras_meta = {'driver': 'GTiff',
+                    'dtype': self.array.dtype.name,
+                    'nodata': self.header['NODATA_value'],
+                    'width': self.array.shape[1],
+                    'height': self.array.shape[0],
+                    'count': 1,
+                    'crs': crs,
+                    'transform': transform}
+        self.meta = ras_meta
+        
     
     def reproject(self, dst_epsg, output_file=None):
         """Reproject the raster to a different coordinate referenece system
@@ -471,7 +557,7 @@ class Raster(object):
         import rasterio
         from rasterio.warp import calculate_default_transform as cal_tsf
         from rasterio.warp import reproject, Resampling
-        src_rio = self.to_rasterio()
+        src_rio = self.to_rasterio_ds()
         dst_crs = rasterio.crs.CRS.from_epsg(dst_epsg)
         transform, width, height = cal_tsf(src_rio.crs, dst_crs, src_rio.width, 
                                            src_rio.height, *src_rio.bounds)
@@ -559,48 +645,6 @@ class Raster(object):
         """
         fig, ax = gs.vectorshow(self, obj_y, **kwargs)
         return fig, ax
-#%%=========================== private functions ==============================
-    def __osgeo2raster(self, obj_ds):
-        """
-        convert an osgeo dataset to a raster object
-        """
-        array = obj_ds.ReadAsArray()
-        geo_trans_v = obj_ds.GetGeoTransform()
-        projection = obj_ds.GetProjection()
-        left = geo_trans_v[0]
-        top = geo_trans_v[3]
-        cellsize = geo_trans_v[1]
-        nrows = obj_ds.RasterYSize
-        ncols = obj_ds.RasterXSize
-        xllcorner = left
-        yllcorner = top - cellsize*nrows
-        NODATA_value = obj_ds.GetRasterBand(1).GetNoDataValue()
-        if NODATA_value is None:
-            NODATA_value = -9999
-        header = {'ncols':ncols, 'nrows':nrows,
-                  'xllcorner':xllcorner, 'yllcorner':yllcorner,                  
-                  'cellsize':cellsize, 'NODATA_value':NODATA_value}
-        obj_new = Raster(array=array, header=header, projection=projection)
-        return obj_new
-
-    def __set_wkt_projection(self, epsg_code):
-        """
-        get coordinate reference system (crs) as Well Known Text (WKT) 
-            from https://epsg.io
-
-        epsg_code: the epsg code of a crs, e.g. BNG:27700, WGS84:4326
-
-        return wkt text
-        """
-        import requests
-        # access projection information
-        wkt = requests.get('https://epsg.io/{0}.prettywkt/'.format(epsg_code))
-        # remove spaces between charachters
-        remove_spaces = wkt.text.replace(" ", "")
-        # place all the text on one line
-        output = remove_spaces.replace("\n", "")
-        self.projection = output
-        return output
     
 #%%
 def merge(obj_origin, obj_target, resample_method='bilinear'):
@@ -617,8 +661,6 @@ def merge(obj_origin, obj_target, resample_method='bilinear'):
     if obj_origin.header['cellsize'] != obj_target.header['cellsize']:
         obj_origin = obj_origin.resample(obj_target.header['cellsize'], 
                                    method=resample_method)
-#    else:
-#        obj_origin = self
     grid_x, grid_y = obj_origin.to_points()
     rows, cols = sp.map2sub(grid_x, grid_y, obj_target.header)
     ind_r = np.logical_and(rows >= 0, rows <= obj_target.header['nrows']-1)

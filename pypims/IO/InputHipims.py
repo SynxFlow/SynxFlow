@@ -279,7 +279,7 @@ class InputHipims:
             elif type(value) is dict:
                 self.param_per_landcover[keyword] = value
                 value_array = self.Landcover.to_grid_parameter(**value)
-                value = value_array
+                self.attributes[keyword] = value_array
             else:
                 raise ValueError(keyword+' must be a scalar, array or dict')
             self.Summary.set_params_attr(**{keyword:value})
@@ -413,8 +413,9 @@ class InputHipims:
         """
         if param_name not in InputHipims.__grid_files:
             InputHipims.__grid_files.append(param_name)
+            InputHipims._file_tag_list.append(param_name)
         self.attributes[param_name] = param_value
-        print(param_name+ 'is added to the InputHipims object')
+        print(param_name+ ' is added to the InputHipims object')
     
     def set_num_of_sections(self, num_of_sections):
         """ set the number of divided sections to run a case
@@ -440,23 +441,6 @@ class InputHipims:
         self.Summary.set_model_attr(num_GPU=self.num_of_sections)
 #        time_str = self.birthday.strftime('%Y-%m-%d %H:%M:%S')
 
-#    def decomposite_domain(self, num_of_sections):
-#        """ divide a single-gpu case into a multi-gpu case
-#
-#        Args:
-#            num_of_sections: (int) number of domains
-#        """
-#        obj_mg = copy.deepcopy(self)
-#        obj_mg.num_of_sections = num_of_sections
-#        obj_mg.set_device_no()
-#        obj_mg.__divide_grid()
-#        obj_mg.set_case_folder() # set data_folders
-#        outline_boundary = obj_mg.Boundary.outline_boundary
-#        obj_mg.set_boundary_condition(outline_boundary=outline_boundary)
-#        obj_mg.set_gauges_position()
-#        obj_mg.Boundary._divide_domain(obj_mg)
-#        obj_mg.birthday = datetime.now()
-#        return obj_mg
 
 #%%****************************************************************************
 #************************Write input files*************************************

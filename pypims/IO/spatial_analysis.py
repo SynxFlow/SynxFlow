@@ -26,6 +26,7 @@ import gzip
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import rasterio as rio
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch
@@ -109,10 +110,10 @@ def arcgridread(file_name, header_rows=6, return_nan=True):
     prj_file = file_name[:-4]+'.prj'
     if os.path.isfile(prj_file):
         with open(prj_file, 'r') as file:
-            projection = file.read()
+            wkt = file.read()
     else:
-        projection = None
-    return array, header, projection
+        wkt = None
+    return array, header, wkt
 
 def arcgridwrite(file_name, array, header, compression=False):
     """ write gird data into a ascii file
@@ -139,7 +140,7 @@ def arcgridwrite(file_name, array, header, compression=False):
     """
     array = array+0
     if not isinstance(header, dict):
-        raise TypeError('bad argument: head')
+        raise TypeError('bad argument: header')
     if file_name.endswith('.gz'):
         compression = True
     # create a file (gz or asc)
@@ -161,31 +162,26 @@ def arcgridwrite(file_name, array, header, compression=False):
     print(file_name + ' created')
 
 def tif_read(file_name):
-    """read tif file and return array, header, projection only read the first band
+    """read tif file (only the 1st band) and return array, header, crs
     """
-    from osgeo import gdal
-    ds = gdal.Open(file_name)        
-    ncols = ds.RasterXSize
-    nrows = ds.RasterYSize
-    geo_transform = ds.GetGeoTransform()
-    x_min = geo_transform[0]
-    cellsize = geo_transform[1]
-    y_max = geo_transform[3]
+    with rio.open(file_name) as src:
+        masked_array = src.read(1, masked=True)
+        ras_meta = src.meta
+    array = masked_array.data+0.0
+    array[array == masked_array.fill_value] = np.nan
+    ncols = ras_meta['width']
+    nrows = ras_meta['height']
+    geo_transform = ras_meta['transform']
+    cellsize = geo_transform[0]
+    x_min = geo_transform[2]
+    y_max = geo_transform[5]
     xllcorner = x_min
     yllcorner = y_max-nrows*cellsize
-    rasterBand = ds.GetRasterBand(1)
-    NODATA_value = rasterBand.GetNoDataValue()
-    array = rasterBand.ReadAsArray()
     header = {'ncols':ncols, 'nrows':nrows,
               'xllcorner':xllcorner, 'yllcorner':yllcorner,
-              'cellsize':cellsize, 'NODATA_value':NODATA_value}     
-    if not np.isscalar(header['NODATA_value']):
-        header['NODATA_value'] = -9999
-    array[array == header['NODATA_value']] = float('nan')
-    projection = ds.GetProjection()
-    rasterBand = None
-    ds = None
-    return array, header, projection
+              'cellsize':cellsize, 'NODATA_value':-9999}     
+    crs = ras_meta['crs']
+    return array, header, crs
 
 def byte_file_read(file_name):
     """ Read file from a bytes object
@@ -210,7 +206,8 @@ def combine_raster(asc_files, num_header_rows=6):
     """Combine a list of asc files to a DEM Raster
 
     Args:   
-        asc_files: a list of asc file names. All raster files have the same cellsize.
+        asc_files: a list of asc file names. All raster files have the same 
+        cellsize.
     """
     # default values for the combined Raster file
     xllcorner_all = []
@@ -269,7 +266,8 @@ def map_show(array, header, figname=None, figsize=None, dpi=300,
     """Display raster data
 
     Args:
-        figname: the file name to export map, if figname is empty, then the figure will not be saved
+        figname: the file name to export map, if figname is empty, then the 
+        figure will not be saved
         figsize: the size of map
         dpi: The resolution in dots per inch
         vmin and vmax: the data range that the colormap covers
@@ -300,7 +298,8 @@ def rank_show(array, header, figname=None, figsize=None, dpi=300,
             breaks=[0.2, 0.3, 0.5, 1, 2], # default for water depth
             show_colorbar=True, show_colorlegend=False,
             relocate=False, scale_ratio=1):
-    """Categorize array data as ranks according to the breaks and display a ranked map
+    """Categorize array data as ranks according to the breaks and display a 
+    ranked map
     """
     np.warnings.filterwarnings('ignore')
     array = array+0
@@ -361,7 +360,8 @@ def check_file_existence(file_name):
         raise
 
 def header2extent(header):
-    """ convert a header dict to a 4-element tuple (left, right, bottom, top) all four elements shows the coordinates at the edge of a cell, not center
+    """ convert a header dict to a 4-element tuple (left, right, bottom, top) 
+    all four elements shows the coordinates at the edge of a cell, not center
     """
     left = header['xllcorner']
     right = header['xllcorner']+header['ncols']*header['cellsize']
@@ -407,15 +407,16 @@ def map2sub(X, Y, header):
     rows = (y0-Y)/header['cellsize'] # row and col number starts from 0
     cols = (X-x0)/header['cellsize']
     if isinstance(rows, np.ndarray):
-        rows = rows.astype('int64')
-        cols = cols.astype('int64') #.astype('int64')
+        rows = np.round(rows).astype('int64')
+        cols = np.round(cols).astype('int64') #.astype('int64')
     else:
         rows = int(rows)
         cols = int(cols)
     return rows, cols
 
 def sub2map(rows, cols, header):
-    """convert subscripts of a matrix to map coordinates rows, cols: subscripts of the data matrix, starting from 0
+    """convert subscripts of a matrix to map coordinates rows,
+    cols: subscripts of the data matrix, starting from 0
 
     Args: 
         rows: rows in the array
@@ -445,7 +446,8 @@ def compare_extent(extent0, extent1):
         displaye: whether to show the extent in figures
 
     Return:
-        int: 0 extent0>=extent1; 1 extent0<extent1; 2 extent0 and extent1 have intersections
+        int: 0 extent0>=extent1; 1 extent0<extent1; 2 extent0 and extent1 have
+        intersections
 
     """
     logic_left = extent0[0]<=extent1[0]
@@ -475,10 +477,12 @@ def extent2shape_points(extent):
 
 def _adjust_map_extent(extent, relocate=True, scale_ratio=1):
     """
-    Adjust the extent (left, right, bottom, top) to a new staring point and new unit. extent values will be divided by the scale_ratio
+    Adjust the extent (left, right, bottom, top) to a new staring point and 
+    new unit. extent values will be divided by the scale_ratio
 
     Example:
-        if scale_ratio = 1000, and the original extent unit is meter, then the unit is converted to km, and the extent is divided by 1000
+        if scale_ratio = 1000, and the original extent unit is meter, then the 
+        unit is converted to km, and the extent is divided by 1000
     """
     if relocate:
         left = 0 
