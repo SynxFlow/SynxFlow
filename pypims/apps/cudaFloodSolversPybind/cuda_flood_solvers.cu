@@ -79,6 +79,8 @@
 #include "cuda_adaptive_time_control.h"
 #include <thrust/device_ptr.h>
 #include <thrust/reduce.h>
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 
 
 //using the name space for GeoClasses
@@ -300,14 +302,11 @@ int run(const char* work_dir){
     //precipitation
     precipitation.update_time(time_controller.current(), 0.0);
     precipitation.update_data_values();
-    fv::cuEulerIntegrator(h, precipitation, time_controller.dt(), time_controller.current());
 
-    //infiltration
-    fv::cuInfiltrationGreenAmpt(h, hydraulic_conductivity, capillary_head, water_content_diff, culmulative_depth, time_controller.dt());
-
-    //sewer sink
-    fv::cuEulerIntegrator(h, sewer_sink, time_controller.dt(), time_controller.current());
-    fv::cuUnaryOn(h, mass_filter);    //avoid negative depth
+    //infiltration, precipitation, sewer sink
+    fv::cuTotalSourceSink(h, hU, hydraulic_conductivity, capillary_head, water_content_diff, culmulative_depth, precipitation, sewer_sink, time_controller.dt());
+    h.update_time(time_controller.current(), time_controller.dt());
+    h.update_boundary_values();
 
     //update maximum depth
     fv::cuBinary(h_max, h, h_max, [] __device__(Scalar& a, Scalar b) -> Scalar{ return fmax(a, b); });
@@ -339,7 +338,8 @@ int run(const char* work_dir){
     }
 
     //print current time
-    printf("%f\n", time_controller.current());
+    //printf("%f\n", time_controller.current());
+    py::print(time_controller.current());
     fout << time_controller.current() << " " <<time_controller.dt() << std::endl;
     cnt++;
 
@@ -377,6 +377,7 @@ int run(const char* work_dir){
 
   printf("Writing maximum inundated depth.\n");
   raster_writer.write(h_max, "h_max", t_all);
+  py::print("Simulation successfully finished!");
   std::cout << "Total runtime " << total_runtime << "ms" << std::endl;
 
   return 0;
@@ -592,14 +593,11 @@ void single_run(cuDataBank& bank, std::vector<int> device_list, unsigned int dom
     //precipitation
     precipitation.update_time(time_controller.current(), 0.0);
     precipitation.update_data_values();
-    fv::cuEulerIntegrator(h, precipitation, time_controller.dt(), time_controller.current());
 
-    //infiltration
-    fv::cuInfiltrationGreenAmpt(h, hydraulic_conductivity, capillary_head, water_content_diff, culmulative_depth, time_controller.dt());
-
-    //sewer sink
-    fv::cuEulerIntegrator(h, sewer_sink, time_controller.dt(), time_controller.current());
-    fv::cuUnaryOn(h, mass_filter);    //avoid negative depth
+    //infiltration, precipitation, sewer sink
+    fv::cuTotalSourceSink(h, hU, hydraulic_conductivity, capillary_head, water_content_diff, culmulative_depth, precipitation, sewer_sink, time_controller.dt());
+    h.update_time(time_controller.current(), time_controller.dt());
+    h.update_boundary_values();
 
     //update maximum depth
     fv::cuBinary(h_max, h, h_max, [] __device__(Scalar& a, Scalar b) -> Scalar{ return fmax(a, b); });
@@ -619,7 +617,8 @@ void single_run(cuDataBank& bank, std::vector<int> device_list, unsigned int dom
 
     //print current time
     if (domain_id == 0){
-      printf("%f\n", time_controller.current());
+      //printf("%f\n", time_controller.current());
+      py::print(time_controller.current());
       fout << time_controller.current() << " " << time_controller.dt() << std::endl;
     }
 
