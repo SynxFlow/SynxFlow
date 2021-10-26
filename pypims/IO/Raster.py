@@ -9,7 +9,8 @@ Raster
 =======
 
 To do:
-    Read, write and analyze gridded Raster data
+    1. Read, write, analyze, and visualise gridded raster data
+    2. Convert shape data to raster data
 
 ---------------
 
@@ -58,6 +59,13 @@ class Raster(object):
                 NODATA_value
             crs: coordinate reference system, either epsg(epsg code, int) or
                 wkt(string), or a rasterio.crs object
+        Example: define a raster object with a random array
+            array = np.random.rand(10, 10)
+            header = {'ncols':array.shape[1], 'nrows':array.shape[0],
+                      'xllcorner':0, 'yllcorner':1,
+                      'cellsize':100, 'NODATA_value':-9999}
+            obj_ras = Raster(array=array, header=header)
+            obj_ras.mapshow() %plot map
 
         """
         # get data from file or arguments
@@ -403,7 +411,7 @@ class Raster(object):
             obj_new.crs = self.crs
         return obj_new
     
-    def paste_on(self, obj_large):
+    def paste_on(self, obj_large, ignore_nan=True):
         """ Paste the object to a larger grid defined by obj_large and
         replace corresponding grid values with the object array
 
@@ -425,6 +433,10 @@ class Raster(object):
         array_small = self.array[ind_r, :]
         array_small = array_small[:, ind_c]
         rows_grid, cols_grid = np.meshgrid(rows, cols, indexing='ij')
+        if ignore_nan:
+            array_large = obj_large.array[rows_grid, cols_grid]
+            ind_nan = np.isnan(array_small)
+            array_small[ind_nan] = array_large[ind_nan]
         obj_large.array[rows_grid, cols_grid] = array_small
         return obj_large
 
