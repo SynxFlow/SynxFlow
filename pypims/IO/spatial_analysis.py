@@ -100,9 +100,7 @@ def arcgridread(file_name, header_rows=6, return_nan=True):
 
     """
     check_file_existence(file_name)
-    # read header
     header = arc_header_read(file_name, header_rows)
-    # read value array
     array = np.loadtxt(file_name, skiprows=header_rows, dtype='float64')
     if return_nan:
         if 'NODATA_value' in header:
