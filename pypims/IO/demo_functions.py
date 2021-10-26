@@ -14,7 +14,7 @@ To do:
 ---------------
 
 """
-# import os
+import os
 import pkg_resources
 import numpy as np
 from .InputHipims import InputHipims
@@ -76,11 +76,13 @@ def get_sample_data():
     """ Get sample data for demonstartion
 
     Returns:
-        A DEM raster object and a dictionary with boundary_condition,
-        rain_source, and gauges_pos data
+        dem_file: string for DEM file name
+        demo_data: a dictionary with boundary_condition, rain_source, and 
+            gauges_pos data
+        data_path: string the path of sample data
     """
-    dem_file = pkg_resources.resource_filename(__name__,
-                                             'sample/DEM.gz')
+    data_path = pkg_resources.resource_filename(__name__, 'sample')
+    dem_file = os.path.join(data_path, 'DEM.gz')
     demo_data = {
         'boundary_condition': [
             {'polyPoints': np.array([[1427, 195],
@@ -97,14 +99,14 @@ def get_sample_data():
         'gauges_pos': np.array([[300, 1600],
                                 [400, 1200]])
     }
-    return dem_file, demo_data
+    return dem_file, demo_data, data_path
     
 # =============private functions==================
 def __set_defaul_input(obj_in):
     """Set some default values for an InputHipims object
     """
     # load data for the demo
-    _, demo_data = get_sample_data()
+    _, demo_data, _ = get_sample_data()
     # define initial condition
     h0 = obj_in.DEM.array+0
     h0[np.isnan(h0)] = 0

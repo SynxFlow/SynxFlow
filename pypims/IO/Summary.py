@@ -143,6 +143,9 @@ class Summary:
                     ratios = counts/counts.sum()
                     ratios = ratios.round(4)*100
                     ratios_str = str(ratios.tolist())+'%'
+                    if key in ['sewer_sink', 'hydraulic_conductivity']:
+                        values = np.round(values*3600*1000, 4)
+                        ratios_str = ratios_str+' (unit: mm/h)'
                     self.params_attr[key] = [values.tolist(), ratios_str]
             else:
                 print(key+' is not a grid parameter')

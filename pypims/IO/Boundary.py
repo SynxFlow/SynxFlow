@@ -430,7 +430,7 @@ def _get_bound_normal(cell_subs, dem_obj):
         if theta >= np.pi:
             theta = theta-np.pi
         else:
-            theta = theta-np.pi
+            theta = theta+np.pi
     elif ~np.isnan(end0_value) & np.isnan(end1_value): # towards in
         pass
     else:

@@ -30,13 +30,14 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 #%% draw inundation map with domain outline
 def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
             figsize=None, dpi=300, title=None, cax=True, cax_str=None,
-            relocate=False, scale_ratio=1, ytick_labelrotation=None, **kwargs):
+            scale_ratio=1, **kwargs):
     """Display raster data without projection
 
     Args:
         raster_obj: a Raster object
         array, header: to make Raster object if raster_obj is not given
-        figname: the file name to export map, if figname is empty, then the figure will not be saved
+        figname: the file name to export map, if figname is empty, then the 
+            figure will not be saved
         figsize: the size of map
         dpi: The resolution in dots per inch
         vmin and vmax define the data range that the colormap covers
@@ -60,7 +61,7 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
     else:
         fig = ax.get_figure()
     img = ax.imshow(array, extent=map_extent, **kwargs)
-    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
+    
     # add colorbar
 	# create an axes on the right side of ax. The width of cax will be 5%
     # of ax and the padding between cax and ax will be fixed at 0.05 inch.
@@ -68,6 +69,8 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
         _ = _set_continous_colorbar(ax, img, cax_str)
     ax.axes.grid(linestyle='-.', linewidth=0.2)
     ax.set_aspect('equal', 'box')
+    if scale_ratio==1000:
+        _adjust_axis_scale(ax)
     if title is not None:
         ax.set_title(title)
     # save figure
@@ -79,8 +82,7 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
 def rankshow(raster_obj=None, array=None, header=None, figname=None, 
              figsize=None, dpi=200, ax=None, color='Blues',
              breaks=[0.2, 0.3, 0.5, 1, 2],
-             legend_kw=None, ytick_labelrotation=None,
-             relocate=False, scale_ratio=1, alpha=1, **kwargs):
+             legend_kw=None, scale_ratio=1, alpha=1, **kwargs):
     """ Display water depth map in ranks defined by breaks
 
         Args:
@@ -99,7 +101,7 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
                      legend_kw={'loc':'upper left', 'facecolor':None, 
                                 'fontsize':'small', 'title':'depth(m)', 
                                 'labelspacing':0.1}, 
-                     ytick_labelrotation=None, relocate=False, scale_ratio=1,
+                     scale_ratio=1,
                      alpha=1)
     """
     if raster_obj is not None:
@@ -117,8 +119,9 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
     else:
         fig = ax.get_figure()
     chm_plot = ax.imshow(array, extent=map_extent, cmap=newcmp, norm=norm, 
-                         alpha=alpha, **kwargs) 
-    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
+                         alpha=alpha, **kwargs)
+    if scale_ratio==1000:
+        _adjust_axis_scale(ax)
     # create colorbar        
     if legend_kw is not None: # legend
         _set_color_legend(ax, norm, newcmp, legend_kw)
@@ -129,8 +132,7 @@ def rankshow(raster_obj=None, array=None, header=None, figname=None,
     return fig, ax
 
 def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
-              cmap=None, blend_mode='overlay', alpha=1, relocate=False,
-              scale_ratio=1, ytick_labelrotation=None):
+              cmap=None, blend_mode='overlay', alpha=1, scale_ratio=1):
     """ Draw a hillshade map
     """
     array = raster_obj.array+0
@@ -146,13 +148,14 @@ def hillshade(raster_obj, figsize=None, azdeg=315, altdeg=45, vert_exag=1,
     rgb = ls.shade(array, cmap=cmap, blend_mode=blend_mode, 
                    vert_exag=vert_exag)
     ax.imshow(rgb, extent=raster_obj.extent, alpha=alpha)
-    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
+    if scale_ratio==1000:
+        _adjust_axis_scale(ax)
     return fig, ax
 
 def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, ax=None,
-               relocate=False, scale_ratio=1, ytick_labelrotation=None, 
-               **kwargs):
-    """plot velocity map of U and V, whose values stored in two raster objects seperately
+               scale_ratio=1, **kwargs):
+    """plot velocity map of U and V, whose values stored in two raster objects 
+    seperately
 
     """
     X, Y = obj_x.to_points()        
@@ -171,7 +174,8 @@ def vectorshow(obj_x, obj_y, figname=None, figsize=None, dpi=300, ax=None,
     # fig, ax = plt.subplots(1, figsize=figsize)
     ax.quiver(X, Y, U, V, **kwargs)
     ax.set_aspect('equal', 'box')
-    _adjust_axis_tick(ax, relocate, scale_ratio, ytick_labelrotation)
+    if scale_ratio==1000:
+        _adjust_axis_scale(ax)
     if figname is not None:
         fig.savefig(figname, dpi=dpi)
     return fig, ax
@@ -208,8 +212,10 @@ def make_mp4(output_file, obj_list=None, header=None, array_3d=None,
 
     Args:
         obj_list: a list of Raster objects
-        header: a header dict providing georeference the grid [not necessary if obj_list was given]
-        array_3d: a 3D numpy array storing grid values for each timestep (in 1st dimension), [not necessary if obj_list was given]
+        header: a header dict providing georeference the grid [not necessary 
+                if obj_list was given]
+        array_3d: a 3D numpy array storing grid values for each timestep (in 
+                 1st dimension), [not necessary if obj_list was given]
         time_str: a list of string to show time information for each frame
 
     """
@@ -318,7 +324,8 @@ def _set_rank_colorbar(ax, img, norm):
 def _set_color_legend(ax, norm, cmp, legend_kw):
     """ Set color legend attributes
 
-    legend_kw: dict, keyword arguments to set legend, eg: {loc:'lower right', bbox_to_anchor:(1,0), facecolor:None}
+    legend_kw: dict, keyword arguments to set legend, eg: {loc:'lower right', 
+                                        bbox_to_anchor:(1,0), facecolor:None}
 
     """
     category_names = [(str(norm.boundaries[ii-1])+'~'+
@@ -355,50 +362,45 @@ def _set_continous_colorbar(ax, img, cax_str=None,
         cbar.ax.xaxis.set_label_coords(0, 1.06)
     return cbar
 
-def _adjust_axis_tick(ax, relocate=True, scale_ratio=1, labelrotation=None):
-    """
-    Adjust the axis tick to a new staring point and/or new unit 
-
-    Example:
-
-        if scale_ratio = 1000, and the original extent unit is meter, then the unit is converted to km, and the extent is divided by 1000
+def _reset_axis_tick(ax, axis_name, tick_space):
+    if axis_name == 'x':
+        ax_lim = ax.get_xlim()
         
+    else:
+        ax_lim = ax.get_ylim()
+    lim0 = ax_lim[0]-ax_lim[0]%tick_space+tick_space
+    new_ticks = np.arange(lim0, ax_lim[1], tick_space)
+    if axis_name == 'x':
+        ax.set_xticks(new_ticks)
+    else:
+        ax.set_yticks(new_ticks)
+
+def _adjust_axis_scale(ax, scale_ratio=1000, unit_tag='km'):
+    """ Adjust the axis tick to a new new unit 
     """
     xticks = ax.get_xticks()
-    x_space = xticks[1]-xticks[0]
+    dx = xticks[1]-xticks[0]
+    if dx < 1000:
+        _reset_axis_tick(ax, 'x', 1000)
     yticks = ax.get_yticks()
-    y_space = yticks[1]-yticks[0]
-    if relocate:
-        xlim = ax.get_xlim()
-        ylim = ax.get_ylim()
-        xticks = np.arange(xlim[0], xlim[1], x_space)
-        xticks_label = xticks-xlim[0]
-        yticks = np.arange(ylim[0], ylim[1], y_space)
-        yticks_label = yticks-ylim[0]
-        ax.set_xticks(xticks)
-        ax.set_yticks(yticks)
-    else:
-        xticks_label = xticks
-        yticks_label = yticks
-    if scale_ratio == 1000:
-        label_tag = 'km'
-        xticks_label = (xticks_label/1000).astype('int64')
-        yticks_label = (yticks_label/1000).astype('int64')
-    else:
-        label_tag = 'meter'
-        xticks_label = (xticks_label).astype('int64')
-        yticks_label = (yticks_label).astype('int64')
-    ax.set_xticklabels(xticks_label)
-    ax.set_yticklabels(yticks_label)
-    ax.set_xlabel(label_tag+' towards east')
-    ax.set_ylabel(label_tag+' towards north')
-    if labelrotation is None:
-        if y_space > 1.5*x_space:
-            labelrotation = 90
-        else:
-            labelrotation = 0
-    ax.tick_params(axis='y', labelrotation=labelrotation)
-    return None
+    dy = yticks[1]-yticks[0]
+    print(dy)
+    if dy < 1000:
+        _reset_axis_tick(ax, 'y', 1000)
+    xticks = ax.get_xticks()
+    yticks = ax.get_yticks()
+    xticks_label = (xticks/1000).astype('int64')
+    xticks_label_list = [str(x) for x in xticks_label]
+    yticks_label = (yticks/1000).astype('int64')
+    yticks_label_list = [str(y) for y in yticks_label]
+    # print(yticks)
+    ax.set_xticklabels(xticks_label_list)
+    ax.set_yticklabels(yticks_label_list)
+    # print(yticks_label_list)
+    ax.set_xlabel(unit_tag+' towards east')
+    ax.set_ylabel(unit_tag+' towards north')
+    return ax
+
 
 def main():
     print('Package to show grid data')
