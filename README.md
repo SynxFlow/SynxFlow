@@ -29,7 +29,7 @@ pip install pypims
 
 
 
-## Basic usage
+## Running a demo
 
 The flood simulation engine can be imported by
 
@@ -37,7 +37,7 @@ The flood simulation engine can be imported by
 from pypims import flood
 ```
 
-The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). This package has already been included in pypims, you can import it by
+The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). This package has already been included as part of pypims, you can import it by
 
 ```python
 from pypims import IO
@@ -50,14 +50,8 @@ A quick demonstration to prepare input files with attached sample data contaning
 
 ```python
 import os
-from pypims.IO.demo_functions import get_sample_data
-_, _, data_path = get_sample_data() # get the path of sample data
-case_folder = os.path.join(os.getcwd(), 'model_case') # define a case folder in the current directory
-num_of_devices = 1
-obj_in = IO.InputHipims(case_folder=case_folder, num_of_sections=num_of_devices, 
-                        data_path=data_path) # create input object
-obj_in.domain_show() # show domain map
-print(obj_in) # show case information
+from pypims.IO.demo_functions import demo_input
+obj_in = demo_input() # create input object
 obj_in.write_input_files() # create all input files
 ```
 
@@ -65,13 +59,5 @@ Once the inputs have all been prepared, the simulations can be started by
 
 
 ```python
-flood.run(case_folder)
+flood.run(obj_in.get_case_folder())
 ```
-
-or
-
-```python
-flood.run_mgpus(case_folder) # using this if num_of_devices > 1
-```
-
-for multiple GPUs.
