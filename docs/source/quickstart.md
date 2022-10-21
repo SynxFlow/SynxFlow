@@ -12,7 +12,7 @@ pip install cmake
 
 Pypims needs NVIDIA GPUs which support CUDA to run the simulations, therefore you need the GPU and the CUDA Toolkit. The CUDA Toolkit can be downloaded from the [NVIDIA website](https://developer.nvidia.com/cuda-downloads). If you use Linux system, the C++ compiler 'GCC' is usually on the system as default. If you use windows, you should download and install [Visual Studio](https://visualstudio.microsoft.com/vs/).
 
-####Installing on Linux
+#### Installing on Linux
 
 You may need to define the CUDAToolkit_ROOT environmental varialble first if there exists several different versions of CUDA Toolkits on your system. This can be done by
 
@@ -31,7 +31,7 @@ Once the aforementioned dependencies have been properly installed. Installing py
 pip install pypims
 ```
 
-####Installing on Windows
+#### Installing on Windows
 
 Installing on Windows is slightly less straightforward than on Linux. The steps below are tested with Windows 10, Visual Studio 2019 and Python 3.7. You need to firstly manually install the dependency packages inculding 'GDAL', 'rasterio' and 'fiona'. 
 
