@@ -21,3 +21,7 @@ Xia X, Liang Q, Ming X (2019) A full-scale fluvial flood modelling framework bas
 Xia X, Liang Q (2018) A new efficient implicit scheme for discretising the stiff friction terms in the shallow water equations. [Advances in Water Resources](https://www.sciencedirect.com/science/article/pii/S0309170818302124), 117: 87-97.
 
 Xia X, Liang Q, Ming X, Hou J (2017) An efficient and stable hydrodynamic model with novel source term discretization schemes for overland flow and flood simulations. [Water Resources Research](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016WR020055), 53: 3730-3759.
+
+### Joining the community
+
+You can join the Pypims community on [Slack](https://join.slack.com/t/pypims-community/shared_invite/zt-1ieab3l44-vw6QY43tsFaEd~w8T_llYg) to share your experiences, ask for help and receive the latest updates about Pypims. Your feed
