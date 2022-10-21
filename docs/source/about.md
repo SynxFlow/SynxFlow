@@ -24,4 +24,4 @@ Xia X, Liang Q, Ming X, Hou J (2017) An efficient and stable hydrodynamic model 
 
 ### Joining the community
 
-You can join the Pypims community on [Slack](https://join.slack.com/t/pypims-community/shared_invite/zt-1ieab3l44-vw6QY43tsFaEd~w8T_llYg) to share your experiences, ask for help and receive the latest updates about Pypims. Your feed
+You can join the Pypims community on [Slack](https://join.slack.com/t/pypims-community/shared_invite/zt-1ieab3l44-vw6QY43tsFaEd~w8T_llYg) to share your experiences, ask for help and receive the latest updates about Pypims. Your feedbacks and support mean a lot to us!
