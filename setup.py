@@ -92,7 +92,7 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: C++',
         'Intended Audience :: Science/Research'
     ],
@@ -101,6 +101,7 @@ setup(
                         'matplotlib',
                         'imageio',
                         'pandas',
+                        'rasterio',
                         'pyshp',
                         'fiona'],
     package_data={'pypims.IO': ['sample/Example_DEM.asc',

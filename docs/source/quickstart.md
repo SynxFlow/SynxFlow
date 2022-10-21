@@ -2,13 +2,19 @@
 
 ### Installing
 
-Before installing pypims, you need to install [Cmake](https://cmake.org/download/), NVIDIA CUDA Toolkit and the C++ compiler. Cmake can be simply installed by
+You will have to set up your Python environment as a first step. There are several ways of doing it, but [Anaconda](https://www.anaconda.com/products/distribution) is a highly recommended way. 
+
+Before installing pypims, you also need to install [Cmake](https://cmake.org/download/), NVIDIA CUDA Toolkit and the C++ compiler. Cmake can be simply installed by
 
 ```shell
 pip install cmake
 ```
 
-The CUDA Toolkit can be downloaded from the [NVIDIA website](https://developer.nvidia.com/cuda-downloads). If you use Linux system, the C++ compiler 'GCC' is usually on the system as default. If you use windows, you should download and install [Visual Studio](https://visualstudio.microsoft.com/vs/). If there exists several different versions of CUDA Toolkits on your system, cmake may struggle to decide which one to use and return an error. In such a case, you need to define the CUDAToolkit_ROOT environmental varialble. On Linux, this can be done by
+Pypims needs NVIDIA GPUs which support CUDA to run the simulations, therefore you need the GPU and the CUDA Toolkit. The CUDA Toolkit can be downloaded from the [NVIDIA website](https://developer.nvidia.com/cuda-downloads). If you use Linux system, the C++ compiler 'GCC' is usually on the system as default. If you use windows, you should download and install [Visual Studio](https://visualstudio.microsoft.com/vs/).
+
+####Installing on Linux
+
+You may need to define the CUDAToolkit_ROOT environmental varialble first if there exists several different versions of CUDA Toolkits on your system. This can be done by
 
 ```shell
 export CUDAToolkit_ROOT=<path to your cuda directory>
@@ -24,6 +30,31 @@ Once the aforementioned dependencies have been properly installed. Installing py
 ```shell
 pip install pypims
 ```
+
+####Installing on Windows
+
+Installing on Windows is slightly less straightforward than on Linux. The steps below are tested with Windows 10, Visual Studio 2019 and Python 3.7. You need to firstly manually install the dependency packages inculding 'GDAL', 'rasterio' and 'fiona'. 
+
+Taking GDAL as an example, firstly download the wheel from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/). You need to choose the wheel for the right platform and python version, for example 'GDAL‑3.4.2‑cp37‑cp37m‑win_amd64.whl', which corresponds to amd64 platform and Python 3.7. Then GDAL can be installed in the commandline tool as
+
+```shell
+python -m pip install <path to downloaded wheel>
+```
+
+'rasterio' and 'fiona' need to be installed following similar steps.
+
+The next step is to download the source code of pypims from [Github](https://github.com/pypims/pypims). This can also be done by
+
+```shell
+git clone https://github.com/pypims/pypims.git
+```
+
+After finishing downloading, go to the folder of the pypims source code and run the following command
+
+```shell
+python setup.py install
+```
+Now you should have pypims successfully installed on your computer.
 
 ### Running a simulation with the example
 

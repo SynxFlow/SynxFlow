@@ -6,7 +6,7 @@
 Welcome to pypims's documentation
 =================================
 
-Pypims: Python APIs for `hipims-cuda <https://github.com/HEMLab/hipims>`_.
+Pypims: A python-based integrated toolchain for high-performance flood simulation and data processing.
 
 
 .. toctree::

@@ -3,13 +3,21 @@
 
 ### About Pypims
 
-Pypims is built upon the open-source software [hipims-cuda](https://github.com/HEMLab/hipims). Pypims provides an user friendly Python-based interface
-for users to prepare the inputs, run the hipims-cuda model and visualise the outputs.
+Pypims is a further development of the open-source software [hipims-cuda](https://github.com/HEMLab/hipims). It provides an user friendly Python-based integrated toolchain
+to prepare the inputs, run flood simulations and visualise the outputs.
 
 ### About HiPIMS-CUDA
 
-HiPIMS standards for High-Performance Integrated hydrodynamic Modelling System, which is developed by members of [HEMLab](https://www.hemlab.org). There are three versions of hipims. hipims-cuda is one of them.
+HiPIMS standards for High-Performance Integrated hydrodynamic Modelling System, which is originated by the [HEMLab](https://www.hemlab.org) team. There are different versions of hipims supporting different hardware and with different functionalities. hipims-cuda is one of them and maintained by reseachers from the University of Birmingham and Loughborough University.
 hipims-cuda uses state-of-art numerical schemes (Godunov-type finite volume) to solve the 2D shallow water equations for flood simulations. 
-To support high-resolution flood simulations, hipims-cuda is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing. 
-Since hipims-cuda has a modular and flexible structure, it has a great potential to be further 
-developed for other applications in hydrological science as long as the problem can be solved on a uniform rectangular grid.
+To support high-resolution flood simulations, hipims-cuda is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing.
+
+### References
+
+The details about the science behind pypims and hipims-cuda are documented in the following papers:
+
+Xia X, Liang Q, Ming X (2019) A full-scale fluvial flood modelling framework based on a high-performance integrated hydrodynamic modelling system (HiPIMS). [Advances in Water Resources](http://pstorage-loughborough-53465.s3.amazonaws.com/17232146/manuscript_final_R1_unmarked.pdf), 132: 103392.
+
+Xia X, Liang Q (2018) A new efficient implicit scheme for discretising the stiff friction terms in the shallow water equations. [Advances in Water Resources](https://www.sciencedirect.com/science/article/pii/S0309170818302124), 117: 87-97.
+
+Xia X, Liang Q, Ming X, Hou J (2017) An efficient and stable hydrodynamic model with novel source term discretization schemes for overland flow and flood simulations. [Water Resources Research](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016WR020055), 53: 3730-3759.
