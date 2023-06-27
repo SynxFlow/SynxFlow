@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../../pypims'))
 # -- Project information -----------------------------------------------------
 
 project = 'pypims'
-copyright = '2022, Xilin Xia, Xiaodong Ming'
-author = 'Xilin Xia, Xiaodong Ming'
+copyright = '2023, Xilin Xia, Xiaodong Ming, Qiuhua Liang'
+author = 'Xilin Xia, Xiaodong Ming, Qiuhua Liang'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.3.1'
