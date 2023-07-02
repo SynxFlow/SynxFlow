@@ -3,14 +3,11 @@
 
 ### About Pypims
 
-Pypims is a further development of the open-source software [hipims-cuda](https://github.com/HEMLab/hipims). It provides an user friendly Python-based integrated toolchain
-to prepare the inputs, run flood simulations and visualise the outputs.
+Pypims is a further development of the open-source software [hipims-cuda](https://github.com/HEMLab/hipims). It provides an user friendly Python-based integrated toolchain to prepare the inputs, run flood simulations and visualise the outputs.
 
 ### About HiPIMS-CUDA
 
-HiPIMS standards for High-Performance Integrated hydrodynamic Modelling System, which is originated by the [HEMLab](https://www.hemlab.org) team. There are different versions of hipims supporting different hardware and with different functionalities. hipims-cuda is one of them and maintained by reseachers from the University of Birmingham and Loughborough University.
-hipims-cuda uses state-of-art numerical schemes (Godunov-type finite volume) to solve the 2D shallow water equations for flood simulations. 
-To support high-resolution flood simulations, hipims-cuda is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing.
+hipims-cuda is an open source flood Modelling suite developed and maintained by Prof Qiuhua Liang and his team in Loughborough University. hipims-cuda uses state-of-art numerical schemes (Godunov-type finite volume) to solve the 2D shallow water equations for flood simulations. To support high-resolution flood simulations, hipims-cuda is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing.
 
 ### References
 
