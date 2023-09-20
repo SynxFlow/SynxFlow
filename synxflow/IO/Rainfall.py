@@ -24,7 +24,7 @@ from datetime import timedelta
 from .Raster import Raster
 from . import indep_functions as indep_f
 class Rainfall:
-    """ a class to set rainfall data for hipims
+    """ a class to set rainfall data for the model
 
     Attributes:
 

@@ -8,7 +8,7 @@ Independent functions
 =====================
 
 To do:
-    non-object-based independent functions to support hipims IO
+    non-object-based independent functions to support model IO
     
 -----------------
 
@@ -24,7 +24,7 @@ import numpy as np
 from .rainfall_processing import _check_rainfall_rate_values
 
 def load_object(file_name):
-    """ Read a pickle file as an InputHipims/OutputHipims object
+    """ Read a pickle file as an InputModel/OutputModel object
     """
     #read an object file
     try:
@@ -37,7 +37,7 @@ def load_object(file_name):
     return obj
 
 def save_object(obj, file_name, compression=True):
-    """ Save an InputHipims/OutputHipims object to a pickle file 
+    """ Save an InputModel/OutputModel object to a pickle file 
     """
     # Overwrites any existing file.
     if compression:
@@ -187,7 +187,7 @@ def _write_two_arrays(file_name, id_values, bound_id_code=None):
             file2write.write("$Element_id  Value\n")
             file2write.write(bound_id_code_str)
 
-#%% static method for InputHipims
+#%% static method for InputModel
 def _create_io_folders(case_folder, make_dir=False):
     """ create Input-Output path for a Hipims case
         (compatible for single/multi-GPU)

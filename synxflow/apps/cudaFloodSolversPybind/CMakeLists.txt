@@ -8,7 +8,7 @@ set(LIB_SRCS cuda_flood_solvers.cu)
 #set (CUDA_NVCC_FLAGS "-arch=sm_20 -Xptxas=v")
 #set (CUDA_SEPARABLE_COMPILATION ON)
 
-file(GLOB_RECURSE gc_headers "${PROJECT_SOURCE_DIR}/pypims/lib/include/*.h")
+file(GLOB_RECURSE gc_headers "${PROJECT_SOURCE_DIR}/synxflow/lib/include/*.h")
 
 set (GC_INCLUDE_DIRS "")
 foreach (_header_file ${gc_headers})
@@ -20,7 +20,7 @@ list(REMOVE_DUPLICATES GC_INCLUDE_DIRS)
 include_directories(${GC_INCLUDE_DIRS})
 include_directories("${pybind11_sources_SOURCE_DIR}/include")
 include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR}/pypims/apps/cudaFloodSolversPybind)
+include_directories(${PROJECT_SOURCE_DIR}/synxflow/apps/cudaFloodSolversPybind)
 
 cuda_add_library(${LIB} STATIC ${LIB_SRCS})
 add_dependencies(${LIB} lib cuda_lib)
@@ -43,5 +43,5 @@ install(
   TARGETS
     ${flood}
   LIBRARY
-    DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pypims
+    DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/synxflow
   )

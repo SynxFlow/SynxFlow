@@ -4,7 +4,7 @@
 # Author: Xiaodong Ming
 
 """
-InputHipims
+InputModel
 ===========
 
 The module is based on the following assumptions:
@@ -27,7 +27,7 @@ To do:
 
 # Structure:
 
-#    class InputHipims
+#    class InputModel
 
 #        - Initialize an object: __init__
 
@@ -53,9 +53,9 @@ from .Landcover import Landcover
 from .Summary import Summary
 from .spatial_analysis import sub2map
 from . import indep_functions as indep_f
-#%% definition of class InputHipims
-class InputHipims:
-    """To define input files for a HiPIMS flood model case
+#%% definition of class InputModel
+class InputModel:
+    """To define input files for a flood model case
 
     Read data, process data, write input files, and save data of a model case.
 
@@ -72,7 +72,7 @@ class InputHipims:
             Landcover object. Keys are grid parameter names. Each Value is a 
             dict with three keys: param_value, land_value, default_value. 
             Refer to Landcover for more details.
-        Sections: a list of objects of child-class InputHipimsSub
+        Sections: a list of objects of child-class InputModelSub
         Boundary: A boundary object for boundary conditions
         DEM: a Raster object to provide DEM data [alias: Raster].
         Rainfall: a Rainfall object to process rainfall data
@@ -108,7 +108,7 @@ class InputHipims:
                            'capillary_head', 'water_content_diff']
     def __init__(self, dem_data=None, num_of_sections=1, case_folder=None,
                  data_path=None):
-        """Initialise the InputHipims object
+        """Initialise the InputModel object
 
         Args:
             dem_data: (Raster object) or (str) provides file name of the DEM data
@@ -116,7 +116,7 @@ class InputHipims:
                 suffix .gz|.asc|.tif. 'landcover' and 'rain_mask' can also be read if
                 these files were given with one of the three suffix
         """
-        self.attributes = InputHipims.__attributes_default.copy()
+        self.attributes = InputModel.__attributes_default.copy()
         self.num_of_sections = num_of_sections
         self.birthday = datetime.now()
         if case_folder is None:
@@ -139,8 +139,8 @@ class InputHipims:
         # get row and col index of all cells on DEM grid
         self._get_cell_subs()  # add _valid_cell_subs and _outline_cell_subs
         # divide model domain to several sections if it is not a sub section
-        # each section contains a "HiPIMS_IO_class.InputHipimsSub" object
-        if isinstance(self, InputHipimsSub):
+        # each section contains a "model_IO_class.InputModelSub" object
+        if isinstance(self, InputModelSub):
             pass
         else:
             self.__divide_grid()
@@ -217,7 +217,7 @@ class InputHipims:
         bound_obj = Boundary(boundary_list, outline_boundary)
         valid_subs = self._valid_cell_subs
         outline_subs = self._outline_cell_subs
-        if not isinstance(self, InputHipimsSub):
+        if not isinstance(self, InputModelSub):
             dem_header = self.header
         # add the subsripts and id of boundary cells on the domain grid
             bound_obj._fetch_boundary_cells(valid_subs,
@@ -411,11 +411,11 @@ class InputHipims:
             param_value: (scalar) or (numpy arary) with the same shape of the 
                 DEM array
         """
-        if param_name not in InputHipims.__grid_files:
-            InputHipims.__grid_files.append(param_name)
-            InputHipims._file_tag_list.append(param_name)
+        if param_name not in InputModel.__grid_files:
+            InputModel.__grid_files.append(param_name)
+            InputModel._file_tag_list.append(param_name)
         self.attributes[param_name] = param_value
-        print(param_name+ ' is added to the InputHipims object')
+        print(param_name+ ' is added to the InputModel object')
     
     def set_num_of_sections(self, num_of_sections):
         """ set the number of divided sections to run a case
@@ -455,7 +455,7 @@ class InputHipims:
                 files without suffix
         """
         self._make_data_dirs()
-        grid_files = InputHipims.__grid_files
+        grid_files = InputModel.__grid_files
         if file_tag is None or file_tag == 'all': # write all files
             write_list = self._file_tag_list
             if self.num_of_sections > 1:
@@ -492,7 +492,7 @@ class InputHipims:
             file_tag: the pure name of a grid-based file
         """
         self._make_data_dirs()
-        grid_files = InputHipims.__grid_files
+        grid_files = InputModel.__grid_files
         if file_tag not in grid_files:
             raise ValueError(file_tag+' is not a grid-based file')
         if is_single_gpu or self.num_of_sections == 1:
@@ -718,10 +718,10 @@ class InputHipims:
     def __divide_grid(self):
         """Divide DEM grid to sub grids
 
-        Create objects based on sub-class InputHipimsSub
+        Create objects based on sub-class InputModelSub
         """
-        if isinstance(self, InputHipimsSub):
-            return 0  # do not divide InputHipimsSub objects, return a number
+        if isinstance(self, InputModelSub):
+            return 0  # do not divide InputModelSub objects, return a number
         else:
             if self.num_of_sections == 1:
                 return 1 # do not divide if num_of_sections is 1
@@ -732,23 +732,23 @@ class InputHipims:
         array_local, header_local = \
             indep_f._split_array_by_rows(self.DEM.array, dem_header,
                                          split_rows)
-        # to receive InputHipimsSub objects for sections
+        # to receive InputModelSub objects for sections
         Sections = []
         section_sequence = np.arange(num_of_sections)
         header_global = dem_header
         for i in section_sequence:  # from bottom to top
             case_folder = os.path.join(self._case_folder, str(i))
-            # create a sub object of InputHipims
-            sub_hipims = InputHipimsSub(array_local[i], header_local[i],
+            # create a sub object of InputModel
+            sub_model = InputModelSub(array_local[i], header_local[i],
                                         case_folder, num_of_sections)
             # get valid_cell_subs on the global grid
-            valid_cell_subs = sub_hipims._valid_cell_subs
+            valid_cell_subs = sub_model._valid_cell_subs
             valid_subs_global = \
                  indep_f._cell_subs_convertor(valid_cell_subs, header_global,
                                       header_local[i], to_global=True)
-            sub_hipims.valid_subs_global = valid_subs_global
+            sub_model.valid_subs_global = valid_subs_global
             # record section sequence number
-#            sub_hipims.section_id = i
+#            sub_model.section_id = i
             #get overlayed_id (top two rows and bottom two rows)
             top_h = np.where(valid_cell_subs[0] == 0)
             top_l = np.where(valid_cell_subs[0] == 1)
@@ -764,16 +764,16 @@ class InputHipims:
                 overlayed_id = {'top_high':top_h[0], 'top_low':top_l[0],
                                 'bottom_high':bottom_h[0],
                                 'bottom_low':bottom_l[0]}
-            sub_hipims.overlayed_id = overlayed_id
+            sub_model.overlayed_id = overlayed_id
             all_ids = list(overlayed_id.values())
             all_ids = np.concatenate(all_ids).ravel()
             all_ids.sort()
             overlayed_cell_subs_global = (valid_subs_global[0][all_ids],
                                           valid_subs_global[1][all_ids])
-            sub_hipims.overlayed_cell_subs_global = overlayed_cell_subs_global
-            Sections.append(sub_hipims)
-        # reset global var section_id of InputHipimsSub
-        InputHipimsSub.section_id = 0
+            sub_model.overlayed_cell_subs_global = overlayed_cell_subs_global
+            Sections.append(sub_model)
+        # reset global var section_id of InputModelSub
+        InputModelSub.section_id = 0
         self.Sections = Sections
         self._initialize_summary_obj()# get a Model Summary object
 
@@ -1031,7 +1031,7 @@ class InputHipims:
                 shutil.copy2(file, field_dir)
     
     def _setup_by_files(self, data_path):
-        """Read files to setup hipims input object
+        """Read files to setup model input object
         DEM, landcover, rain_mask, endswith '.gz', '.asc', or '.tif'
         rain_source.csv
         """
@@ -1057,8 +1057,8 @@ class InputHipims:
 
 #%%****************************************************************************
 #************************sub-class definition**********************************
-class InputHipimsSub(InputHipims):
-    """object for each section, child class of InputHipims
+class InputModelSub(InputModel):
+    """object for each section, child class of InputModel
 
     Attributes:
         sectionNO: the serial number of each section
@@ -1073,19 +1073,19 @@ class InputHipimsSub(InputHipims):
     """
     section_id = 0
     def __init__(self, dem_array, header, case_folder, num_of_sections):
-        self.section_id = InputHipimsSub.section_id
-        InputHipimsSub.section_id = self.section_id+1
+        self.section_id = InputModelSub.section_id
+        InputModelSub.section_id = self.section_id+1
         dem_data = Raster(array=dem_array, header=header)
         super().__init__(dem_data, num_of_sections, case_folder)
 
 #%%****************************************************************************
 #********************************Static method*********************************
 def load_input_object(filename):
-    """load object from a dictionary and return as an InputHipims object
+    """load object from a dictionary and return as an InputModel object
     Args:
         filename: a string giving the object file name
     Return: 
-        An object of InputHipims
+        An object of InputModel
     """
     obj_dict = indep_f.load_object(filename)
     
@@ -1096,7 +1096,7 @@ def load_input_object(filename):
         obj_dict.pop('DEM')
     else:
         raise ValueError(filename+' has no key: DEM')
-    obj_in = InputHipims(dem_data=obj_dem,
+    obj_in = InputModel(dem_data=obj_dem,
                          num_of_sections=obj_dict['num_of_sections'],
                          case_folder=obj_dict['_case_folder'])
     

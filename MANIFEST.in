@@ -1,2 +1,2 @@
 include README.rst CMakeLists.txt
-recursive-include pypims *.py *.cu *.cc *.h *.cuh CMakeLists.txt *.gz *.png *.npy *.asc *.csv
+recursive-include synxflow *.py *.cu *.cc *.h *.cuh CMakeLists.txt *.gz *.png *.npy *.asc *.csv

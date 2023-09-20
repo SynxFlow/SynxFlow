@@ -70,20 +70,21 @@ class build_ext(build_ext_orig):
 
 version = {}
 _here = os.path.abspath(os.path.dirname(__file__))
-_this_package = 'pypims'
+_this_package = 'synxflow'
 with open(os.path.join(_here, _this_package, 'version.py')) as f:
     exec(f.read(), version)
 
 setup(
-    name='pypims',
+    name='synxflow',
     version=version['__version__'],
     author='Xilin Xia',
-    author_email='x.xia2@lboro.ac.uk',
+    author_email='x.xia.1@bham.ac.uk',
     packages=find_packages(),
-    ext_modules=[CMakeExtension('pypims/apps/cudaFloodSolversPybind/cuda_flood_solvers_pybind')],
+    ext_modules=[CMakeExtension('synxflow/apps/cudaFloodSolversPybind/cuda_debris_flow_solver_pybind'),
+                 CMakeExtension('synxflow/apps/cudaDebrisFlowSolverPybind/cuda_flood_solvers_pybind')],
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
-    description='Python APIs for hipims',
+    description='Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment',
     cmdclass={
         'build_ext': build_ext,
     },
@@ -96,15 +97,15 @@ setup(
         'Programming Language :: C++',
         'Intended Audience :: Science/Research'
     ],
-    install_requires=['numpy',
-                        'scipy',
+    install_requires=['numpy==1.23.5',
+                        'scipy==1.10.1',
                         'matplotlib',
                         'imageio',
-                        'pandas',
+                        'pandas==1.5.3',
                         'rasterio',
                         'pyshp',
                         'fiona'],
-    package_data={'pypims.IO': ['sample/Example_DEM.asc',
+    package_data={'synxflow.IO': ['sample/Example_DEM.asc',
                             'sample/DEM.gz',
                             'sample/landcover.gz',
                             'sample/rain_mask.gz',

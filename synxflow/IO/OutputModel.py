@@ -4,11 +4,11 @@
 # Created on Wed Apr  1 23:46:54 2020
 # Author: Xiaodong Ming
 """
-OutputHipims
+OutputModel
 ============
 
 To do:
-    Process output files from HiPIMS
+    Process output files
 
 ----------------------
 
@@ -22,8 +22,8 @@ from . import spatial_analysis as sp
 from .Raster import Raster
 from .Summary import Summary
 from .indep_functions import save_as_dict, _create_io_folders, load_object
-class OutputHipims:
-    """To read and analyze otuput files from a HiPIMS flood model
+class OutputModel:
+    """To read and analyze otuput files from a flood model
 
     Attributes:
         case_folder: (str) the absolute path of the case folder
@@ -45,7 +45,7 @@ class OutputHipims:
     """  
     def __init__(self, input_obj=None, case_folder=None,
                  num_of_sections=1, header_file_tag=None):
-        """Initialize the object with a InputHiPIMS object or a case folder and
+        """Initialize the object with a InputModel object or a case folder and
             the number of sections
 
         Args:
@@ -86,7 +86,7 @@ class OutputHipims:
                 self.input_folder = input_folder
         else:
             raise IOError('The first argument (input_obj) must be '
-                          'a InputHipims object')
+                          'a InputModel object')
 
     def read_gauges_file(self, file_tag='h', compressed=False):
         """ Read gauges files for time seires of values at the monitored gauges
@@ -316,20 +316,20 @@ class OutputHipims:
     
 #%% =======================Supporting functions===============================
 def load_output_object(filename):
-    """load object from a dictionary and return as an OutputHipims object
+    """load object from a dictionary and return as an OutputModel object
     
     Args:
         filename: a string giving the object file name
     Return: 
-        An object of OutputHipims
+        An object of OutputModel
     """
     obj_dict = load_object(filename)
-    if type(obj_dict) is OutputHipims:
+    if type(obj_dict) is OutputModel:
         obj_out = obj_dict
     elif type(obj_dict) is dict:
-        obj_out = OutputHipims(obj_dict)
+        obj_out = OutputModel(obj_dict)
     else:
-        raise ValueError(filename+' should store either a dict or OutputHipims'
+        raise ValueError(filename+' should store either a dict or OutputModel'
                          ' object')
     return obj_out
     

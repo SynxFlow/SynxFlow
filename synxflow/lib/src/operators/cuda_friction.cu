@@ -365,24 +365,43 @@ namespace GC{
         auto hU_ = hU[index];
         auto hU_advection_ = hU_advection[index];
         Scalar h_small = 1e-10;
-        if (h_ < h_small){
+        if (h_ <= h_small){
           hU[index] = hU[index] +dt*hU_advection_;
         }
         else{
           //updating velocity rather than discharge
 // Iterative fully implicit scheme
+/*          Vector2 U_ = hU_ / h_;
           Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
-          Vector2 U_ = hU_ / h_;
           Vector2 acc_ = hU_advection_ / h_;
           Vector2 U_1 = ManningNewton(acc_, C_f, dt, U_);
-          hU[index] = U_1*h_;
+          hU[index] = U_1*h_;            */
 // Non-iterative fully-implicit scheme
- /*       Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
+/*        Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
           Vector2 m_ = hU[index] + dt*hU_advection_;
           Vector2 U_ = m_ / h_;
           Scalar vel = norm(U_);
           Scalar alpha = (1.0 - sqrt(1.0 + 4.0*dt*C_f*vel)) / (1e-10 - 2.0*dt*C_f*vel);
           hU[index] = alpha*m_; */
+// Non-iterative fully-implicit scheme with limitation on Manning's n
+          Vector2 m_ = hU_ + dt*hU_advection_;
+          Vector2 U_ = m_ / h_;
+          Scalar vel = norm(U_);
+          //-------- Increasing manning ----------
+          Scalar manning_cri = manning_;
+          if (vel > 15.0){
+            manning_cri = sqrt(1.0/((1e-10+dt)*g_*pow(h_, -4.0 / 3.0)*vel));
+          }
+          manning_ = fmax(manning_cri, manning_); 
+//-------- End increasing manning ------
+          Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
+          Scalar alpha;
+          if (2.0*dt*C_f*vel >= 1e-10){
+            alpha = (1.0 - sqrt(1.0 + 4.0*dt*C_f*vel)) / (-2.0*dt*C_f*vel);
+          }else{
+            alpha = 1.0;
+          }
+          hU[index] = alpha*m_;
 // Point implicit version 1 (Song et al. 2011)
           /* Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
           Vector2 m_ = hU[index] + dt*hU_advection_;
@@ -673,7 +692,7 @@ namespace GC{
 
     }
 
-    __global__ void cuFrictionManningMCImplicitKernel(Scalar* gravity, Scalar* manning_coeff, Scalar* friction_coeff, Scalar* h, Scalar* hC, Vector* hU, Vector* hU_advection, Scalar rho_water, Scalar rho_solid, Scalar dt, unsigned int size){
+    __global__ void cuFrictionManningMCImplicitKernel(Scalar* gravity, Scalar* manning_coeff, Scalar* friction_coeff, Scalar* h, Scalar* hC, Vector* hU, Vector* hU_advection, Scalar rho_water, Scalar rho_solid, Scalar porosity, Scalar dt, unsigned int size){
 
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
       while (index < size){
@@ -690,17 +709,26 @@ namespace GC{
         }
         else{
           // ---- Manning step ----
-          Scalar C_ = hC_ / h_;
-          Scalar rho_mix = rho_solid*C_ + rho_water*(1.0 - C_);
+          //// changing manning's n ad-hoc to 
+          //Scalar h_f = h_ - hC_ / (1 - porosity);
           //updating velocity rather than discharge
-          Scalar C_f = g_*manning_*manning_*pow(h_, -4.0 / 3.0);
+          //Scalar C_f = rho_water/rho_mix*g_*manning_*manning_*pow(h_f, -1.0 / 3.0)/h_; //make some changes herein
           Vector2 U_ = hU_ / h_;
+          Scalar vel = norm(U_);
+          Scalar manning_cri = manning_;
+          if (vel > 15.0){
+            manning_cri = sqrt(1.0/((1e-10+dt)*g_*pow(h_, -4.0 / 3.0)*vel));
+          }
+          manning_ = fmax(manning_cri, manning_); 
+          Scalar C_f = g_*manning_*manning_*pow(h_, -1.0 / 3.0)/h_;
           Vector2 acc_ = hU_advection_ / h_;
           Vector2 U_1 = ManningNewton(acc_, C_f, dt, U_);
           hU_ = U_1*h_;
           // ---- Mohr-Coulomb step ----
           Vector2 _friction_force = 0.0;
           U_ = hU_ / h_;
+          Scalar C_ = hC_ / h_;
+          Scalar rho_mix = rho_solid*C_ + rho_water*(1.0 - C_);
           if (norm(U_) <= 1e-6){
             _friction_force = 0.0;
           }
@@ -711,13 +739,14 @@ namespace GC{
           if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
             _friction_force = -1.0 / dt*hU_;
           }
-          hU[index] = hU_ + _friction_force*dt;
+          hU_ = hU_ + _friction_force*dt;
+          hU[index] = hU_;
         }
         index += blockDim.x * gridDim.x;
       }
     }
 
-    void cuFrictionManningMCImplicit(Scalar dt, Scalar rho_water, Scalar rho_solid, cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& friction_coeff, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Vector, on_cell>& hU_advection){
+    void cuFrictionManningMCImplicit(Scalar dt, Scalar porosity, Scalar rho_water, Scalar rho_solid, cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& friction_coeff, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Vector, on_cell>& hU_advection){
 
       cuFrictionManningMCImplicitKernel << <BLOCKS_PER_GRID, THREADS_PER_BLOCK >> > (
         gravity.data.dev_ptr(), 
@@ -729,6 +758,7 @@ namespace GC{
         hU_advection.data.dev_ptr(),
         rho_water,
         rho_solid,
+        porosity,
         dt, 
         h.data.size());
 

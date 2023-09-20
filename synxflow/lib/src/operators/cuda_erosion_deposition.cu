@@ -130,6 +130,7 @@ namespace GC{
         Scalar rho_mix = rho_water*(1 - C) + rho_solid*C;
         Scalar rho_0 = rho_water*porosity + rho_solid*(1.0 - porosity);
         Vector2 mom_correction_ = -1.0*(rho_solid - rho_water)*g*pow(h_, 2.0) / rho_mix / 2.0*C_grad_ - (rho_0 - rho_mix) / rho_mix / (1.0 - porosity)*ED_rate_*U;
+        //Vector2 mom_correction_ = -1.0*(rho_solid - rho_water)*g*pow(h_, 2.0) / rho_mix / 2.0*C_grad_ - rho_0  / rho_mix / (1.0 - porosity)*ED_rate_*U;
         mom_correction[index] = mom_correction_;
         index += blockDim.x * gridDim.x;
       }
@@ -153,7 +154,7 @@ namespace GC{
 
     }
 
-    __global__ void cuEDTakahashiIversonXiaKernel(Scalar* gravity, Scalar* h, Vector* hU, Scalar* hC, Scalar* manning_coeff, Scalar* miu_dynamic, Scalar* miu_static, Scalar* ED_rate, Scalar rho_solid, Scalar rho_water, Scalar porosity, Scalar dim_mid, unsigned int size){
+    __global__ void cuEDTakahashiIversonXiaKernel(Scalar* gravity, Scalar* h, Vector* hU, Scalar* hC, Scalar* manning_coeff, Scalar* miu_dynamic, Scalar* miu_static, Scalar* ED_rate, Scalar rho_solid, Scalar rho_water, Scalar porosity, Scalar dim_mid, Scalar alpha, Scalar beta, Scalar dt, unsigned int size){
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
       while (index < size){
         Scalar g = gravity[index];
@@ -166,6 +167,7 @@ namespace GC{
         Scalar miu_dynamic_ = miu_dynamic[index];
         Scalar miu_static_ = miu_static[index];
         Scalar small_value = 1e-10;
+        // ---- calculate force using velocity from the Manning step ----
         if (h_ < small_value){
           C_ = 0.0;
           U_ = 0.0;
@@ -176,33 +178,57 @@ namespace GC{
         }
         Scalar rho_mix = rho_water*(1.0 - C_) + rho_solid*C_;
         Scalar tau = 0.0;
+        Scalar h_fluid = h_ - hC_/(1.0-porosity);
         if (h_ > dim_mid){
           tau = rho_mix*g*pow(manning_, 2.0)*pow(h_, -1.0 / 3.0)*dot(U_,U_) + (rho_solid - rho_water)*hC_*g*miu_dynamic_;
         }
         else{
           tau = 0.0;
         }
-        Scalar tau_0 = (rho_solid - rho_water)*hC_*g*miu_static_;
-        Scalar rho_bed = porosity*rho_water + (1.0 - porosity)*rho_solid;
-        Scalar _E_rate = 0.0;
-        Scalar _D_rate = 0.0;
-        if(tau > tau_0){
-          _E_rate = (tau - tau_0)*(1.0 - porosity) / (rho_bed*fmax(norm(U_),0.1));
-          _D_rate = 0.0;
-        }else{
-          _E_rate = 0.0;
-          _D_rate = (tau - tau_0)*(1.0 - porosity) / (rho_bed*fmax(norm(U_),0.1));
+  //      if (hC_ < 0.0){
+  //        printf("%f\n", hC_);
+  //      }
+        // ---- Mohr-Couloumb step ----
+        Vector2 _friction_force = 0.0;
+        if (norm(U_) <= 1e-6){
+          _friction_force = 0.0;
         }
-        Scalar _ED_rate = _E_rate + _D_rate;
-        //if(index == 27475){
-        //  printf("%f %f %f\n", _ED_rate, hC_, C_);
-        //}
+        else{
+          _friction_force = -1.0*(rho_solid - rho_water) / rho_mix*g*hC_*miu_dynamic_*U_ / norm(U_);
+        }
+        ////constrain friction force
+        if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
+          _friction_force = -1.0 / dt*hU_;
+        }
+        hU_ = hU_ + _friction_force*dt;
+        // ---- Calculate ED rate ----
+        if (h_ < small_value){
+          U_ = 0.0;
+        }
+        else{
+          U_ = hU_ / h_;
+        }
+        Scalar vel = norm(U_);
+        Scalar coeff = (rho_solid - rho_water)*g*(1.0-porosity)*miu_static_;
+        Scalar tau_0 = (rho_solid - rho_water)*g*hC_*miu_static_;
+        Scalar tau_1 = h_fluid*coeff;
+        Scalar rho_bed = porosity*rho_water + (1.0 - porosity)*rho_solid;
+        Scalar ED_coeff = 0.0;
+        if(tau > tau_0){
+          ED_coeff = alpha;
+        }else{
+          ED_coeff = beta;
+        }
+        vel = vel/ED_coeff;
+        Scalar _h = (h_*rho_bed*vel+dt*(tau+tau_1))/(rho_bed*vel+dt*coeff);
+        Scalar _ED_rate = (_h - h_)*(1.0 - porosity)/dt;
         ED_rate[index] = _ED_rate;
+        hU[index] = hU_;
         index += blockDim.x * gridDim.x;
       }
     }
 
-    void cuEDTakahashiIversonXia(cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& miu_dynamic, cuFvMappedField<Scalar, on_cell>& miu_static, cuFvMappedField<Scalar, on_cell>& ED_rate, Scalar rho_solid, Scalar rho_water, Scalar porosity, Scalar dim_mid){
+    void cuEDTakahashiIversonXia(cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& miu_dynamic, cuFvMappedField<Scalar, on_cell>& miu_static, cuFvMappedField<Scalar, on_cell>& ED_rate, Scalar rho_solid, Scalar rho_water, Scalar porosity, Scalar alpha, Scalar beta, Scalar dt, Scalar dim_mid) {
 
       cuEDTakahashiIversonXiaKernel << <BLOCKS_PER_GRID, THREADS_PER_BLOCK >> >(
         gravity.data.dev_ptr(),
@@ -217,6 +243,9 @@ namespace GC{
         rho_water,
         porosity,
         dim_mid,
+        alpha,
+        beta,
+        dt,
         h.data.size()
         );
 

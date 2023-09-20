@@ -90,7 +90,7 @@ class Summary:
         self.params_attr = summary_dict['params_attr']
     
     def __setup_from_object(self, obj_in):
-        """Setup from a InputHipims object
+        """Setup from a InputModel object
         """
         
         dem_array = obj_in.DEM.array

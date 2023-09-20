@@ -17,13 +17,13 @@ To do:
 import os
 import pkg_resources
 import numpy as np
-from .InputHipims import InputHipims
-from .OutputHipims import OutputHipims
+from .InputModel import InputModel
+from .OutputModel import OutputModel
 from .Raster import Raster
 
 def demo_input(num_of_sections=1, set_example_inputs=True,
                figname=None, dpi=200, **kwargs):
-    """ A demonstration to generate a hipims input object
+    """ A demonstration to generate a Model input object
     
     Args:
         set_example_inputs: (True|False) if True, initial condition, boundary 
@@ -34,7 +34,7 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
     """
     dem_file = pkg_resources.resource_filename(__name__,
                                              'sample/DEM.gz')
-    obj_in = InputHipims(dem_data=dem_file, num_of_sections=num_of_sections)
+    obj_in = InputModel(dem_data=dem_file, num_of_sections=num_of_sections)
     if set_example_inputs:
         __set_defaul_input(obj_in)
     # show model summary print(obj_in)
@@ -46,7 +46,7 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
     return obj_in
 
 def demo_output(case_folder, num_of_sections=1):
-    """ A demonstration to generate a hipims output object
+    """ A demonstration to generate a Model output object
 
     Args:
         case_folder: (string) path to case folder
@@ -55,7 +55,7 @@ def demo_output(case_folder, num_of_sections=1):
     Note:
         a input folder and files must be created before using this function
     """
-    obj_out = OutputHipims(case_folder=case_folder,
+    obj_out = OutputModel(case_folder=case_folder,
                            num_of_sections=num_of_sections)
     return obj_out
 
@@ -103,7 +103,7 @@ def get_sample_data():
     
 # =============private functions==================
 def __set_defaul_input(obj_in):
-    """Set some default values for an InputHipims object
+    """Set some default values for an InputModel object
     """
     # load data for the demo
     _, demo_data, _ = get_sample_data()

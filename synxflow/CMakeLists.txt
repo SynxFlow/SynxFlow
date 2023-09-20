@@ -43,5 +43,5 @@ message("pybind11 : "${pybind11_sources_SOURCE_DIR})
 
 add_subdirectory(lib)
 add_subdirectory(apps/cudaFloodSolversPybind)
-#add_subdirectory(apps/cudaMultiGPUsFloodSolver)
+add_subdirectory(apps/cudaDebrisFlowSolverPybind)
 #add_subdirectory(apps/cudaIntegratedShallowFlowSolver)

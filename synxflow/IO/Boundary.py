@@ -7,7 +7,7 @@ Boundary
 ========
 
 To do:
-    * Define boundary conditions for hipims model
+    * Define boundary conditions for the model
 
 -----------
 
@@ -130,7 +130,7 @@ class Boundary(object):
     def _fetch_boundary_cells(self, valid_subs, outline_subs, dem_header):
         """ To get the subsripts and id of boundary cells on the domain grid
         
-        valid_subs, outline_subs, dem_header are from hipims object
+        valid_subs, outline_subs, dem_header are from model object
             _valid_cell_subs, _outline_cell_subs
         cell_subs: (tuple)subscripts of outline boundary cells
         cell_id: (numpy vector)valid id of outline boundary cells
@@ -202,17 +202,17 @@ class Boundary(object):
                     print('Theta = '+'{:.2f}'.format(theta/np.pi*180)+'degree')
         self.hU_sources = self.data_table['hUSources']
 
-    def _divide_domain(self, hipims_obj):
+    def _divide_domain(self, model_obj):
         """ Create Boundary objects for each sub-domain
         
-        IF hipims_obj has sub sections
+        IF model_obj has sub sections
         """
-        boundary_list = hipims_obj.Boundary.boundary_list
-        outline_boundary = hipims_obj.Boundary.outline_boundary
-        header_global = hipims_obj.header
-        outline_subs = hipims_obj._outline_cell_subs
-        for i in range(hipims_obj.num_of_sections):
-            obj_section = hipims_obj.Sections[i]
+        boundary_list = model_obj.Boundary.boundary_list
+        outline_boundary = model_obj.Boundary.outline_boundary
+        header_global = model_obj.header
+        outline_subs = model_obj._outline_cell_subs
+        for i in range(model_obj.num_of_sections):
+            obj_section = model_obj.Sections[i]
             header_local = obj_section.header
             # convert global subscripts to local
             outline_subs_local = _cell_subs_convertor(

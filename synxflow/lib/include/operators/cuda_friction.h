@@ -58,7 +58,7 @@ namespace GC{
   
     void cuFrictionManningSteepImplicit(Scalar dt, cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Vector, on_cell>& hU_advection, cuFvMappedField<Vector, on_cell>& z_grad);
   
-    void cuFrictionManningMCImplicit(Scalar dt, Scalar rho_water, Scalar rho_solid, cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& friction_coeff, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Vector, on_cell>& hU_advection);
+    void cuFrictionManningMCImplicit(Scalar dt, Scalar porosity, Scalar rho_water, Scalar rho_solid, cuFvMappedField<Scalar, on_cell>& gravity, cuFvMappedField<Scalar, on_cell>& manning_coeff, cuFvMappedField<Scalar, on_cell>& friction_coeff, cuFvMappedField<Scalar, on_cell>& h, cuFvMappedField<Scalar, on_cell>& hC, cuFvMappedField<Vector, on_cell>& hU, cuFvMappedField<Vector, on_cell>& hU_advection);
   }//end of namespace fv
 
 }//end of namespace GC
