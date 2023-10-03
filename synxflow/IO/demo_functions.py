@@ -72,7 +72,7 @@ def demo_raster(figname=None):
     ax.set_title('The Upper Lee catchment DEM (mAOD)')
     return obj_ras
 
-def get_sample_data():
+def get_sample_data(case_type = 'flood'):
     """ Get sample data for demonstartion
 
     Returns:
@@ -81,24 +81,31 @@ def get_sample_data():
             gauges_pos data
         data_path: string the path of sample data
     """
-    data_path = pkg_resources.resource_filename(__name__, 'sample')
-    dem_file = os.path.join(data_path, 'DEM.gz')
-    demo_data = {
-        'boundary_condition': [
-            {'polyPoints': np.array([[1427, 195],
-                                 [1446, 243]]),
-             'type': 'open',
-             'hU': [[0, 30], [60, 20]]},
-            {'polyPoints': np.array([[58, 1645],
-                                 [72, 1170]]),
-             'type': 'open',
-             'h': [[0, 10], [60, 10]]}],
-        'rain_source': np.array([[0, 2.77777778e-06],
-                                 [1800, 2.77777778e-05],
-                                 [3600, 0]]),
-        'gauges_pos': np.array([[300, 1600],
-                                [400, 1200]])
-    }
+    if case_type == 'flood':
+        data_path = pkg_resources.resource_filename(__name__, 'sample')
+        data_path = os.path.join(data_path, 'flood')
+        dem_file = os.path.join(data_path,'DEM.gz')
+        demo_data = {
+            'boundary_condition': [
+                {'polyPoints': np.array([[1427, 195],
+                                    [1446, 243]]),
+                'type': 'open',
+                'hU': [[0, 30], [60, 20]]},
+                {'polyPoints': np.array([[58, 1645],
+                                    [72, 1170]]),
+                'type': 'open',
+                'h': [[0, 10], [60, 10]]}],
+            'rain_source': np.array([[0, 2.77777778e-06],
+                                    [1800, 2.77777778e-05],
+                                    [3600, 0]]),
+            'gauges_pos': np.array([[300, 1600],
+                                    [400, 1200]])
+        }
+    elif case_type == 'debris':
+        data_path = pkg_resources.resource_filename(__name__, 'sample')
+        data_path = os.path.join(data_path, 'debris')
+        dem_file = os.path.join(data_path, 'DEM.txt')
+        demo_data = {}
     return dem_file, demo_data, data_path
     
 # =============private functions==================

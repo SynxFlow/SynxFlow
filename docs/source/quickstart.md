@@ -4,13 +4,13 @@
 
 You will have to set up your Python environment as a first step. There are several ways of doing it, but [Anaconda](https://www.anaconda.com/products/distribution) is a highly recommended way. 
 
-Before installing pypims, you also need to install [Cmake](https://cmake.org/download/), NVIDIA CUDA Toolkit and the C++ compiler. Cmake can be simply installed by
+Before installing synxflow, you also need to install [Cmake](https://cmake.org/download/), NVIDIA CUDA Toolkit and the C++ compiler. Cmake can be simply installed by
 
 ```shell
 pip install cmake
 ```
 
-Pypims needs NVIDIA GPUs which support CUDA to run the simulations, therefore you need the GPU and the CUDA Toolkit. The CUDA Toolkit can be downloaded from the [NVIDIA website](https://developer.nvidia.com/cuda-downloads). If you use Linux system, the C++ compiler 'GCC' is usually on the system as default. If you use windows, you should download and install [Visual Studio](https://visualstudio.microsoft.com/vs/).
+synxflow needs NVIDIA GPUs which support CUDA to run the simulations, therefore you need the GPU and the CUDA Toolkit. The CUDA Toolkit can be downloaded from the [NVIDIA website](https://developer.nvidia.com/cuda-downloads). If you use Linux system, the C++ compiler 'GCC' is usually on the system as default. If you use windows, you should download and install [Visual Studio](https://visualstudio.microsoft.com/vs/).
 
 #### Installing on Linux
 
@@ -25,10 +25,10 @@ For example
 export CUDAToolkit_ROOT=/usr/local/cuda-10.1
 ```
 
-Once the aforementioned dependencies have been properly installed. Installing pypims is straightforward, simple type in the following in your terminal
+Once the aforementioned dependencies have been properly installed. Installing synxflow is straightforward, simple type in the following in your terminal
 
 ```shell
-pip install pypims
+pip install synxflow
 ```
 
 #### Installing on Windows
@@ -43,31 +43,31 @@ python -m pip install <path to downloaded wheel>
 
 'rasterio' and 'fiona' need to be installed following similar steps.
 
-The next step is to download the source code of pypims from [Github](https://github.com/pypims/pypims). This can also be done by
+The next step is to download the source code of synxflow from [Github](https://github.com/synxflow/synxflow). This can also be done by
 
 ```shell
-git clone https://github.com/pypims/pypims.git
+git clone https://github.com/synxflow/synxflow.git
 ```
 
-After finishing downloading, go to the folder of the pypims source code and run the following command
+After finishing downloading, go to the folder of the synxflow source code and run the following command
 
 ```shell
 python setup.py install
 ```
-Now you should have pypims successfully installed on your computer.
+Now you should have synxflow successfully installed on your computer.
 
 ### Running a simulation with the example
 
 The flood simulation engine can be imported by
 
 ```python
-from pypims import flood
+from synxflow import flood
 ```
 
-The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). This package has already been included as part of pypims, you can import it by
+The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). This package has already been included as part of synxflow, you can import it by
 
 ```python
-from pypims import IO
+from synxflow import IO
 ```
 A quick demonstration to prepare input files with attached sample data contaning the following files:
 - DEM.gz/.asc/.tif (essential file, in projected crs, map unit:m)
@@ -77,7 +77,7 @@ A quick demonstration to prepare input files with attached sample data contaning
 
 ```python
 import os
-from pypims.IO.demo_functions import demo_input
+from synxflow.IO.demo_functions import demo_input
 obj_in = demo_input() # create input object
 obj_in.write_input_files() # create all input files
 ```

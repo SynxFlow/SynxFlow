@@ -1,17 +1,17 @@
-.. pypims documentation master file, created by
+.. synxflow documentation master file, created by
    sphinx-quickstart on Sun Jun 28 22:59:12 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pypims's documentation
+Welcome to synxflow's documentation
 =================================
 
-Pypims: A python-based integrated toolchain for high-performance flood simulation and data processing.
+SynxFlow: Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment554080
 
 
 .. toctree::
    :caption: Table of Content:
-
+775075
    about
    quickstart
 
