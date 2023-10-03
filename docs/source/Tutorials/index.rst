@@ -5,3 +5,4 @@ Tutorials
    :maxdepth: 2
 
    flood.ipynb
+   debris.ipynb

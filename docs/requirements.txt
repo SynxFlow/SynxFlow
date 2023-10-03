@@ -9,3 +9,4 @@ pyshp
 sphinx>=4.1
 sphinx-rtd-theme>=1.0.0
 nbsphinx
+myst-parser

@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('../../pypims'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'pypims'
-copyright = '2023, Xilin Xia, Xiaodong Ming, Qiuhua Liang'
+project = 'synxflow'
+copyright = 'SynxFlow authors'
 author = 'Xilin Xia, Xiaodong Ming, Qiuhua Liang'
 
 # The full version, including alpha/beta/rc tags
@@ -31,7 +31,7 @@ release = '0.0.3.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 
-            'recommonmark', 'sphinx.ext.napoleon',
+            'myst_parser', 'sphinx.ext.napoleon',
             'sphinx_rtd_theme','nbsphinx',]
 
 # Napoleon settings
