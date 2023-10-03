@@ -12,17 +12,17 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../pypims'))
+sys.path.insert(0, os.path.abspath('../../synxflow'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'synxflow'
 copyright = 'SynxFlow authors'
-author = 'Xilin Xia, Xiaodong Ming, Qiuhua Liang'
+author = 'SynxFlow authors'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.3.1'
+release = '0.0.4.0'
 
 
 # -- General configuration ---------------------------------------------------

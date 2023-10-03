@@ -33,7 +33,7 @@ def demo_input(num_of_sections=1, set_example_inputs=True,
 
     """
     dem_file = pkg_resources.resource_filename(__name__,
-                                             'sample/DEM.gz')
+                                             'sample/flood/DEM.gz')
     obj_in = InputModel(dem_data=dem_file, num_of_sections=num_of_sections)
     if set_example_inputs:
         __set_defaul_input(obj_in)
