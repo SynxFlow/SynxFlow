@@ -64,7 +64,7 @@ The flood simulation engine can be imported by
 from synxflow import flood
 ```
 
-The inputs can be prepared by [hipims-io](https://pypi.org/project/hipims-io/). This package has already been included as part of synxflow, you can import it by
+The IO package for processing inputs and outputs can be imported by
 
 ```python
 from synxflow import IO
