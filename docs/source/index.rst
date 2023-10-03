@@ -6,12 +6,12 @@
 Welcome to synxflow's documentation
 =================================
 
-SynxFlow: Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment554080
+SynxFlow: Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment
 
 
 .. toctree::
    :caption: Table of Content:
-775075
+
    about
    quickstart
 
