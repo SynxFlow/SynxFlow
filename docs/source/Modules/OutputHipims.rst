@@ -1,2 +1,0 @@
-.. automodule :: IO.OutputHipims
-   :members:

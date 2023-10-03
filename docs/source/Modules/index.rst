@@ -5,8 +5,8 @@ API documentation
     :maxdepth: 2
 
     demo_functions
-    InputHipims
-    OutputHipims
+    InputModel
+    OutputModel
     Boundary
     Landcover
     Raster

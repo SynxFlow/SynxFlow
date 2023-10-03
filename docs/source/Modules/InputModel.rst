@@ -1,0 +1,3 @@
+
+.. automodule :: IO.InputModel
+   :members:
