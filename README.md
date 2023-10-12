@@ -2,7 +2,7 @@
 
 ## What the software can do
 
-This software can dynamically simulate flood inundation, landslides runout and debris flows using CUDA-enabled GPUs.
+This software can dynamically simulate flood inundation and debris flows using CUDA-enabled GPUs.
 
 ## Using the model
 
