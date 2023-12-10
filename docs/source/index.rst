@@ -6,7 +6,7 @@
 Welcome to synxflow's documentation
 =================================
 
-SynxFlow: Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment
+SynxFlow: Synergising High-Performance Hazard Simulation with Data Flow
 
 
 .. toctree::
