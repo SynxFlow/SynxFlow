@@ -6,15 +6,15 @@ This software can dynamically simulate flood inundation, landslides runout and d
 
 ## Using the model
 
-Full documentation and tutorials can be found [here](https://synxflow.readthedocs.io)
+For how to install and use the model, please visit [here](https://synxflow.readthedocs.io)
 
 ## Running the model on Google Colab
 
 The tutorials can also run on Google Colab by using one of the following links
 
-[Run a flood simulation](https://colab.research.google.com/drive/1ujrdzuEeFOZ1L_iETmu4G97HiZQpOb2o?usp=sharing)
+[Click me to run a flood simulation](https://colab.research.google.com/drive/1ujrdzuEeFOZ1L_iETmu4G97HiZQpOb2o?usp=sharing)
 
-[Run a debris flow simulation](https://colab.research.google.com/drive/1xz-CqSVJBH_nyFZSRVagRVHZ2dcXiFI-?usp=sharing)
+[Click me to run a debris flow simulation](https://colab.research.google.com/drive/1xz-CqSVJBH_nyFZSRVagRVHZ2dcXiFI-?usp=sharing)
 
 
 ## Acknowledgment
