@@ -23,6 +23,6 @@ The SynxFlow authors have many years' experiences of developing and applying hyd
 
 #### What if I have trouble using the model?
 
-If you encounter any issues or have questions, feel free to leave a comment on our [Github](https://github.com/SynxFlow/SynxFlow/issues) page. We are always happy to answer any questions.
+If you encounter any issues or have questions, feel free to leave a comment on our [Github](https://github.com/SynxFlow/SynxFlow/discussions) discussions page. We are always happy to answer any questions.
 
 
