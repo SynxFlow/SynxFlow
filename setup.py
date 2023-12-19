@@ -81,7 +81,8 @@ setup(
     author_email='x.xia.1@bham.ac.uk',
     packages=find_packages(),
     ext_modules=[CMakeExtension('synxflow/apps/cudaFloodSolversPybind/cuda_debris_flow_solver_pybind'),
-                 CMakeExtension('synxflow/apps/cudaDebrisFlowSolverPybind/cuda_flood_solvers_pybind')],
+                 CMakeExtension('synxflow/apps/cudaDebrisFlowSolverPybind/cuda_flood_solvers_pybind'),
+                 CMakeExtension('synxflow/apps/cudaLandslideSolverPybind/cuda_landslide_solver_pybind')],
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
     description='Simulating Mass Movement and Flood Inundation for Multi-hazard Risk Assessment',
@@ -93,7 +94,7 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: C++',
         'Intended Audience :: Science/Research'
     ],
@@ -110,5 +111,7 @@ setup(
                             'sample/flood/rain_mask.gz',
                             'sample/flood/rain_source.csv',
                             'sample/debris/DEM.txt',
-                            'sample/debris/Erosion.txt'],},
+                            'sample/debris/Erosion.txt',
+                            'sample/landslide/dem.gz',
+                            'sample/landslide/depth.gz'],},
 )

@@ -682,7 +682,7 @@ void single_run(cuDataBank& bank, std::vector<int> device_list, unsigned int dom
 
 int run_mgpus(const char* work_dir){
 
-  printf("Welcome using HiPIMs, now enjoy the power of multiple GPUs!\n");
+  printf("Welcome using SynxFlow, now enjoy the power of multiple GPUs!\n");
 
   if(cd(work_dir) == -1){
     printf("The working directory does not exist!/n");

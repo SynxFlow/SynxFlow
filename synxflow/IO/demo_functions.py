@@ -106,6 +106,11 @@ def get_sample_data(case_type = 'flood'):
         data_path = os.path.join(data_path, 'debris')
         dem_file = os.path.join(data_path, 'DEM.txt')
         demo_data = {}
+    elif case_type == 'landslide':
+        data_path = pkg_resources.resource_filename(__name__, 'sample')
+        data_path = os.path.join(data_path, 'landslide')
+        dem_file = os.path.join(data_path, 'DEM.txt')
+        demo_data = {}
     return dem_file, demo_data, data_path
     
 # =============private functions==================

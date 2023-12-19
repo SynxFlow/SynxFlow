@@ -618,6 +618,38 @@ class InputModel:
         indep_f.write_device_setup(self._case_folder, self.num_of_sections,
                                    device_no)
 
+    def write_landslide_config(self, rheology_type = 1, rheology_params = [0.5, 0, 2000], gravity_correction_type = 0, curvature_on = False, filter_mass_flux = False):
+        """
+        Write the configuration values only to a file, based on provided parameters.
+        :param filename: The name of the file to write to.
+        :param rheology_type: Type of rheology (1, 2, or 3)
+        :param rheology_params: Parameters specific to the rheology type
+        :param gravity_correction_type: Type of gravity correction
+        :param curvature_on: Boolean indicating if curvature is on
+        :param filter_mass_flux: Boolean indicating if mass flux filtering is on
+        """
+        filename = os.path.join(self._case_folder, 'input','setup.conf')
+        with open(filename, 'w') as file:
+            print("[Type of rheology]", file=file)
+            print(rheology_type, file=file)
+            print("[Parameter values]", file=file)
+            if rheology_type == 1:
+                _miu, _cohesion, _rho = rheology_params
+                print(f"{_miu} {_cohesion} {_rho}", file=file)
+            elif rheology_type == 2:
+                _miu1, _miu2, _L, _beta = rheology_params
+                print(f"{_miu1} {_miu2} {_L} {_beta}", file=file)
+            elif rheology_type == 3:
+                _miu1, _miu2, _U = rheology_params
+                print(f"{_miu1} {_miu2} {_U}", file=file)
+
+            print("[Gravity correction type]", file=file)
+            print(gravity_correction_type, file=file)
+            print("[Consider curvature effect or not]", file=file)
+            print(str(curvature_on).lower(), file=file)
+            print("[Filter mass flux or not]", file=file)
+            print(str(filter_mass_flux).lower(), file=file)
+
     def save_object(self, file_name):
         """ Save object as a pickle file
         """
