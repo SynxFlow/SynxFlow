@@ -628,7 +628,10 @@ class InputModel:
         :param curvature_on: Boolean indicating if curvature is on
         :param filter_mass_flux: Boolean indicating if mass flux filtering is on
         """
-        filename = os.path.join(self._case_folder, 'input','setup.conf')
+        directory = os.path.join(self._case_folder, 'input')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filename = os.path.join(directory,'setup.conf')
         with open(filename, 'w') as file:
             print("[Type of rheology]", file=file)
             print(rheology_type, file=file)

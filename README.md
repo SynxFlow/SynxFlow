@@ -14,6 +14,8 @@ The tutorials can also run on Google Colab by using one of the following links
 
 [Click me to run a flood simulation](https://colab.research.google.com/drive/1ujrdzuEeFOZ1L_iETmu4G97HiZQpOb2o?usp=sharing)
 
+[Click me to run a landslide runout simulation](https://colab.research.google.com/drive/1D_Y0-NOyNBuDAKISqiPtGClNe5mRybsF?usp=sharingg)
+
 [Click me to run a debris flow simulation](https://colab.research.google.com/drive/1xz-CqSVJBH_nyFZSRVagRVHZ2dcXiFI-?usp=sharing)
 
 

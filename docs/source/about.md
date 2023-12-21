@@ -2,7 +2,7 @@
 
 ### SynxFlow: Synergising High-Performance Hazard Simulation with Data Flow
 
-SynxFlow is an open-source model capable of dynamically simulating flood inundation and debris flows using CUDA-enabled GPUs. It features a user-friendly yet versatile Python interface and seamlessly integrates with tools such as Numpy, Pandas, and GDAL for efficient processing of inputs, simulation execution, and output visualisation. With the acceleration of modern GPUs, SynxFlow can complete large-scale simulations in just minutes, making it an ideal solution for integrating into data science workflows to streamline and accelerate natural hazard risk assessment, empowering both research and business applications.
+SynxFlow is an open-source model capable of dynamically simulating flood inundation, landslide runout, and debris flows using CUDA-enabled GPUs. It features a user-friendly yet versatile Python interface and seamlessly integrates with tools such as Numpy, Pandas, and GDAL for efficient processing of inputs, simulation execution, and output visualisation. With the acceleration of modern GPUs, SynxFlow can complete large-scale simulations in just minutes, making it an ideal solution for integrating into data science workflows to streamline and accelerate natural hazard risk assessment, empowering both research and business applications.
 
 ### Frequently Asked Questions
 
@@ -18,6 +18,8 @@ Thinking about the complexities of software installation, data preparation, or t
 The SynxFlow authors have many years' experiences of developing and applying hydrodynamic models. The algothims used in the model are highly efficient and robust, using Godonov-type shock-capturing metheds for solving shallow water based equations. The numerical methods in the model are documented in the following papers.
 
 [Reference for the flood model](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016WR020055)
+
+[Reference for the landslide runout model](https://www.sciencedirect.com/science/article/pii/S0013795217306324)
 
 [Reference for the debris flow model](https://www.sciencedirect.com/science/article/pii/S0013795223003289)
 
