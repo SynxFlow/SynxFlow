@@ -18,7 +18,7 @@
 
 namespace GC{
 
-typedef double Scalar;
+typedef float Scalar;
 
 }
 

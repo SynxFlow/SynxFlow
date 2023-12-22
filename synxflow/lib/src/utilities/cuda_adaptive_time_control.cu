@@ -130,7 +130,7 @@ namespace GC{
     cuUpdateByCFLReduceKernel2 << <1, threadsPerBlock >> >(dt_array_ptr->data.dev_ptr(), dt_array_ptr->data.size());
 //    dt_ = thrust::reduce(thrust::device_ptr <Scalar> (dt_array_ptr->data.dev_ptr()), thrust::device_ptr <Scalar> (dt_array_ptr->data.dev_ptr() + dt_array_ptr->data.size()),(Scalar) 3e35, thrust::minimum<Scalar>());
     checkCuda(cudaMemcpy(&dt_, dt_array_ptr->data.dev_ptr(), sizeof(Scalar), cudaMemcpyDeviceToHost));
-    dt_ = std::min(dt_, 60.0); //maximum time step is 1 minite
+    dt_ = std::min(dt_, (Scalar)60.0); //maximum time step is 1 minite
   }
 
   bool cuAdaptiveTimeControl2D::is_end(){

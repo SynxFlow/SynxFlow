@@ -64,7 +64,7 @@ namespace GC{
         //Scalar v_settling = sqrt(pow(13.95*visc / dim_mid, 2.0) + 1.09*g*(rho_solid-rho_water)/rho_water*dim_mid) - 13.95*visc / dim_mid;
         //Scalar L_sat = hC_/(1-0.42)*norm(U) / v_settling; //Xia
         //L_sat = fmax(8.0*h_, L_sat);
-        L_sat = fmax(5.0*dim_mid, L_sat);
+        L_sat = fmax((Scalar)5.0*dim_mid, L_sat);
         Scalar ED_rate_ = (qb_sat - norm(hU_)*C) / L_sat;
         Scalar hC_sat = 0.0;
         if (norm(U) > 0.0){

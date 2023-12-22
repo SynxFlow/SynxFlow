@@ -101,7 +101,7 @@ namespace GC{
         auto h_ = h[index];
         auto hU_ = hU[index];
         auto z_grad_ = z_grad[index];
-        auto miu = friction_coeff1 + friction_coeff2*h_ / wall_width / sqrt(1.0 + dot(z_grad_, z_grad_));
+        auto miu = friction_coeff1 + friction_coeff2*h_ / wall_width / sqrt((Scalar)1.0 + dot(z_grad_, z_grad_));
 		//if (g >= 8.0*9.81 || g <= 0.2*9.81){
         //  printf("miu %d %f %f %f \n", index, miu, h_, g);
         //}

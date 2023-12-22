@@ -86,8 +86,8 @@ namespace GC{
                   Scalar h_neib = *(h_begin + id_neib);
                   Scalar z_neib = *(z_begin + id_neib);
                   Scalar z_face = std::max(z_this, z_neib);
-                  Scalar h_L = std::max(h_this + z_this - z_face, 0.0);
-                  Scalar h_R = std::max(h_neib + z_neib - z_face, 0.0);
+                  Scalar h_L = std::max(h_this + z_this - z_face, (Scalar)0.0);
+                  Scalar h_R = std::max(h_neib + z_neib - z_face, (Scalar)0.0);
                   Scalar volume_neib = *(cell_volume_begin + id_neib);
                   Vector2 hU_neib = *(hU_begin + id_neib);
                   if(h_neib == 0.0){
@@ -120,8 +120,8 @@ namespace GC{
                 Scalar h_bound = GetBoundary(h_boundary_type, h_this, normal);
                 Scalar z_bound = GetBoundary(z_boundary_type, z_this, normal);
                 Scalar z_face = std::max(z_this, z_bound);
-                Scalar h_L = std::max(h_this + z_this - z_face, 0.0);
-                Scalar h_R = std::max(h_bound + z_bound - z_face, 0.0);
+                Scalar h_L = std::max(h_this + z_this - z_face, (Scalar)0.0);
+                Scalar h_R = std::max(h_bound + z_bound - z_face, (Scalar)0.0);
                 Vector2 hU_bound = GetBoundary(hU_boundary_type, hU_this, normal);
                 if(h_bound == 0.0){
                   u_bound = 0.0;

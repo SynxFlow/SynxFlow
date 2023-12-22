@@ -37,8 +37,8 @@ namespace GC{
         auto z_gradient_ = *(z_gradient_begin + id);
         auto h_gradient_ = *(h_gradient_begin + id);
         auto gravity_ = *(gravity_begin + id);
-        auto new_gravity = gravity_/(1.0 + dot(z_gradient_, z_gradient_ + h_gradient_));
-        new_gravity = std::max(0.0, std::min(gravity_,new_gravity));
+        auto new_gravity = gravity_/((Scalar)1.0 + dot(z_gradient_, z_gradient_ + h_gradient_));
+        new_gravity = std::max((Scalar)0.0, std::min(gravity_,new_gravity));
         *modified_gravity_iter = new_gravity;
       }
       return buffer;

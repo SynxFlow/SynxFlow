@@ -38,7 +38,7 @@ namespace GC{
         ratio = upwind/downwind;
       }
 
-      ratio = std::max( 0.0, std::min(1.0, ratio));
+      ratio = std::max( (Scalar)0.0, std::min((Scalar)1.0, ratio));
       return ratio;
     }
 

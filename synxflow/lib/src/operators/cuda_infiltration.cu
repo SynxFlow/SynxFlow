@@ -75,8 +75,8 @@ namespace GC{
         culmulative_depth[index] += delta_F;
         Scalar h1 = _h - delta_F + (_precipitation - _sewer_sink)*delta_t;
         Scalar h2 = _h - delta_F - _sewer_sink*delta_t;
-        h[index] = fmax(h1, 0.0);
-        hU[index] = fmax(h2, 0.0)*U;
+        h[index] = fmax(h1, (Scalar)0.0);
+        hU[index] = fmax(h2, (Scalar)0.0)*U;
         index += blockDim.x * gridDim.x;
       }
 

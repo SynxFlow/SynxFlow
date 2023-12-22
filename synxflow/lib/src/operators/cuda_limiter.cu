@@ -30,7 +30,7 @@ namespace GC{
 
   namespace fv{
 
-    __device__ void NonSimplex(unsigned int index, double standard_matrix[][3], unsigned int M, double &L_x, double &L_y){
+    __device__ void NonSimplex(unsigned int index, Scalar standard_matrix[][3], unsigned int M, Scalar &L_x, Scalar &L_y){
       unsigned int h = M - 2;
       unsigned int k = M - 1; //indices for the initial working set, e.g. L_x >= 0, L_y >= 0
       unsigned int to_remove = 0;
@@ -113,7 +113,7 @@ namespace GC{
     //This kernel only supports cell with maximumly 4 faces and 2D problem
     __global__ void cuGradientLimiterKernelNonSimplex(Scalar* phi_data, Scalar* _phi_bound, unsigned int phi_size, Flag* cell_neigbours_dimensions, ShortDualHandle* cell_neigbours, unsigned int cell_neighbours_length, Vector2* cell_centres, Flag* cell_halffacets, unsigned int cell_halffacets_length, Vector2* face_centres, Vector2* face_normals, Vector2* phi_gradient, unsigned int phi_gradient_size){
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
-      double standard_matrix[13][3];
+      Scalar standard_matrix[13][3];
       while (index < phi_size){
         Flag cell_neigbours_number = cell_neigbours_dimensions[index];
         unsigned int M = cell_neigbours_number * 2 + 4; //four constraints plus 4 extra ones
@@ -194,7 +194,7 @@ namespace GC{
     //This kernel only supports cell with maximumly 4 faces and 2D problem
     __global__ void cuGradientLimiterKernelNonSimplex(Vector2* phi_data, Vector2* _phi_bound, unsigned int phi_size, Flag* cell_neigbours_dimensions, ShortDualHandle* cell_neigbours, unsigned int cell_neighbours_length, Vector2* cell_centres, Flag* cell_halffacets, unsigned int cell_halffacets_length, Vector2* face_centres, Vector2* face_normals, Tensor2* phi_gradient, unsigned int phi_gradient_size){
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
-      double standard_matrix[13][3];
+      Scalar standard_matrix[13][3];
       while (index < phi_size){
         Flag cell_neigbours_number = cell_neigbours_dimensions[index];
         unsigned int M = cell_neigbours_number * 2 + 4; //four constraints plus 2 extra ones
@@ -344,9 +344,9 @@ namespace GC{
     }
 
 
-    __device__ void pivot(double standard_matrix[][3], unsigned int M, unsigned int i, unsigned int j){
+    __device__ void pivot(Scalar standard_matrix[][3], unsigned int M, unsigned int i, unsigned int j){
       
-      double a_ij = standard_matrix[i][j];
+      Scalar a_ij = standard_matrix[i][j];
       for(unsigned int h = 0; h < M; ++h){
         for(unsigned int k = 0; k < 3; ++k){
           if(h != i && k != j){
@@ -369,7 +369,7 @@ namespace GC{
     }
 
     
-    __device__ void simplex(double standard_matrix[][3], unsigned int M, ShortDualFlag x_vector[], ShortDualFlag y_vector[], ShortDualFlag x_pos[], double &L_x, double &L_y){
+    __device__ void simplex(Scalar standard_matrix[][3], unsigned int M, ShortDualFlag x_vector[], ShortDualFlag y_vector[], ShortDualFlag x_pos[], Scalar &L_x, Scalar &L_y){
       
       //avoiding very small numbers
       for(int i = 0; i < 11; i++){
@@ -381,7 +381,7 @@ namespace GC{
       }
 
       while(true){
-        double b_min = standard_matrix[0][2];
+        Scalar b_min = standard_matrix[0][2];
         for(unsigned int i = 0; i < M; ++i){
           if(standard_matrix[i][2] < b_min){
             b_min = standard_matrix[i][2];
@@ -389,7 +389,7 @@ namespace GC{
         }
         if(b_min >= 0){  // b >= 0
           unsigned int k = 0;
-          double c_min, c_1, c_2;
+          Scalar c_min, c_1, c_2;
           c_1 = standard_matrix[M][0];
           c_2 = standard_matrix[M][1];
           if(c_1 <= c_2){
@@ -416,10 +416,10 @@ namespace GC{
           }else{// try to pivot
             //find smallest positive b_i/a_ij
             unsigned int h = 0;
-            double ba_min = 1e15;
+            Scalar ba_min = 1e15;
             for(unsigned int i = 0; i < M; ++i){
-              double a_ik = standard_matrix[i][k];
-              double b_i = standard_matrix[i][2];
+              Scalar a_ik = standard_matrix[i][k];
+              Scalar b_i = standard_matrix[i][2];
               if(a_ik > 0){
                 if(b_i/a_ik < ba_min){
                   h = i;
@@ -460,10 +460,10 @@ namespace GC{
               break;
             }
           }
-          double ba_min = standard_matrix[h][2]/standard_matrix[h][k];
+          Scalar ba_min = standard_matrix[h][2]/standard_matrix[h][k];
           for(unsigned int i = 0; i < M; i++){
-            double a_ik = standard_matrix[i][k];
-            double b_i = standard_matrix[i][2];
+            Scalar a_ik = standard_matrix[i][k];
+            Scalar b_i = standard_matrix[i][2];
             if(a_ik > 0 && b_i >= 0){
               if(b_i/a_ik < ba_min){
                 h = i;
@@ -495,7 +495,7 @@ namespace GC{
     //This kernel only supports cell with maximumly 4 faces and 2D problem
     __global__ void cuGradientLimiterKernelSimplex(Scalar* phi_data, Scalar* _phi_bound, unsigned int phi_size, Flag* cell_neigbours_dimensions, ShortDualHandle* cell_neigbours, unsigned int cell_neighbours_length, Vector2* cell_centres, Flag* cell_halffacets, unsigned int cell_halffacets_length, Vector2* face_centres, Vector2* face_normals, Vector2* phi_gradient, unsigned int phi_gradient_size){
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
-      double standard_matrix[11][3];
+      Scalar standard_matrix[11][3];
       while(index < phi_size){
         Flag cell_neigbours_number = cell_neigbours_dimensions[index];
         unsigned int M = cell_neigbours_number*2 + 2; //four constraints plus 2 extra ones
@@ -562,8 +562,8 @@ namespace GC{
         standard_matrix[M][0] = c_x; //Obj = sum|(D_x*u_xi)|*L_x + sum|(D_y*u_yi)|*L_x
         standard_matrix[M][1] = c_y; 
         standard_matrix[M][2] = 0.0;
-        double L_x = 1.0;
-        double L_y = 1.0;
+        Scalar L_x = 1.0;
+        Scalar L_y = 1.0;
         __syncthreads();
         simplex(standard_matrix, M, x_vector, y_vector, x_pos, L_x, L_y);
         _gradient.x *= L_x;
@@ -577,7 +577,7 @@ namespace GC{
     //This kernel only supports cell with maximumly 4 faces and 2D problem
     __global__ void cuGradientLimiterKernelSimplex(Vector2* phi_data, Vector2* _phi_bound, unsigned int phi_size, Flag* cell_neigbours_dimensions, ShortDualHandle* cell_neigbours, unsigned int cell_neighbours_length, Vector2* cell_centres, Flag* cell_halffacets, unsigned int cell_halffacets_length, Vector2* face_centres, Vector2* face_normals, Tensor2* phi_gradient, unsigned int phi_gradient_size){
       unsigned int index = blockDim.x * blockIdx.x + threadIdx.x;
-      double standard_matrix[11][3];
+      Scalar standard_matrix[11][3];
       while(index < phi_size){
         Flag cell_neigbours_number = cell_neigbours_dimensions[index];
         unsigned int M = cell_neigbours_number*2 + 2; //four constraints plus 2 extra ones
@@ -651,8 +651,8 @@ namespace GC{
         standard_matrix[M][0] = c_x; //Obj = sum|(D_x*u_xi)|*L_x + sum|(D_y*u_yi)|*L_x
         standard_matrix[M][1] = c_y; 
         standard_matrix[M][2] = 0.0;
-        double L_x = 0.0;
-        double L_y = 0.0;
+        Scalar L_x = 0.0;
+        Scalar L_y = 0.0;
         __syncthreads();
         simplex(standard_matrix, M, x_vector, y_vector, x_pos, L_x, L_y);
         _gradient.xx *= L_x;
@@ -770,7 +770,7 @@ namespace GC{
         ratio = upwind / downwind;
       }
 
-      ratio = fmax(0.0, fmin(1.0, ratio));
+      ratio = fmax((Scalar)0.0, fmin((Scalar)1.0, ratio));
       return ratio;
     }
 

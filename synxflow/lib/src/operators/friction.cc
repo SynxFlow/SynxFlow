@@ -48,7 +48,7 @@ namespace GC{
         auto hU_ = *(hU_begin + id);
         auto A = *(A_begin + id);
         auto b = *(b_begin + id);
-        auto dt = 1.0/A;
+        auto dt = (Scalar)1.0/A;
         auto a = b - hU_/dt;
         *friction_iter = friction_formula(g, miu, h_, hU_, a, dt);
       }

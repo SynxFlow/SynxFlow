@@ -205,12 +205,12 @@ namespace GC{
             dz_clip = 0.0;
           }
           Scalar dz = z_neib - z_this - dz_clip;
-          Scalar deta_this = fmax(0.0, fmin(dz, eta_neib - eta_this));
-          Scalar deta_neib = fmax(0.0, fmin(-dz, - eta_neib + eta_this));
+          Scalar deta_this = fmax((Scalar)0.0, fmin(dz, eta_neib - eta_this));
+          Scalar deta_neib = fmax((Scalar)0.0, fmin(-dz, - eta_neib + eta_this));
           Scalar eta_L = eta_this + deta_this;
           Scalar eta_R = eta_neib + deta_neib;
-          Scalar h_L = fmax(0.0, eta_L - z_f);
-          Scalar h_R = fmax(0.0, eta_R - z_f);
+          Scalar h_L = fmax((Scalar)0.0, eta_L - z_f);
+          Scalar h_R = fmax((Scalar)0.0, eta_R - z_f);
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar g = 0.5*(g_this + g_neib);
@@ -224,10 +224,10 @@ namespace GC{
           }
           Vector2 _hU_flux = (flux.q.x*normal + flux.q.y*shear);
           if (h_neib < h_small){
-            delta_z = fmax(0.0, z_f - eta_this);
+            delta_z = fmax((Scalar)0.0, z_f - eta_this);
           }
           else{
-            delta_z = fmax(0.0, fmin(dz_clip, z_f - eta_this));
+            delta_z = fmax((Scalar)0.0, fmin(dz_clip, z_f - eta_this));
           }
           z_f -= delta_z;
           Vector2 _z_flux = 0.5*g*(h_L + h_this)*(z_f - z_this)*normal;

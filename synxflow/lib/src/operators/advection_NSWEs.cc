@@ -130,8 +130,8 @@ namespace GC{
               Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
               Scalar grav = (g_this + g_neib)/2.0;
               Scalar z_face = std::max(_z_this, _z_neib);
-              Scalar h_L = std::max(_h_this + _z_this - z_face, 0.0);
-              Scalar h_R = std::max(_h_neib + _z_neib - z_face, 0.0);
+              Scalar h_L = std::max(_h_this + _z_this - z_face, (Scalar)0.0);
+              Scalar h_R = std::max(_h_neib + _z_neib - z_face, (Scalar)0.0);
               Vector2 u_L(dot(_u_this, normal),dot(_u_this, shear));
               Vector2 u_R(dot(_u_neib, normal),dot(_u_neib, shear));
               auto flux = hllcRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -162,8 +162,8 @@ namespace GC{
             Scalar z_bound = *(z_boundary_value_begin + id_boundary);
             Scalar grav = (g_this + g_bound)/2.0;
             Scalar z_face = std::max(_z_this, z_bound);
-            Scalar h_L = std::max(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = std::max(h_bound + z_bound - z_face, 0.0);
+            Scalar h_L = std::max(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = std::max(h_bound + z_bound - z_face, (Scalar)0.0);
             Vector2 hU_bound = *(hU_boundary_value_begin + id_boundary);
             Vector2 u_bound;
             if(fabs(h_bound) < small_value){

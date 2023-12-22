@@ -81,8 +81,8 @@ namespace GC{
             Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
             Scalar grav = (g_this + g_neib)/2.0;
             Scalar z_face = fmax(_z_this, _z_neib);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(_h_neib + _z_neib - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(_h_neib + _z_neib - z_face, (Scalar)0.0);
             Vector2 u_L(dot(_u_this, normal),dot(_u_this, shear));
             Vector2 u_R(dot(_u_neib, normal),dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -97,8 +97,8 @@ namespace GC{
             Scalar z_bound = _z_bound[id_boundary];
             Scalar grav = (g_this + g_bound)/2.0;
             Scalar z_face = fmax(_z_this, z_bound);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(h_bound + z_bound - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(h_bound + z_bound - z_face, (Scalar)0.0);
             Vector2 u_bound = _u_bound[id_boundary];
             Vector2 u_L(dot(_u_this, normal),dot(_u_this, shear));
             Vector2 u_R(dot(u_bound, normal),dot(u_bound, shear));
@@ -171,8 +171,8 @@ namespace GC{
             Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
             Scalar grav = (g_this + g_neib) / 2.0;
             Scalar z_face = fmax(_z_this, _z_neib);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(_h_neib + _z_neib - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(_h_neib + _z_neib - z_face, (Scalar)0.0);
             Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
             Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -189,8 +189,8 @@ namespace GC{
             Vector2 _u_bound = u_bound[id_boundary];
             Scalar grav = (g_this + g_bound) / 2.0;
             Scalar z_face = fmax(_z_this, _z_bound);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(_h_bound + _z_bound - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(_h_bound + _z_bound - z_face, (Scalar)0.0);
             Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
             Vector2 u_R(dot(_u_bound, normal), dot(_u_bound, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -251,7 +251,7 @@ namespace GC{
             Scalar _eta_neib = eta_neib + dot(grad_eta_neib, direction_neib);
             Scalar _z_neib = _eta_neib - _h_neib;
             Scalar z_face = fmax(_z_this, _z_neib);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
             H[i] = h_L;
           }
           else{
@@ -259,8 +259,8 @@ namespace GC{
             Scalar h_bound = _h_bound[id_boundary];
             Scalar z_bound = _z_bound[id_boundary];
             Scalar z_face = fmax(_z_this, z_bound);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(h_bound + z_bound - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(h_bound + z_bound - z_face, (Scalar)0.0);
             H[i] = h_L;
           }
         }
@@ -351,8 +351,8 @@ namespace GC{
               Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
               Scalar grav = (g_this + g_neib) / 2.0;
               Scalar z_face = fmax(_z_this, _z_neib);
-              Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-              Scalar h_R = fmax(_h_neib + _z_neib - z_face, 0.0);
+              Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+              Scalar h_R = fmax(_h_neib + _z_neib - z_face, (Scalar)0.0);
               Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
               Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
               auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -372,8 +372,8 @@ namespace GC{
             Scalar z_bound = _z_bound[id_boundary];
             Scalar grav = (g_this + g_bound) / 2.0;
             Scalar z_face = fmax(_z_this, z_bound);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(h_bound + z_bound - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(h_bound + z_bound - z_face, (Scalar)0.0);
             Vector2 u_bound = _u_bound[id_boundary];
             Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
             Vector2 u_R(dot(u_bound, normal), dot(u_bound, shear));
@@ -484,7 +484,7 @@ namespace GC{
           Vector2 _hU_flux = (flux.q.x*normal + flux.q.y*shear)*X_f;
           Vector2 _z_flux = -0.5*g*eta_this*eta_f*(X_f - X_this)*normal;
           _h_advection += _h_flux*area / volume_this;
-          _h_advection_constraint += fmax(0.0, _h_flux)*area / volume_this;
+          _h_advection_constraint += fmax((Scalar)0.0, _h_flux)*area / volume_this;
           _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
         }
         h_advection[index] = _h_advection;
@@ -583,8 +583,8 @@ namespace GC{
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar z_f = fmax(z_this, z_neib);
-          Scalar h_L = fmax(0.0, h_this + z_this - z_f);
-          Scalar h_R = fmax(0.0, h_neib + z_neib - z_f);
+          Scalar h_L = fmax((Scalar)0.0, h_this + z_this - z_f);
+          Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
           Vector2 _z_flux = -0.5*g*h_L*h_L*normal;
@@ -678,8 +678,8 @@ namespace GC{
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar z_f = fmax(z_this, z_neib);
-          Scalar h_L = fmax(0.0, h_this + z_this - z_f);
-          Scalar h_R = fmax(0.0, h_neib + z_neib - z_f);
+          Scalar h_L = fmax((Scalar)0.0, h_this + z_this - z_f);
+          Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
           Vector2 _z_flux = -0.5*g*h_L*h_L*normal;
@@ -789,12 +789,12 @@ namespace GC{
             u_neib = hU_neib / h_neib;
           }
           Scalar Tr_neib = sqrt(g*h_neib)/(2.0*g*pow(manning_neib,2)*norm(u_neib)*pow(h_neib,-4.0/3.0))/area;          
-          Scalar Tr = fmin(1.0, (Tr_this + Tr_neib)*0.5);
+          Scalar Tr = fmin((Scalar)1.0, (Tr_this + Tr_neib)*(Scalar)0.5);
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar z_f = fmax(z_this, z_neib);
-          Scalar h_L = fmax(0.0, h_this + z_this - z_f);
-          Scalar h_R = fmax(0.0, h_neib + z_neib - z_f);
+          Scalar h_L = fmax((Scalar)0.0, h_this + z_this - z_f);
+          Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           auto flux_relaxation = cuLaxFriedrichsRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));          
           Scalar _h_flux = (1.0 - Tr)*flux_relaxation.h + Tr*flux.h;
@@ -912,12 +912,12 @@ namespace GC{
             dz_clip = 0.0;
           }
           Scalar dz = z_neib - z_this - dz_clip;
-          Scalar deta_this = fmax(0.0, fmin(dz, eta_neib - eta_this));
-          Scalar deta_neib = fmax(0.0, fmin(-dz, - eta_neib + eta_this));
+          Scalar deta_this = fmax((Scalar)0.0, fmin(dz, eta_neib - eta_this));
+          Scalar deta_neib = fmax((Scalar)0.0, fmin(-dz, - eta_neib + eta_this));
           Scalar eta_L = eta_this + deta_this;
           Scalar eta_R = eta_neib + deta_neib;
-          Scalar h_L = fmax(0.0, eta_L - z_f);
-          Scalar h_R = fmax(0.0, eta_R - z_f);
+          Scalar h_L = fmax((Scalar)0.0, eta_L - z_f);
+          Scalar h_R = fmax((Scalar)0.0, eta_R - z_f);
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar g = 0.5*(g_this + g_neib);
@@ -925,10 +925,10 @@ namespace GC{
           Scalar _h_flux = flux.h;
           Vector2 _hU_flux = (flux.q.x*normal + flux.q.y*shear);
           if (h_neib < h_small){
-            delta_z = fmax(0.0, z_f - eta_this);
+            delta_z = fmax((Scalar)0.0, z_f - eta_this);
           }
           else{
-            delta_z = fmax(0.0, fmin(dz_clip, z_f - eta_this));
+            delta_z = fmax((Scalar)0.0, fmin(dz_clip, z_f - eta_this));
           }
           z_f -= delta_z;
           Vector2 _z_flux = 0.5*g*(h_L + h_this)*(z_f - z_this)*normal;
@@ -1042,12 +1042,12 @@ namespace GC{
             dz_clip = 0.0;
           }
           Scalar dz = z_neib - z_this - dz_clip;
-          Scalar deta_this = fmax(0.0, fmin(dz, eta_neib - eta_this));
-          Scalar deta_neib = fmax(0.0, fmin(-dz, -eta_neib + eta_this));
+          Scalar deta_this = fmax((Scalar)0.0, fmin(dz, eta_neib - eta_this));
+          Scalar deta_neib = fmax((Scalar)0.0, fmin(-dz, -eta_neib + eta_this));
           Scalar eta_L = eta_this + deta_this;
           Scalar eta_R = eta_neib + deta_neib;
-          Scalar h_L = fmax(0.0, eta_L - z_f);
-          Scalar h_R = fmax(0.0, eta_R - z_f);
+          Scalar h_L = fmax((Scalar)0.0, eta_L - z_f);
+          Scalar h_R = fmax((Scalar)0.0, eta_R - z_f);
           Vector2 u_L(dot(u_this, normal), dot(u_this, shear));
           Vector2 u_R(dot(u_neib, normal), dot(u_neib, shear));
           Scalar g = 0.5*(g_this + g_neib);
@@ -1055,10 +1055,10 @@ namespace GC{
           Scalar _h_flux = flux.h;
           Vector2 _hU_flux = (flux.q.x*normal + flux.q.y*shear);
           if (h_neib < h_small){
-            delta_z = fmax(0.0, z_f - eta_this);
+            delta_z = fmax((Scalar)0.0, z_f - eta_this);
           }
           else{
-            delta_z = fmax(0.0, fmin(dz_clip, z_f - eta_this));
+            delta_z = fmax((Scalar)0.0, fmin(dz_clip, z_f - eta_this));
           }
           z_f -= delta_z;
           Scalar eta_f = z_f + h_L;
@@ -1141,8 +1141,8 @@ namespace GC{
             Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
             Scalar grav = (g_this + g_neib) / 2.0;
             Scalar z_face = fmax(_z_this, _z_neib);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(_h_neib + _z_neib - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(_h_neib + _z_neib - z_face, (Scalar)0.0);
             Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
             Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
@@ -1158,8 +1158,8 @@ namespace GC{
             Scalar z_bound = _z_bound[id_boundary];
             Scalar grav = (g_this + g_bound) / 2.0;
             Scalar z_face = fmax(_z_this, z_bound);
-            Scalar h_L = fmax(_h_this + _z_this - z_face, 0.0);
-            Scalar h_R = fmax(h_bound + z_bound - z_face, 0.0);
+            Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
+            Scalar h_R = fmax(h_bound + z_bound - z_face, (Scalar)0.0);
             Vector2 u_bound = _u_bound[id_boundary];
             Vector2 u_L(dot(_u_this, normal), dot(_u_this, shear));
             Vector2 u_R(dot(u_bound, normal), dot(u_bound, shear));
