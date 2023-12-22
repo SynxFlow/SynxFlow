@@ -364,9 +364,9 @@ int run(const char* work_dir){
     hU.update_boundary_values();
 
     //constraining erosion deposition rate
-    fv::cuBinary(ED_rate, hC, ED_rate, [=] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmax(a, -1.0*b / dt); });
+    fv::cuBinary(ED_rate, hC, ED_rate, [=] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmax(a, (Scalar)-1.0*b / dt); });
     //fv::cuBinary(ED_rate, hC, ED_rate, [=] __device__(Scalar& a, Scalar& b) -> Scalar { return fmax(a, 0.0); });
-    fv::cuBinary(ED_rate, erodible_depth, ED_rate, [=] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin(a, b*(1.0 - porosity) / dt); });
+    fv::cuBinary(ED_rate, erodible_depth, ED_rate, [=] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin(a, b*((Scalar)1.0 - porosity) / dt); });
     
     //calculate the concentration
     fv::cuBinary(hC, h, C, divide_scalar);

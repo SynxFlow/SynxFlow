@@ -373,7 +373,7 @@ int run(const char* work_dir){
     if (curvature_on){
       fv::cuBinary(u, z_hessian, centrifugal, [] __device__(Vector& a, Tensor& b) -> Scalar{ return dot(dot(b, a), a); });
       fv::cuBinary(z_grad, centrifugal, centrifugal, [] __device__(Vector& a, Scalar& b) -> Scalar{ return b / (1.0 + dot(a, a)); });
-      fv::cuBinary(gravity, centrifugal, centrifugal, [] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin(10.0*a, fmax(-0.9*a, b)); });
+      fv::cuBinary(gravity, centrifugal, centrifugal, [] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin((Scalar)10.0*a, fmax((Scalar)-0.9*a, b)); });
     }
 
     //calculate advection
@@ -433,7 +433,7 @@ int run(const char* work_dir){
       //calculate centrifugal force
       fv::cuBinary(u, z_hessian, centrifugal, [] __device__(Vector& a, Tensor& b) -> Scalar{ return dot(dot(b, a), a); });
       fv::cuBinary(z_grad, centrifugal, centrifugal, [] __device__(Vector& a, Scalar& b) -> Scalar{ return b / (1.0 + dot(a, a)); });
-      fv::cuBinary(gravity, centrifugal, centrifugal, [] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin(10.0*a, fmax(-0.9*a, b)); });
+      fv::cuBinary(gravity, centrifugal, centrifugal, [] __device__(Scalar& a, Scalar& b) -> Scalar{ return fmin((Scalar)10.0*a, fmax((Scalar)-0.9*a, b)); });
     }
 
     //calculate advection
