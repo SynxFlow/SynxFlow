@@ -48,7 +48,7 @@ def mapshow(raster_obj=None, array=None, header=None, ax=None, figname=None,
         array = raster_obj.array
         header = raster_obj.header
     # change NODATA_value to nan
-    np.warnings.filterwarnings('ignore')
+    #np.warnings.filterwarnings('ignore')
     array = array+0
     ind = array == header['NODATA_value']
     if ind.sum()>0:
