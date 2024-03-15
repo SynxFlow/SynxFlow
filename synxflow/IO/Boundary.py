@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: Xiaodong Ming
+# @Date:   2024-03-14 09:21:13
+# @Last Modified by:   Xiaodong Ming
+# @Last Modified time: 2024-03-14 14:31:31
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Author: Xiaodong Ming
@@ -243,20 +248,23 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
     if outline_boundary == 'fall':
         hSources = np.array([[0, 0], [1, 0]])
         hUSources = np.array([[0, 0, 0], [1, 0, 0]])
-        data_table = data_table.append({'type':'fall', 'extent':None,
-                                        'hSources':hSources,
-                                        'hUSources':hUSources},
-                                       ignore_index=True)
+        new_row = pd.DataFrame({'type':['fall'], 
+                                'extent':[None],
+                                'hSources':[hSources],
+                                'hUSources':[hUSources]})
     elif outline_boundary == 'rigid':
-        data_table = data_table.append({'type':'rigid', 'extent':None,
-                                        'hSources':None, 'hUSources':None},
-                                       ignore_index=True)
+        new_row = pd.DataFrame({'type':['rigid'], 
+                                'extent':[None],
+                                'hSources':[None], 
+                                'hUSources':[None]})
     elif outline_boundary == 'open':
-        data_table = data_table.append({'type':'open', 'extent':None,
-                                        'hSources':None, 'hUSources':None},
-                                       ignore_index=True)
+        new_row = pd.DataFrame({'type':['open'], 
+                                'extent':[None],
+                                'hSources':[None],
+                                'hUSources':[None]})
     else:
         raise ValueError("outline_boundary must be fall, open or rigid!")
+    data_table = pd.concat([data_table, new_row], ignore_index=True)
     data_table.name[0] = 'Outline boundary'
     # convert boundary_list to a dataframe
     if boundary_list is None:
@@ -268,8 +276,9 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
             # set extent
         if 'polyPoints' in one_bound.keys():
             bound_extent = np.array(one_bound['polyPoints'])
-            data_table = data_table.append({'extent':bound_extent, }, 
-                                           ignore_index=True)
+            new_row = pd.DataFrame({'extent':[bound_extent]})
+            data_table = pd.concat([data_table, new_row], 
+                                    ignore_index=True)
         else:
             bound_ind = 0
             print('polyPoints is not given in boundary_list[0],'
