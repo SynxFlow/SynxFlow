@@ -198,7 +198,7 @@ class Rainfall:
         source_uniq, source_counts = np.unique(mask_valid, return_counts=True)
         num_source = source_uniq.size
         mode_value = stats.mode(source_counts)
-        spatial_res = np.sqrt(mode_value[0][0])*cellsize
+        spatial_res = np.sqrt(mode_value.mode[0])*cellsize
         cell_mean = np.mean(rain_rate_valid, axis=1)
         # total value along time axis for a cell
         rain_total = np.trapz(cell_mean, x=time_s, axis=0)*1000 # mm
