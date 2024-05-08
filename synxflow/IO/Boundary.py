@@ -453,5 +453,9 @@ def _get_array_value_by_rc(end_xy, dem_obj):
     except:
         end_value = np.nan
     if end_value == dem_obj.header['NODATA_value']:
-        end_value == np.nan
+        end_value = np.nan
+    nrows = dem_obj.header['nrows']
+    ncols = dem_obj.header['ncols']
+    if rc_num[0] < 0 or rc_num[0] >= nrows or rc_num[1] < 0 or rc_num[1] >= ncols:
+        end_value = np.nan
     return end_value
