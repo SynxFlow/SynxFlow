@@ -1,6 +1,6 @@
 // ====================================================================================== 
 // Author              :    Xilin Xia, University of Birmingham, x.xia.1@bham.ac.uk
-// Update Time         :    2023/09/19
+// Update Time         :    2024/08/30
 // ======================================================================================
 // LICENCE: GPLv3 
 // ======================================================================================
@@ -167,7 +167,7 @@ int run(const char* work_dir){
   fvScalarFieldOnCell z_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "z"));
   fvScalarFieldOnCell h_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "h"));
   fvVectorFieldOnCell hU_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "hU"));
-  fvScalarFieldOnCell hC_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "hC"));
+  fvScalarFieldOnCell C_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "C"));
   fvScalarFieldOnCell erodible_depth_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "erodible_depth"));
   fvScalarFieldOnCell manning_coeff_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "manning"));
   fvScalarFieldOnCell mu_dynamic_host(fvMeshQueries(mesh), completeFieldReader("input/field/", "dynamic_friction_coeff"));
@@ -178,12 +178,12 @@ int run(const char* work_dir){
 
   std::cout << "Read in field successfully" << std::endl;
 
-  //h, z, hU
+  //h, z, hU, C
   cuFvMappedField<Scalar, on_cell> z_old(z_host, mesh_ptr_dev);
   cuFvMappedField<Scalar, on_cell> z(z_host, mesh_ptr_dev);
   cuFvMappedField<Scalar, on_cell> h(h_host, mesh_ptr_dev);
   cuFvMappedField<Vector, on_cell> hU(hU_host, mesh_ptr_dev);
-  cuFvMappedField<Scalar, on_cell> hC(hC_host, mesh_ptr_dev);
+  cuFvMappedField<Scalar, on_cell> C(C_host, mesh_ptr_dev);
   cuFvMappedField<Scalar, on_cell> erodible_depth(erodible_depth_host, mesh_ptr_dev);
   cuFvMappedField<Scalar, on_cell> manning_coeff(manning_coeff_host, mesh_ptr_dev);
   cuFvMappedField<Scalar, on_cell> mu_dynamic(mu_dynamic_host, mesh_ptr_dev);
@@ -202,8 +202,8 @@ int run(const char* work_dir){
   cuFvMappedField<Scalar, on_cell> hUx(h, partial);
   cuFvMappedField<Scalar, on_cell> hUy(h, partial);
 
-  //Concentration
-  cuFvMappedField<Scalar, on_cell> C(h, partial);
+  //Solid phase depth
+  cuFvMappedField<Scalar, on_cell> hC(h, partial);
 
   //concentration gradient
   cuFvMappedField<Vector, on_cell> C_grad(hU, partial);
@@ -211,14 +211,14 @@ int run(const char* work_dir){
   //creating gauges writer
   cuGaugesWriter<Scalar, on_cell> h_writer(fvMeshQueries(mesh), h, "input/field/gauges_pos.dat", "output/h_gauges.dat");
   cuGaugesWriter<Vector, on_cell> hU_writer(fvMeshQueries(mesh), hU, "input/field/gauges_pos.dat", "output/hU_gauges.dat");
-  cuGaugesWriter<Scalar, on_cell> hC_writer(fvMeshQueries(mesh), hC, "input/field/gauges_pos.dat", "output/hC_gauges.dat");
+  cuGaugesWriter<Scalar, on_cell> C_writer(fvMeshQueries(mesh), C, "input/field/gauges_pos.dat", "output/C_gauges.dat");
 
-
+  //----Below is not needed------
   //find minimum z
-  Scalar min_z = thrust::reduce(thrust::device_ptr <Scalar>(z.data.dev_ptr()), thrust::device_ptr <Scalar>(z.data.dev_ptr() + z.data.size()), (Scalar) 3e35, thrust::minimum<Scalar>());
+  //Scalar min_z = thrust::reduce(thrust::device_ptr <Scalar>(z.data.dev_ptr()), thrust::device_ptr <Scalar>(z.data.dev_ptr() + z.data.size()), (Scalar) 3e35, thrust::minimum<Scalar>());
 
-  fv::cuUnaryOn(z, [=] __device__(Scalar& a) -> Scalar{ return a - min_z + 0.0001; });
-
+  //fv::cuUnaryOn(z, [=] __device__(Scalar& a) -> Scalar{ return a - min_z + 0.0001; });
+  //-----------------------------
   //advections
   cuFvMappedField<Scalar, on_cell> h_advection(h, partial);
   cuFvMappedField<Vector, on_cell> hU_advection(hU, partial);
@@ -297,14 +297,18 @@ int run(const char* work_dir){
     }
   };
 
-  auto divide_scalar = [] __device__(Scalar& a, Scalar& b) ->Vector{
+  auto divide_scalar = [] __device__(Scalar& a, Scalar& b) ->Scalar{
     if (b >= 1e-10){
       return a / b;
     }
     else{
-      return Vector(0.0);
+      return Scalar(0.0);
     }
   };
+
+  auto multiply_scalar = [] __device__(Scalar& a, Scalar& b) ->Scalar{
+    return a*b;
+  };  
 
   //print current time
   std::cout << time_controller.current() << std::endl;
@@ -315,6 +319,11 @@ int run(const char* work_dir){
   h.update_boundary_values();
   hU.update_time(time_controller.current(), 0.0);
   hU.update_boundary_values();
+  C.update_time(time_controller.current(), 0.0);
+  C.update_boundary_values();
+  
+  //hC for the initial step
+  fv::cuBinary(h, C, hC, multiply_scalar);
 
   //ascii raster writer
   cuGisAsciiWriter raster_writer("input/mesh/DEM.txt");
@@ -380,7 +389,7 @@ int run(const char* work_dir){
     //updating momentum
     fv::cuEulerIntegrator(hU, mom_correction, time_controller.dt(), time_controller.current());
 
-    //updating concentration
+    //updating solid phase depth
     fv::cuEulerIntegrator(hC, ED_rate, time_controller.dt(), time_controller.current());
 
     fv::cuUnaryOn(ED_rate, [=] __device__(Scalar& a) -> Scalar{ return a / (1.0 - porosity); });
@@ -407,6 +416,12 @@ int run(const char* work_dir){
     precipitation.update_data_values();
     fv::cuEulerIntegrator(h, precipitation, time_controller.dt(), time_controller.current());
 
+    //calculate the concentration, update the boundary, and then calculate hC again, so that concentration boundary condition can be applied
+    fv::cuBinary(hC, h, C, divide_scalar);
+    C.update_time(time_controller.current(), time_controller.dt());
+    C.update_boundary_values();
+    fv::cuBinary(h, C, hC, multiply_scalar);
+
 
     //forwarding the time
     time_controller.forward();
@@ -415,7 +430,7 @@ int run(const char* work_dir){
     if (cnt % 100 == 0){
         h_writer.write(time_controller.current());
         hU_writer.write(time_controller.current());
-        hC_writer.write(time_controller.current());
+        C_writer.write(time_controller.current());
     }
 //
     //h_writer.write(time_controller.current());
@@ -446,7 +461,7 @@ int run(const char* work_dir){
       fv::cuUnary(hU, hUy, [] __device__(Vector& a) -> Scalar{ return a.y; });
       raster_writer.write(hUx, "hUx", t_out);
       raster_writer.write(hUy, "hUy", t_out);
-      raster_writer.write(hC, "hC", t_out);
+      raster_writer.write(C, "C", t_out);
       t_out += dt_out;
     }
 
@@ -455,7 +470,7 @@ int run(const char* work_dir){
       cuBackupWriter(h, "h_backup_", backup_time);
       cuBackupWriter(z, "z_backup_", backup_time);
       cuBackupWriter(hU, "hU_backup_", backup_time);
-      cuBackupWriter(hC, "hC_backup_", backup_time);
+      cuBackupWriter(C, "C_backup_", backup_time);
       backup_time += backup_interval;
     }
 

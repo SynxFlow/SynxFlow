@@ -888,6 +888,8 @@ class InputModel:
                 bound_code = bound_obj.data_table.h_code[ind_num]
             elif file_tag == 'hU':
                 bound_code = bound_obj.data_table.hU_code[ind_num]
+            elif file_tag == 'C':
+                bound_code = bound_obj.data_table.C_code[ind_num]
             else:
                 bound_code = np.array([[2, 0, 0]]) # shape (1, 3)
             if bound_code.ndim < 2:
@@ -983,20 +985,21 @@ class InputModel:
 #------------------------------------------------------------------------------
 #*************** Private methods only for the parent class ********************
 #------------------------------------------------------------------------------
-    def __write_boundary_conditions(self, field_dir, file_tag='both'):
+    def __write_boundary_conditions(self, field_dir, file_tag='all'):
         """ Write boundary condition source files,if hU is given as flow
         timeseries, convert flow to hUx and hUy.
         Private function to call by public function write_boundary_conditions
-        file_tag: 'h', 'hU', 'both'
-        h_BC_[N].dat, hU_BC_[N].dat
+        file_tag: 'h', 'hU','C', 'all'
+        h_BC_[N].dat, hU_BC_[N].dat, C_BC_[N].dat
         if hU is given as flow timeseries, convert flow to hUx and hUy
         """
         obj_boundary = self.Boundary
         file_names_list = []
         fmt_h = ['%g', '%g']
         fmt_hu = ['%g', '%g', '%g']
+        fmt_c = ['%g', '%g']
         # write h_BC_[N].dat
-        if file_tag in ['both', 'h']:
+        if file_tag in ['all', 'h']:
             h_sources = obj_boundary.data_table['hSources']
             ind_num = 0
             for i in np.arange(obj_boundary.num_of_bound):
@@ -1008,7 +1011,7 @@ class InputModel:
                     ind_num = ind_num+1
                     file_names_list.append(file_name)
         # write hU_BC_[N].dat
-        if file_tag in ['both', 'hU']:
+        if file_tag in ['all', 'hU']:
             hU_sources = obj_boundary.data_table['hUSources']
             ind_num = 0
             for i in np.arange(obj_boundary.num_of_bound):
@@ -1017,6 +1020,18 @@ class InputModel:
                     file_name = os.path.join(field_dir,
                                              'hU_BC_'+str(ind_num)+'.dat')
                     np.savetxt(file_name, hU_source, fmt=fmt_hu, delimiter=' ')
+                    ind_num = ind_num+1
+                    file_names_list.append(file_name)
+        # write C_BC_[N].dat
+        if file_tag in ['all', 'C']:
+            C_sources = obj_boundary.data_table['CSources']
+            ind_num = 0
+            for i in np.arange(obj_boundary.num_of_bound):
+                C_source = C_sources[i]
+                if C_source is not None:
+                    file_name = os.path.join(field_dir,
+                                             'C_BC_'+str(ind_num)+'.dat')
+                    np.savetxt(file_name, C_source, fmt=fmt_c, delimiter=' ')
                     ind_num = ind_num+1
                     file_names_list.append(file_name)
         return file_names_list

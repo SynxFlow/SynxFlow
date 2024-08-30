@@ -242,26 +242,30 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
      'h' and 'hU' have priority to 'type'
     """
     data_table = pd.DataFrame(columns=['type', 'extent',
-                                       'hSources', 'hUSources',
-                                       'h_code', 'hU_code', 'name'])
+                                       'hSources', 'hUSources','CSources',
+                                       'h_code', 'hU_code','C_code', 'name'])
     # set default outline boundary [0]
     if outline_boundary == 'fall':
         hSources = np.array([[0, 0], [1, 0]])
         hUSources = np.array([[0, 0, 0], [1, 0, 0]])
+        CSources = np.array([[0, 0], [1, 0]])
         new_row = pd.DataFrame({'type':['fall'], 
                                 'extent':[None],
                                 'hSources':[hSources],
-                                'hUSources':[hUSources]})
+                                'hUSources':[hUSources],
+                                'CSources':[CSources]})
     elif outline_boundary == 'rigid':
         new_row = pd.DataFrame({'type':['rigid'], 
                                 'extent':[None],
                                 'hSources':[None], 
-                                'hUSources':[None]})
+                                'hUSources':[None],
+                                'CSources':[None]})
     elif outline_boundary == 'open':
         new_row = pd.DataFrame({'type':['open'], 
                                 'extent':[None],
                                 'hSources':[None],
-                                'hUSources':[None]})
+                                'hUSources':[None],
+                                'CSources':[None]})
     else:
         raise ValueError("outline_boundary must be fall, open or rigid!")
     data_table = pd.concat([data_table, new_row], ignore_index=True)
@@ -299,6 +303,12 @@ def _setup_boundary_data_table(boundary_list, outline_boundary='open'):
             bound_type = 'open'
         else:
             data_table.hUSources[bound_ind] = None
+
+        if 'C' in one_bound.keys():
+            data_table.CSources[bound_ind] = np.array(one_bound['C'])
+            bound_type = 'open'
+        else:
+            data_table.CSources[bound_ind] = None
         
         data_table.type[bound_ind] = bound_type
         if 'name' in one_bound.keys():
@@ -321,9 +331,11 @@ def _get_boundary_code(boudnary_data_table):
     n_seq = 0  # sequence of boundary
     m_h = 0  # sequence of boundary with IO source files
     m_hu = 0
+    m_c = 0
     for n_seq in range(num_of_bound):
         
         data_table.h_code[n_seq] = np.array([[2, 0, 0]])
+        data_table.C_code[n_seq] = np.array([[2, 0, 0]])
         bound_type = data_table.type[n_seq]
         if bound_type == 'rigid':
             data_table.hU_code[n_seq] = np.array([[2, 2, 0]])
@@ -331,14 +343,18 @@ def _get_boundary_code(boudnary_data_table):
         elif bound_type == 'fall':
             h_sources = np.array([[0, 0], [1, 0]])
             hU_sources = np.array([[0, 0, 0], [1, 0, 0]])
+            c_sources = np.array([[0, 0], [1, 0]])
             data_table.h_code[n_seq] = np.array([[3, 0, m_h]])
             data_table.hU_code[n_seq] = np.array([[3, 0, m_hu]])
+            data_table.C_code[n_seq] = np.array([[3, 0, m_c]])
             m_h = m_h+1
             m_hu = m_hu+1
+            m_c = m_c+1
             description1 = bound_type+', h and hU fixed as zero'
         else: # open
             h_sources = data_table.hSources[n_seq]
             hU_sources = data_table.hUSources[n_seq]
+            C_sources = data_table.CSources[n_seq]
             data_table.hU_code[n_seq] = np.array([[2, 1, 0]])
             description1 = bound_type
             if h_sources is not None:
@@ -349,6 +365,10 @@ def _get_boundary_code(boudnary_data_table):
                 data_table.hU_code[n_seq] = np.array([[3, 0, m_hu]]) #[3 0 m]
                 description1 = description1+', hU given'
                 m_hu = m_hu+1
+            if C_sources is not None:
+                data_table.C_code[n_seq] = np.array([[3, 0, m_c]]) #[3 0 m]
+                description1 = description1+', C given'
+                m_c = m_c+1
         description.append(description1)
     description[0] = '(outline) '+ description[0] # indicate outline boundary
     data_table['description'] = description
