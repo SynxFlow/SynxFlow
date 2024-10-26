@@ -32,11 +32,14 @@ release = '0.0.5.0'
 # ones.
 extensions = ['sphinx.ext.autodoc', 
             'myst_parser', 'sphinx.ext.napoleon',
-            'sphinx_rtd_theme','nbsphinx',]
+            'sphinx_rtd_theme','nbsphinx','sphinxcontrib.googleanalytics']
 
 # Napoleon settings
 napoleon_google_docstring = True
 napoleon_include_init_with_doc = True
+
+#GA settings
+googleanalytics_id = 'G-BBDGM7NX4Z'
 
 #extensions.append('rst2pdf.pdfbuilder')
 #pdf_documents = [('index', u'pypims_doc', u'Pypims documentation', u'Xilin Xia, Xiaodong Ming'),]
