@@ -1,5 +1,5 @@
 # SynxFlow: Synergising High-Performance Hazard Simulation with Data Flow
-
+[![status](https://joss.theoj.org/papers/04b306f03970eb31c48199863ad669aa/status.svg)](https://joss.theoj.org/papers/04b306f03970eb31c48199863ad669aa)
 ## What the software can do
 
 This software can dynamically simulate flood inundation, landslides runout and debris flows using multiple CUDA-enabled GPUs. It also offers an user-friendly yet versatile Python interface that can be fully integrated into data science workflows, aiming to streamline and accelerate hazard risk assessment tasks.
