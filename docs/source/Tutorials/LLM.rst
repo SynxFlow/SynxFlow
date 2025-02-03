@@ -4,6 +4,8 @@ Using LLMs to Build SynxFlow Workflow
 
 This guide explains how you can leverage a Large Language Model (LLM) as your assistant when using SynxFlow. In this example, OpenAI's ChatGPT o3-mini is used because it is effective at coding tasks and can access internet information. (Other LLMs with similar capabilities can also be used.)
 
+Author: `Dr Xilin Xia <https://www.birmingham.ac.uk/staff/profiles/civil/xia-xilin>`_
+
 ------------------------------------------------------------
 Step 1: Browsing the Documentation (The First Prompt)
 ------------------------------------------------------------
