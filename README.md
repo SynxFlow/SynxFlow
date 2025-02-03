@@ -18,6 +18,12 @@ The tutorials can also run on Google Colab by using one of the following links
 
 [Click me to run a debris flow simulation](https://colab.research.google.com/drive/1xz-CqSVJBH_nyFZSRVagRVHZ2dcXiFI-?usp=sharing)
 
+## Using LLMs to control SynxFlow
+
+It is also possible to us Large Language Models (LLMs) to generate script to use SynxFlow and build complex workflows. 
+
+Please see this [tutorial](https://synxflow.readthedocs.io/en/latest/Tutorials/LLM.html).
+
 
 ## Acknowledgment
 SynxFlow represents our distinct vision for the next generation of tools in this field, aiming to address evolving challenges and user needs with cutting-edge technologies. Our goal is to offer powerful, yet user-friendly tools for research and industrial applications, ensuring broad accessibility and applicability. In this spirit, SynxFlow is committed to being an open-source, community-driven and inclusive project. SynxFlow inherits code from established open-source software such as HiPIMS-CUDA [1] and Pypims [2]. The development of SynxFlow has also benefited from the skills, knowledge, and experience gained by its authors while contributing as main developers to HiPIMS-CUDA and Pypims.
