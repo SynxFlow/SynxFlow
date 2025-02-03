@@ -16,3 +16,4 @@ API documentation
     grid_show
     spatial_analysis
     indep_functions
+    engines

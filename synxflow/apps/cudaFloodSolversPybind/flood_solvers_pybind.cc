@@ -24,8 +24,40 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(flood, m) {
-  m.doc() = "core engine for hipims model"; // optional module docstring
+    m.doc() = R"pbdoc(
+        Flood Simulation Engine
+        ==============================
 
-  m.def("run", &run, "flood simulation with single gpu");
-  m.def("run_mgpus", &run_mgpus, "flood simulation with multiple gpus");
+        This module provides the core functionality for running a flood simulation.
+    )pbdoc";
+
+    m.def("run", &run, R"pbdoc(
+        run(work_dir)
+
+        Executes a flood simulation on a single GPU.
+
+        Parameters:
+            work_dir (str): The path to the working directory that contains all
+                necessary input files and configuration data for the simulation.
+
+        Returns:
+            int: A status code where 0 indicates that the simulation completed
+                successfully, and any non-zero value indicates an error.
+
+    )pbdoc");
+
+    m.def("run_mgpus", &run_mgpus, R"pbdoc(
+        run_mgpus(work_dir)
+
+        Executes a flood simulation utilizing multiple GPUs.
+
+        Parameters:
+            work_dir (str): The path to the working directory with the necessary
+                input data and configuration files.
+
+        Returns:
+            int: A status code indicating the outcome of the simulation (0 for success,
+                non-zero for failure).
+    )pbdoc");
 }
+
