@@ -7,4 +7,4 @@ Tutorials
    flood.ipynb
    landslide.ipynb
    debris.ipynb
-   LLM.md
+   LLM

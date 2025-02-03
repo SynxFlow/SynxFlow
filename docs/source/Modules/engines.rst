@@ -1,242 +1,122 @@
 ==========================================
-SynxFlow Engines API Documentation
+Simulation Engines
 ==========================================
 
-The SynxFlow package includes several simulation engines implemented as C extensions,
-each responsible for modeling different types of natural hazard scenarios. This document
-provides an overview of the three main engines:
+The SynxFlow package includes multiple simulation engines implemented as C extensions.
+Each engine is exposed as a Python class with a common interface. The following sections describe
+the API for each simulation engine:
 
-- **Flood Simulation Engine**
-- **Landslide Runout Engine**
-- **Debris Flow Simulation Engine**
+- **flood**: Flood simulation engine.
+- **landslide**: Landslide runout engine.
+- **debris**: Debris flow simulation engine.
 
-Each engine module is designed to leverage GPU acceleration for high-performance simulations.
-The following sections describe the purpose, key function(s), parameters, return values, and
-usage examples for each engine.==========================================
-SynxFlow Engines API Documentation
-==========================================
+.. py:class:: flood(work_dir)
 
-The SynxFlow package includes several simulation engines implemented as C extensions,
-each responsible for modeling different types of natural hazard scenarios. This document
-provides an overview of the three main engines:
+   :param work_dir: str
+      The path to the working directory that contains all necessary input files (e.g. digital elevation models, rainfall data)
+      and where simulation outputs will be stored.
 
-- **Flood Simulation Engine**
-- **Landslide Runout Engine**
-- **Debris Flow Simulation Engine**
+   **Overview:**
 
-Each engine module is designed to leverage GPU acceleration for high-performance simulations.
-The following sections describe the purpose, key function(s), parameters, return values, and
-usage examples for each engine.
+   The *FloodEngine* class provides the core functionality for simulating flood dynamics using GPU acceleration.
+   It performs the simulation based on the provided input data and returns a status code indicating success or failure.
 
-flood
------------------------
-The **flood** module provides the core functionality for simulating flood inundation events.
-It models water flow dynamics and flood extents using high-performance GPU computations.
+   **Methods:**
 
-**Key Function:**
+   .. py:method:: run()
+      
+      Executes the flood simulation.
 
-**run(work_dir)**
+      **Returns:**
 
-- **Signature:**
+         int  
+         A status code where a return value of 0 indicates the simulation completed successfully,
+         and any non-zero value indicates an error.
 
-      int run(const char* work_dir)
+   **Example:**
 
-- **Description:**
+   .. code-block:: python
 
-    Initiates a flood simulation using the specified working directory. The working directory
-    should contain all required input data (e.g. digital elevation models, rainfall data, land cover)
-    and will be used to store the simulation outputs.
+      from synxflow import flood
 
-- **Parameters:**
+      # Create an instance of the FloodEngine with the specified working directory
+      engine = flood.FloodEngine("/path/to/flood/work_dir")
+      status = engine.run()
+      if status == 0:
+          print("Flood simulation completed successfully!")
+      else:
+          print("Flood simulation encountered an error.")
 
-  - **work_dir (str):**  
-    The path to the working directory for simulation inputs and outputs.
 
-- **Returns:**
+.. py:class:: landslide(work_dir)
 
-  - **int:**  
-    A status code where `0` indicates that the simulation completed successfully, and any non‑zero
-    value signals an error.
+   :param work_dir: str
+      The path to the working directory containing the necessary input data (e.g. terrain models, material properties)
+      for the landslide simulation, and where outputs will be written.
 
-- **Example:**
+   **Overview:**
 
-.. code-block:: python
+   The *LandslideEngine* class implements the core engine for simulating landslide runout events.
+   It utilizes GPU acceleration to compute the dynamics of landslide movement based on input configurations.
 
-    from synxflow import flood
+   **Methods:**
 
-    work_dir = "/path/to/flood/work_dir"
-    status = flood.run(work_dir)
-    if status == 0:
-        print("Flood simulation completed successfully!")
-    else:
-        print("Flood simulation encountered an error.")
+   .. py:method:: run()
+      
+      Starts the landslide runout simulation.
 
-landslide
------------------------
-The **landslide** module implements the core engine for simulating landslide runout events.
-It calculates the dynamics of landslides based on terrain, material properties, and environmental factors.
+      **Returns:**
 
-**Key Function:**
+         int  
+         A status code where 0 indicates success and a non-zero value indicates an error.
 
-**run(work_dir)**
+   **Example:**
 
-- **Signature:**
+   .. code-block:: python
 
-      int run(const char* work_dir)
+      from synxflow import landslide
 
-- **Description:**
+      engine = landslide.LandslideEngine("/path/to/landslide/work_dir")
+      status = engine.run()
+      if status == 0:
+          print("Landslide simulation completed successfully!")
+      else:
+          print("Landslide simulation encountered an error.")
 
-    Starts a landslide runout simulation using the provided working directory. The directory must
-    include all necessary input data (such as terrain models and material properties) and serves as
-    the location for simulation outputs.
 
-- **Parameters:**
+.. py:class:: debris(work_dir)
 
-  - **work_dir (str):**  
-    The path to the working directory containing the input configuration and data files.
+   :param work_dir: str
+      The working directory containing simulation input files (e.g. configuration files, terrain data) and where the simulation outputs
+      will be generated.
 
-- **Returns:**
+   **Overview:**
 
-  - **int:**  
-    A status code indicating the result of the simulation (0 for success; non‑zero for an error).
+   The *DebrisEngine* class provides the functionality to run debris flow simulations using GPU acceleration.
+   It is optimized for high-performance computation and is designed to be used in multi-hazard risk assessments.
 
-- **Example:**
+   **Methods:**
 
-.. code-block:: python
+   .. py:method:: run()
+      
+      Executes the debris flow simulation.
 
-    from synxflow import landslide
+      **Returns:**
 
-    work_dir = "/path/to/landslide/work_dir"
-    status = landslide.run(work_dir)
-    if status == 0:
-        print("Landslide simulation completed successfully!")
-    else:
-        print("Landslide simulation encountered an error.")
+         int  
+         A status code indicating the result of the simulation. Zero denotes a successful simulation, whereas any non-zero value
+         indicates an error.
 
-debris
------------------------------
-The **debris** module provides the core engine for running debris flow simulations.
+   **Example:**
 
-**Key Function:**
+   .. code-block:: python
 
-**run(work_dir)**
+      from synxflow import debris
 
-- **Signature:**
+      engine = debris.DebrisEngine("/path/to/debris/work_dir")
+      status = engine.run()
+      if status == 0:
+          print("Debris flow simulation completed successfully!")
+      else:
+          print("Debris flow simulation encountered an error!")
 
-      int run(const char* work_dir)
-
-- **Description:**
-
-    Executes a debris flow simulation with the working directory specified. This directory is used
-    to provide all required simulation inputs (e.g. configuration files, terrain data) and to store
-    the results of the simulation.
-
-- **Parameters:**
-
-  - **work_dir (str):**  
-    The path to the working directory where input files are stored and outputs will be generated.
-
-- **Returns:**
-
-  - **int:**  
-    A status code that indicates the outcome of the simulation (0 indicates success; any non‑zero
-    value indicates an error).
-
-- **Example:**
-
-.. code-block:: python
-
-    from synxflow import debris
-
-    work_dir = "/path/to/debris/work_dir"
-    status = debris.run(work_dir)
-    if status == 0:
-        print("Debris flow simulation completed successfully!")
-    else:
-        print("Debris flow simulation encountered an error.")
-
-
-
-
-flood
------------------------
-The **flood** module provides the core functionality for simulating flood inundation events.
-
-**Key Function:**
-
-**run(work_dir)**
-
-- **Signature:**
-
-      int run(const char* work_dir)
-
-- **Description:**
-
-    Initiates a flood simulation using the specified working directory. The working directory
-    should contain all required input data (e.g. digital elevation models, rainfall data, land cover)
-    and will be used to store the simulation outputs.
-
-- **Parameters:**
-
-  - **work_dir (str):**  
-    The path to the working directory for simulation inputs and outputs.
-
-- **Returns:**
-
-  - **int:**  
-    A status code where `0` indicates that the simulation completed successfully, and any non‑zero
-    value signals an error.
-
-- **Example:**
-
-.. code-block:: python
-
-    from synxflow import flood
-
-    work_dir = "/path/to/flood/work_dir"
-    status = flood.run(work_dir)
-    if status == 0:
-        print("Flood simulation completed successfully!")
-    else:
-        print("Flood simulation encountered an error.")
-
-Landslide Runout Engine
------------------------
-The **landslide** module implements the core engine for simulating landslide runout events.
-
-**Key Function:**
-
-**run(work_dir)**
-
-- **Signature:**
-
-      int run(const char* work_dir)
-
-- **Description:**
-
-    Starts a landslide runout simulation using the provided working directory. The directory must
-    include all necessary input data (such as terrain models and material properties) and serves as
-    the location for simulation outputs.
-
-- **Parameters:**
-
-  - **work_dir (str):**  
-    The path to the working directory containing the input configuration and data files.
-
-- **Returns:**
-
-  - **int:**  
-    A status code indicating the result of the simulation (0 for success; non‑zero for an error).
-
-- **Example:**
-
-.. code-block:: python
-
-    from synxflow import landslide
-
-    work_dir = "/path/to/landslide/work_dir"
-    status = landslide.run(work_dir)
-    if status == 0:
-        print("Landslide simulation completed successfully!")
-    else:
-        print("Landslide simulation encountered an error.")
