@@ -16,7 +16,6 @@ the API for each simulation engine:
 
    The *flood* module provides the core functionality for simulating flood dynamics using GPU acceleration.
 
-   **Function: run(work_dir)**
 
    .. py:function:: run(work_dir)
 
@@ -59,8 +58,6 @@ the API for each simulation engine:
 
    The *landslide* module provides the core functionality for simulating landslide runout events using GPU acceleration.
 
-   **Function: run(work_dir)**
-
    .. py:function:: run(work_dir)
 
       Starts the landslide runout simulation.
@@ -90,8 +87,6 @@ the API for each simulation engine:
 
    The *debris* module provides the core functionality for running debris flow simulations using GPU acceleration.
    It is optimized for high-performance computation and is designed for multi-hazard risk assessments.
-
-   **Function: run(work_dir)**
 
    .. py:function:: run(work_dir)
 

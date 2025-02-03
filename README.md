@@ -20,9 +20,9 @@ The tutorials can also run on Google Colab by using one of the following links
 
 ## Using LLMs to control SynxFlow
 
-It is also possible to us Large Language Models (LLMs) to generate script to use SynxFlow and build complex workflows. 
+It is also possible to use Large Language Models (LLMs) to generate script to use SynxFlow and build complex workflows. 
 
-Please see this [tutorial](https://synxflow.readthedocs.io/en/latest/Tutorials/LLM.html).
+Please see this [tutorial](https://synxflow.readthedocs.io/en/latest/Tutorials/LLM.html) to learn how to do this.
 
 
 ## Acknowledgment
