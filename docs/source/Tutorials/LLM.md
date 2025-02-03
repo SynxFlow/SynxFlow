@@ -1,4 +1,4 @@
-# Tutorial: Using LLMs to Build SynxFlow Workflow
+# Using LLMs to Build SynxFlow Workflow
 
 Authour: [Xilin Xia](https://www.linkedin.com/in/xilin-xia-8787a4199/?originalSubdomain=uk)
 
@@ -12,16 +12,19 @@ This is to ensure that ChatGPT can learn the latest information about the API us
 
 **First Prompt:**
 
-> "Please use your browsing capability to visit and read the following SynxFlow documentation pages and tutorials:  
-> 1. InputModel API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/InputModel.html](https://synxflow.readthedocs.io/en/latest/Modules/InputModel.html)  
-> 2. Boundary API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Boundary.html](https://synxflow.readthedocs.io/en/latest/Modules/Boundary.html)  
-> 3. Rainfall API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Rainfall.html](https://synxflow.readthedocs.io/en/latest/Modules/Rainfall.html)  
-> 4. OutputModel API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/OutputModel.html](https://synxflow.readthedocs.io/en/latest/Modules/OutputModel.html)  
-> 5. Raster API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Raster.html](https://synxflow.readthedocs.io/en/latest/Modules/Raster.html) 
-> 6. Tutorials: (for practical examples of using SynxFlow) [https://synxflow.readthedocs.io/en/latest/Tutorials/flood.html](https://synxflow.readthedocs.io/en/latest/Tutorials/flood.html)
-> 7. Installation: (for steps of install the model) [https://synxflow.readthedocs.io/en/latest/quickstart.html](https://synxflow.readthedocs.io/en/latest/quickstart.html)
+> *“Please use your browsing capability to visit and read the following SynxFlow documentation pages and tutorials:*
 
-> After reviewing, summarise key functionalities of SynxFlow."
+> *1. InputModel API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/InputModel.html](https://synxflow.readthedocs.io/en/latest/Modules/InputModel.html)*  
+> *2. Boundary API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Boundary.html](https://synxflow.readthedocs.io/en/latest/Modules/Boundary.html)*  
+> *3. Rainfall API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Rainfall.html](https://synxflow.readthedocs.io/en/latest/Modules/Rainfall.html)*  
+> *4. OutputModel API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/OutputModel.html](https://synxflow.readthedocs.io/en/latest/Modules/OutputModel.html)*  
+> *5. Raster API Documentation: [https://synxflow.readthedocs.io/en/latest/Modules/Raster.html](https://synxflow.readthedocs.io/en/latest/Modules/Raster.html)*  
+> *6. Tutorials: (for practical examples of using SynxFlow) [https://synxflow.readthedocs.io/en/latest/Tutorials/flood.html](https://synxflow.readthedocs.io/en/latest/Tutorials/flood.html)*  
+> *7. Installation: (for steps of install the model) [https://synxflow.readthedocs.io/en/latest/quickstart.html](https://synxflow.readthedocs.io/en/latest/quickstart.html)*  
+
+> *After reviewing, summarise key functionalities of SynxFlow.”*
+
+
 
 This first prompt instructs ChatGPT to browse and understand the key components of SynxFlow. By reviewing these pages, ChatGPT gathers detailed information about:
 
@@ -40,7 +43,8 @@ This step is crucial because it ensures that any examples or code generated are 
 
 Once the documentation has been reviewed, you can ask ChatGPT to generate a code example for setting up a simulation. For instance, you might ask:
 
-> “Please show me a sample code that creates, runs, and visualizes a flood simulation using SynxFlow’s sample data.”
+> *“Please show me a sample code that creates, runs, and visualizes a flood simulation using SynxFlow’s sample data.”*
+
 
 ChatGPT will then provide a complete script that:
 - Loads sample data (DEM, rain mask, landcover, rain source)  
@@ -55,7 +59,9 @@ ChatGPT will then provide a complete script that:
 
 ChatGPT can further help you extend your simulation to perform sensitivity analyses. For example, if you wish to study the impact of varying Manning’s n from 0.01 to 0.1, you might ask:
 
-> “Write code that loops over Manning’s n values from 0.01 to 0.10 (in increments of 0.01) and plots the maximum inundation depth versus Manning’s n.”
+
+> *“Write code that loops over Manning’s n values from 0.01 to 0.10 (in increments of 0.01) and plots the maximum inundation depth versus Manning’s n.”*
+
 
 The provided code will:
 - Loop over the range of Manning’s n values  
@@ -194,7 +200,9 @@ plt.show()
 
 ChatGPT can also instruct you on using SynxFlow’s built-in visualization functions. For example, if you want to visualize a raster output such as the maximum inundation depth from your simulation, you might ask:
 
-> “How do I use the built-in functions to visualize gridded outputs in SynxFlow?”
+
+> *“How do I use the built-in functions to visualize gridded outputs in SynxFlow?”*
+
 
 ChatGPT may explain that you can use:
 - **`Raster.mapshow()`** for a quick display of raster outputs  
