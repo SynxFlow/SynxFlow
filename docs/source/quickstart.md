@@ -11,7 +11,7 @@ SynxFlow also needs NVIDIA GPUs which support CUDA to run the simulations, there
 
 #### Installing from binary wheels (on Windows and Linux)
 
-If you have a Linux or Windows (version >= 10) machine, with Python 3.9 or 3.10, and CUDA 11.3 or newer. Then synxflow can be installed by
+If you have a Linux or Windows (version >= 10) machine, with Python 3.9, 3.10 or 3.11, and CUDA 11.3 or newer. Then synxflow can be installed by
 
 ```shell
 pip install synxflow
