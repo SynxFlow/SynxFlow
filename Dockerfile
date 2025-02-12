@@ -1,3 +1,6 @@
+# Author: Thivin Anandh
+# Dockerfile to build a container image for SynxFlow
+
 # Use NVIDIA CUDA 11.8 base image with Ubuntu 22.04
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
@@ -23,16 +26,9 @@ RUN apt-get update
 # Install Python 3.11 (or your desired version)
 RUN apt-get install -y python3.11 python3.11-dev python3.11-distutils python3.11-venv
 
-# Install pip for Python 3.11
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
-
-# install Jupyter-Lab
-RUN python3.11 -m pip install jupyterlab
-
+# Set Cmake variables to use the correct python version
 ENV CMAKE_PYTHON_EXECUTABLE=/usr/bin/python3.11
 ENV PATH=/usr/bin/python3.11:${PATH}
-
-# Set CMake Python executable
 ENV CMAKE_ARGS="-DCMAKE_PYTHON_EXECUTABLE=/usr/bin/python3.11"
 
 # Setup a venv so that the cmake build can find the correct python version
@@ -41,6 +37,12 @@ ENV PATH=/venv/bin:${PATH}
 
 # activate the venv
 RUN . /venv/bin/activate
+
+# Install pip for Python 3.11
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+
+# install Jupyter-Lab
+RUN python3.11 -m pip install jupyterlab
 
 # Set environment variables
 ENV CUDA_HOME=/usr/local/cuda
