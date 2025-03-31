@@ -8,3 +8,4 @@ Tutorials
    landslide.ipynb
    debris.ipynb
    LLM
+   data_list.md
