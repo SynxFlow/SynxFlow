@@ -9,11 +9,10 @@ Created on Wed Apr  1 14:56:15 2020
 @author: Xilin Xia
 """
 
+# synxflow/__init__.py
+
 from .version import __version__
-from . import flood, IO
 
 __all__ = [
   '__version__',
-  'flood',
-  'IO',
 ]
