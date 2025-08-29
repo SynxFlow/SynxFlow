@@ -43,7 +43,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = -1.0*g*h*miu*u / phi;
+        f = -1.0f*g*h*miu*u / phi;
       }
       return f;
     }
@@ -79,7 +79,7 @@ namespace GC{
         auto z_grad_ = z_grad[index];
         auto _friction_force = MCFriction(g, miu, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -107,7 +107,7 @@ namespace GC{
         //}
         auto _friction_force = MCFriction(g, miu, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -137,7 +137,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = -1.0*tau/rho*u / vel;
+        f = -1.0f*tau/rho*u / vel;
       }
       return f;
     }
@@ -153,7 +153,7 @@ namespace GC{
         auto z_grad_ = z_grad[index];
         auto _friction_force = PlasticFriction(tau_, rho_, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -184,7 +184,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = -1.0*tau*phi / rho*u / vel - 1.0*g*h*miu*u*phi / vel;
+        f = -1.0f*tau*phi / rho*u / vel - 1.0f*g*h*miu*u*phi / vel;
       }
       return f;
     }
@@ -202,7 +202,7 @@ namespace GC{
         auto z_grad_ = z_grad[index];
         auto _friction_force = MCPlasticFriction(g_, miu_, tau_, rho_, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -243,7 +243,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = - 1.0*g*h*miu*u*phi / vel;
+        f = - 1.0f*g*h*miu*u*phi / vel;
       }
       return f;
     }
@@ -260,7 +260,7 @@ namespace GC{
         auto z_grad_ = z_grad[index];
         auto _friction_force = MuIFriction(g_, miu_1_, miu_2_, beta, L, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -292,7 +292,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = -1.0*g*h*miu*u*phi / vel;
+        f = -1.0f*g*h*miu*u*phi / vel;
       }
       return f;
     }
@@ -309,7 +309,7 @@ namespace GC{
         auto z_grad_ = z_grad[index];
         auto _friction_force = LucasFriction(g_, miu_1_, miu_2_, U_w, h_, hU_, z_grad_);
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         friction_force[index] = _friction_force;
         index += blockDim.x * gridDim.x;
@@ -733,11 +733,11 @@ namespace GC{
             _friction_force = 0.0;
           }
           else{
-            _friction_force = -1.0*(rho_solid - rho_water) / rho_mix*g_*hC_*miu_*U_ / norm(U_);
+            _friction_force = -1.0f*(rho_solid - rho_water) / rho_mix*g_*hC_*miu_*U_ / norm(U_);
           }
           ////constrain friction force
           if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-            _friction_force = -1.0 / dt*hU_;
+            _friction_force = -1.0f / dt*hU_;
           }
           hU_ = hU_ + _friction_force*dt;
           hU[index] = hU_;

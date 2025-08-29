@@ -194,8 +194,8 @@ namespace GC{
             u_neib = hU_neib / h_neib;
             c_neib = hC_neib / h_neib;
           }
-          Vector2 direction_this = 0.5*normal*area;
-          Vector2 direction_neib = -0.5*normal*area;
+          Vector2 direction_this = 0.5f*normal*area;
+          Vector2 direction_neib = -0.5f*normal*area;
           Scalar _z_this = z_this + dot(_z_gradient_this, direction_this);
           Scalar _z_neib = z_neib + dot(_z_gradient_neib, direction_neib);
           Scalar z_f = fmax(z_this, z_neib);
@@ -230,7 +230,7 @@ namespace GC{
             delta_z = fmax((Scalar)0.0, fmin(dz_clip, z_f - eta_this));
           }
           z_f -= delta_z;
-          Vector2 _z_flux = 0.5*g*(h_L + h_this)*(z_f - z_this)*normal;
+          Vector2 _z_flux = 0.5f*g*(h_L + h_this)*(z_f - z_this)*normal;
           _h_advection += _h_flux*area / volume;
           _hU_advection += (_hU_flux + _z_flux)*area / volume;
           _hC_advection += _hC_flux*area / volume;

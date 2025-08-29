@@ -58,14 +58,14 @@ namespace GC{
             Vector normal = uni(*(face_normal_begin + id_face));
             Scalar area = *(face_area_begin + id_face);
             Scalar phi_neib = *(phi_begin + id_neib);
-            *(phi_gradient_begin + id_this) += (phi_neib+phi_this)/2.0*area*normal/volume_this;
+            *(phi_gradient_begin + id_this) += (phi_neib+phi_this)/ static_cast<Scalar>(2.0) *area*normal/volume_this;
           }else{
             Flag id_face = (*(faces_begin + id_this))[neib_cnt];
             Vector normal = uni(*(face_normal_begin + id_face));
             Scalar area = *(face_area_begin + id_face);
             Flag id_boundary = neib_iter.get_global_id();
             Scalar phi_bound = *(phi_boundary_value_begin + id_boundary);
-            *(phi_gradient_begin + id_this) += (phi_bound+phi_this)/2.0*area*normal/volume_this;
+            *(phi_gradient_begin + id_this) += (phi_bound+phi_this)/ static_cast<Scalar>(2.0) *area*normal/volume_this;
           }
           neib_cnt++;
         }
@@ -104,7 +104,7 @@ namespace GC{
             Vector normal = uni(*(face_normal_begin + id_face));
             Scalar area = *(face_area_begin + id_face);
             Vector phi_neib = *(phi_begin + id_neib);
-            *(phi_gradient_begin + id_this) += product((phi_neib+phi_this)/2.0, normal)*area/volume_this;
+            *(phi_gradient_begin + id_this) += product((phi_neib+phi_this)/ static_cast<Scalar>(2.0), normal)*area/volume_this;
           }else{
             Flag id_face = (*(faces_begin + id_this))[neib_cnt];
             Vector normal = uni(*(face_normal_begin + id_face));
@@ -112,7 +112,7 @@ namespace GC{
             Flag id_boundary = neib_iter.get_global_id();
             auto phi_boundary_type = *(phi_boundary_type_begin + id_boundary);
             Vector phi_bound = GetBoundary(phi_boundary_type, phi_this, normal);
-            *(phi_gradient_begin + id_this) += product((phi_bound+phi_this)/2.0, normal)*area/volume_this;
+            *(phi_gradient_begin + id_this) += product((phi_bound+phi_this)/ static_cast<Scalar>(2.0), normal)*area/volume_this;
           }
           neib_cnt++;
         }
@@ -159,7 +159,7 @@ namespace GC{
             Vector normal = uni(*(face_normal_begin + id_face));
             Scalar area = *(face_area_begin + id_face);
             Scalar phi_neib = *(phi_begin + id_neib);
-            *(phi_gradient_begin + id_this) += (phi_neib + phi_this) / 2.0*area*normal / volume_this;
+            *(phi_gradient_begin + id_this) += (phi_neib + phi_this) / static_cast<Scalar>(2.0) *area*normal / volume_this;
           }
           else{
             Flag id_face = (*(faces_begin + id_this))[neib_cnt];
@@ -167,7 +167,7 @@ namespace GC{
             Scalar area = *(face_area_begin + id_face);
             Flag id_boundary = neib_iter.get_global_id();
             Scalar phi_bound = *(phi_boundary_value_begin + id_boundary);
-            *(phi_gradient_begin + id_this) += (phi_bound + phi_this) / 2.0*area*normal / volume_this;
+            *(phi_gradient_begin + id_this) += (phi_bound + phi_this) / static_cast<Scalar>(2.0) *area*normal / volume_this;
           }
           neib_cnt++;
         }
@@ -214,7 +214,7 @@ namespace GC{
             Vector normal = uni(*(face_normal_begin + id_face));
             Scalar area = *(face_area_begin + id_face);
             Vector phi_neib = *(phi_begin + id_neib);
-            *(phi_gradient_begin + id_this) += product((phi_neib + phi_this) / 2.0, normal)*area / volume_this;
+            *(phi_gradient_begin + id_this) += product((phi_neib + phi_this) / static_cast<Scalar>(2.0), normal)*area / volume_this;
           }
           else{
             Flag id_face = (*(faces_begin + id_this))[neib_cnt];
@@ -222,7 +222,7 @@ namespace GC{
             Scalar area = *(face_area_begin + id_face);
             Flag id_boundary = neib_iter.get_global_id();
             Vector phi_bound = *(phi_boundary_value_begin + id_boundary);
-            *(phi_gradient_begin + id_this) += product((phi_bound + phi_this) / 2.0, normal)*area / volume_this;
+            *(phi_gradient_begin + id_this) += product((phi_bound + phi_this) / static_cast<Scalar>(2.0), normal)*area / volume_this;
           }
           neib_cnt++;
         }

@@ -380,8 +380,8 @@ int run(const char* work_dir){
     fv::cuAdvectionNSWEs2ndRobustCurv(gravity, centrifugal, h, z, u, h_grad, eta_grad, u_grad, h_advection, hU_advection);
 
     //multiply advection with -1
-    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0*a;});
-    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0*a;});
+    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0f*a;});
+    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0f*a;});
 
     //integration
     fv::cuEulerIntegrator(h, h_advection, time_controller.dt(), time_controller.current());
@@ -440,8 +440,8 @@ int run(const char* work_dir){
     fv::cuAdvectionNSWEs2ndRobustCurv(gravity, centrifugal, h, z, u, h_grad, eta_grad, u_grad, h_advection, hU_advection);
 
     //multiply advection with -1
-    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0*a;});
-    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0*a;});
+    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0f*a;});
+    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0f*a;});
 
     fv::cuEulerIntegrator(h_old, h_advection_old, time_controller.dt() / 2.0, time_controller.current());
     fv::cuEulerIntegrator(hU_old, hU_advection_old, time_controller.dt() / 2.0, time_controller.current());

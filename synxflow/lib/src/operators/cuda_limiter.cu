@@ -151,7 +151,7 @@ namespace GC{
           else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length + index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -235,7 +235,7 @@ namespace GC{
           else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length + index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -303,7 +303,7 @@ namespace GC{
           else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length + index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -536,7 +536,7 @@ namespace GC{
           }else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length+index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -622,7 +622,7 @@ namespace GC{
           }else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length+index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -703,7 +703,7 @@ namespace GC{
           }else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length+index];
             Vector2 centre_face = face_centres[id_face];
-            direction = 2.0*(centre_face - centre_this);
+            direction = 2.0f*(centre_face - centre_this);
             Vector2 normal = uni(face_normals[id_face]);
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
@@ -892,7 +892,7 @@ namespace GC{
               Vector2 phi_bound = _phi_bound[id_boundary];
               Vector2 centroid_boundary = face_centres[id_face];
               Vector2 direction_vector = centroid_boundary - centroid_this;
-              Vector2 downwind = 2.0*dot(gradient_vector, direction_vector);
+              Vector2 downwind = 2.0f*dot(gradient_vector, direction_vector);
               Vector2 upwind = phi_bound - phi_this;
               _limit_ratio_xx = minmod(upwind.x, downwind.x);
               _limit_ratio_yx = minmod(upwind.y, downwind.y);
@@ -920,7 +920,7 @@ namespace GC{
               Vector2 phi_bound = _phi_bound[id_boundary];
               Vector2 centroid_boundary = face_centres[id_face];
               Vector2 direction_vector = centroid_boundary - centroid_this;
-              Vector2 downwind = 2.0*dot(gradient_vector, direction_vector);
+              Vector2 downwind = 2.0f*dot(gradient_vector, direction_vector);
               Vector2 upwind = phi_bound - phi_this;
               _limit_ratio_xy = minmod(upwind.x, downwind.x);
               _limit_ratio_yy = minmod(upwind.y, downwind.y);

@@ -104,8 +104,8 @@ namespace GC{
                   Vector2 u_R(dot(u_neib, normal),dot(u_neib, shear));
                   auto flux = RiemannSolver(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R)); 
                   Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-                  Vector2 _z_flux_this = -0.5*grav*h_L*h_L*normal;
-                  Vector2 _z_flux_neib = -0.5*grav*h_R*h_R*normal;
+                  Vector2 _z_flux_this = static_cast<Scalar>(-0.5) *grav*h_L*h_L*normal;
+                  Vector2 _z_flux_neib = static_cast<Scalar>(-0.5) *grav*h_R*h_R*normal;
                   *(h_flux_begin + id_this) += flux.h*area/volume_this;
                   (*(hU_flux_begin + id_this)).x += (_hU_flux.x + _z_flux_this.x)*area/volume_this;
                   (*(hU_flux_begin + id_this)).y += (_hU_flux.y + _z_flux_this.y)*area/volume_this;
@@ -140,7 +140,7 @@ namespace GC{
                 Vector2 u_R(dot(u_bound, normal),dot(u_bound, shear));
                 auto flux = RiemannSolver(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R)); 
                 Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-                Vector2 _z_flux_this = -0.5*grav*h_L*h_L*normal;
+                Vector2 _z_flux_this = static_cast<Scalar>(-0.5) *grav*h_L*h_L*normal;
                 *(h_flux_begin + id_this) += flux.h*area/volume_this;
                 (*(hU_flux_begin + id_this)).x += (_hU_flux.x + _z_flux_this.x)*area/volume_this;
                 (*(hU_flux_begin + id_this)).y += (_hU_flux.y + _z_flux_this.y)*area/volume_this;

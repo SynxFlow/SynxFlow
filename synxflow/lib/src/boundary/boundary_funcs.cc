@@ -35,7 +35,7 @@ namespace GC{
   }
 
   Vector3 WallNonSlip(const Vector3& in_value, const Vector3& _normal){
-    return Vector3(-1.0*in_value);
+    return Vector3(static_cast<Scalar>(-1.0) *in_value);
   }
 
   Vector3 WallSlip(const Vector3& in_value, const Vector3& _normal){

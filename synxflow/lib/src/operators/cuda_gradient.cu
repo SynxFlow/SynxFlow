@@ -45,7 +45,7 @@ namespace GC{
             Vector normal = uni(face_normal[id_face]);
             Scalar area = face_area[id_face];
             Scalar phi_neib = phi_data[id_neib];
-            _phi_gradient += (phi_neib+phi_this)/2.0*area*normal/volume_this;
+            _phi_gradient += (phi_neib+phi_this)/2.0f*area*normal/volume_this;
           }else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length+index];
             Vector normal = uni(face_normal[id_face]);
@@ -53,7 +53,7 @@ namespace GC{
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
             Scalar _phi_bound = phi_bound[id_boundary];
-            _phi_gradient += (_phi_bound+phi_this)/2.0*area*normal/volume_this;
+            _phi_gradient += (_phi_bound+phi_this)/2.0f*area*normal/volume_this;
           }
         }
         phi_gradient[index] = _phi_gradient;
@@ -85,7 +85,7 @@ namespace GC{
             Vector normal = uni(face_normal[id_face]);
             Scalar area = face_area[id_face];
             Vector phi_neib = phi_data[id_neib];
-            _phi_gradient += product((phi_neib+phi_this)/2.0, normal)*area/volume_this;
+            _phi_gradient += product((phi_neib+phi_this)/2.0f, normal)*area/volume_this;
           }else{
             Flag id_face = cell_halffacets[i*cell_halffacets_length+index];
             Vector normal = uni(face_normal[id_face]);
@@ -93,7 +93,7 @@ namespace GC{
             Flag id_boundary = neib.get_global_id();
 //            ShortTripleFlag phi_boundary_type = phi_bound[id_boundary];
             Vector _phi_bound = phi_bound[id_boundary];
-            _phi_gradient += product((_phi_bound+phi_this)/2.0, normal)*area/volume_this;
+            _phi_gradient += product((_phi_bound+phi_this)/2.0f, normal)*area/volume_this;
           }
         }
         phi_gradient[index] = _phi_gradient;

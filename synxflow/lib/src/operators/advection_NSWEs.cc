@@ -136,8 +136,8 @@ namespace GC{
               Vector2 u_R(dot(_u_neib, normal),dot(_u_neib, shear));
               auto flux = hllcRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
               Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-              Vector2 _z_flux_this = -0.5*grav*h_L*h_L*normal +0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
-              Vector2 _z_flux_neib = -0.5*grav*h_R*h_R*normal +0.5*g_neib*(_eta_neib - z_neib)*(_eta_neib - z_neib)*normal;
+              Vector2 _z_flux_this = static_cast<Scalar>(-0.5) *grav*h_L*h_L*normal + static_cast<Scalar>(0.5) *g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+              Vector2 _z_flux_neib = static_cast<Scalar>(-0.5) *grav*h_R*h_R*normal + static_cast<Scalar>(0.5) *g_neib*(_eta_neib - z_neib)*(_eta_neib - z_neib)*normal;
 #pragma omp atomic
               *(h_flux_begin + id_this) += flux.h*area/volume_this;
 #pragma omp atomic
@@ -175,7 +175,7 @@ namespace GC{
             Vector2 u_R(dot(u_bound, normal),dot(u_bound, shear));
             auto flux = hllcRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux_this = -0.5*grav*h_L*h_L*normal +0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux_this = -0.5f*grav*h_L*h_L*normal + static_cast<Scalar>(0.5) *g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
 #pragma omp atomic
             *(h_flux_begin + id_this) += flux.h*area/volume_this;
 #pragma omp atomic

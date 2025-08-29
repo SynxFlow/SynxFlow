@@ -290,8 +290,8 @@ int run(const char* work_dir){
     fv::cuAdvectionMSWEsCartesian(gravity, h, z, z_gradient, hU, h_advection, hU_advection); //SRM
 
     //multiply advection with -1
-    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0*a;});
-    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0*a;});
+    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0f*a;});
+    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0f*a;});
 
     //integration
     fv::cuFrictionManningImplicit(time_controller.dt(), gravity, manning_coef, h, hU, hU_advection);
@@ -581,8 +581,8 @@ void single_run(cuDataBank& bank, std::vector<int> device_list, unsigned int dom
     fv::cuAdvectionMSWEsCartesian(gravity, h, z, z_gradient, hU, h_advection, hU_advection);
 
     //multiply advection with -1
-    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0*a;});
-    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0*a;});
+    fv::cuUnaryOn(h_advection, [] __device__ (Scalar& a) -> Scalar{return -1.0f*a;});
+    fv::cuUnaryOn(hU_advection, [] __device__ (Vector& a) -> Vector{return -1.0f*a;});
 
     //integration
     fv::cuFrictionManningImplicit(time_controller.dt(), gravity, manning_coef, h, hU, hU_advection);
