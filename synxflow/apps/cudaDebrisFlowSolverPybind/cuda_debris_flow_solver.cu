@@ -369,9 +369,9 @@ int run(const char* work_dir){
     fv::cuTransportNSWEsSRMCartesian(gravity, h, z, z_gradient, hU, hC, h_advection, hU_advection, hC_advection);
 
     //multiply advection with -1
-    fv::cuUnaryOn(h_advection, [] __device__(Scalar& a) -> Scalar{ return -1.0*a; });
-    fv::cuUnaryOn(hU_advection, [] __device__(Vector& a) -> Vector{ return -1.0*a; });
-    fv::cuUnaryOn(hC_advection, [] __device__(Scalar& a) -> Scalar{ return -1.0*a; });
+    fv::cuUnaryOn(h_advection, [] __device__(Scalar& a) -> Scalar{ return -1.0f*a; });
+    fv::cuUnaryOn(hU_advection, [] __device__(Vector& a) -> Vector{ return -1.0f*a; });
+    fv::cuUnaryOn(hC_advection, [] __device__(Scalar& a) -> Scalar{ return -1.0f*a; });
 
     //integration
     fv::cuEulerIntegrator(h, h_advection, time_controller.dt(), time_controller.current());

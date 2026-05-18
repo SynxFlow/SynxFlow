@@ -129,8 +129,8 @@ namespace GC{
         auto ED_rate_ = ED_rate[index];
         Scalar rho_mix = rho_water*(1 - C) + rho_solid*C;
         Scalar rho_0 = rho_water*porosity + rho_solid*(1.0 - porosity);
-        Vector2 mom_correction_ = -1.0*(rho_solid - rho_water)*g*pow(h_, 2.0) / rho_mix / 2.0*C_grad_ - (rho_0 - rho_mix) / rho_mix / (1.0 - porosity)*ED_rate_*U;
-        //Vector2 mom_correction_ = -1.0*(rho_solid - rho_water)*g*pow(h_, 2.0) / rho_mix / 2.0*C_grad_ - rho_0  / rho_mix / (1.0 - porosity)*ED_rate_*U;
+        Vector2 mom_correction_ = -1.0f*(rho_solid - rho_water)*g*pow(h_, 2.0f) / rho_mix / 2.0f*C_grad_ - (rho_0 - rho_mix) / rho_mix / (1.0f - porosity)*ED_rate_*U;
+        //Vector2 mom_correction_ = -1.0f*(rho_solid - rho_water)*g*pow(h_, 2.0f) / rho_mix / 2.0f*C_grad_ - rho_0  / rho_mix / (1.0f - porosity)*ED_rate_*U;
         mom_correction[index] = mom_correction_;
         index += blockDim.x * gridDim.x;
       }
@@ -194,11 +194,11 @@ namespace GC{
           _friction_force = 0.0;
         }
         else{
-          _friction_force = -1.0*(rho_solid - rho_water) / rho_mix*g*hC_*miu_dynamic_*U_ / norm(U_);
+          _friction_force = -1.0f*(rho_solid - rho_water) / rho_mix*g*hC_*miu_dynamic_*U_ / norm(U_);
         }
         ////constrain friction force
         if (dot(_friction_force*dt, _friction_force*dt) >= dot(hU_, hU_)){
-          _friction_force = -1.0 / dt*hU_;
+          _friction_force = -1.0f / dt*hU_;
         }
         hU_ = hU_ + _friction_force*dt;
         // ---- Calculate ED rate ----

@@ -43,7 +43,7 @@ namespace GC{
         f = 0.0;
       }
       else{
-        f = -1.0*g*h*miu*u / phi;
+        f = static_cast<Scalar>(-1.0)  * g * h * miu * u / phi;
       }
       return f;
       //if (u.x == 0.0){

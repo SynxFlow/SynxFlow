@@ -68,7 +68,7 @@ namespace GC{
           boundary_value[index] = in_value;
           break;
         case 2:
-          boundary_value[index] = -1.0*in_value;
+          boundary_value[index] = -1.0f*in_value;
           break;
         case 3:
           Vector3 _in_value = in_value;

@@ -87,7 +87,7 @@ namespace GC{
             Vector2 u_R(dot(_u_neib, normal),dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area/volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area/volume_this;
           }else{
@@ -104,7 +104,7 @@ namespace GC{
             Vector2 u_R(dot(u_bound, normal),dot(u_bound, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area/volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area/volume_this;
           }
@@ -177,7 +177,7 @@ namespace GC{
             Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*(grav + centrifugal_this)*h_L*h_L*normal + 0.5*(g_this + centrifugal_this)*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*(grav + centrifugal_this)*h_L*h_L*normal + 0.5f*(g_this + centrifugal_this)*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area / volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
           }
@@ -195,7 +195,7 @@ namespace GC{
             Vector2 u_R(dot(_u_bound, normal), dot(_u_bound, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*(grav + centrifugal_this)*h_L*h_L*normal + 0.5*(g_this + centrifugal_this)*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*(grav + centrifugal_this)*h_L*h_L*normal + 0.5f*(g_this + centrifugal_this)*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area / volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
           }
@@ -357,12 +357,12 @@ namespace GC{
               Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
               auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
               Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-              Vector2 _z_flux_this = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+              Vector2 _z_flux_this = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
               h_flux[id_face] = flux.h*area / volume_this;
               hU_flux[id_face] = (_hU_flux + _z_flux_this)*area / volume_this;
-              Vector2 _z_flux_neib = -0.5*grav*h_R*h_R*normal + 0.5*g_neib*(_eta_neib - z_neib)*(_eta_neib - z_neib)*normal;
-              h_flux[id_neib_face] = -1.0*flux.h*area / volume_neib;
-              hU_flux[id_neib_face] = -1.0*(_hU_flux + _z_flux_neib)*area / volume_neib;
+              Vector2 _z_flux_neib = -0.5f*grav*h_R*h_R*normal + 0.5f*g_neib*(_eta_neib - z_neib)*(_eta_neib - z_neib)*normal;
+              h_flux[id_neib_face] = -1.0f*flux.h*area / volume_neib;
+              hU_flux[id_neib_face] = -1.0f*(_hU_flux + _z_flux_neib)*area / volume_neib;
             }
           }
           else{
@@ -379,7 +379,7 @@ namespace GC{
             Vector2 u_R(dot(u_bound, normal), dot(u_bound, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             h_flux[id_face] = flux.h*area / volume_this;
             hU_flux[id_face] = (_hU_flux + _z_flux)*area / volume_this;
           }
@@ -482,7 +482,7 @@ namespace GC{
           }
           Scalar _h_flux = flux.h*X_f;
           Vector2 _hU_flux = (flux.q.x*normal + flux.q.y*shear)*X_f;
-          Vector2 _z_flux = -0.5*g*eta_this*eta_f*(X_f - X_this)*normal;
+          Vector2 _z_flux = -0.5f*g*eta_this*eta_f*(X_f - X_this)*normal;
           _h_advection += _h_flux*area / volume_this;
           _h_advection_constraint += fmax((Scalar)0.0, _h_flux)*area / volume_this;
           _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
@@ -587,7 +587,7 @@ namespace GC{
           Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-          Vector2 _z_flux = -0.5*g*h_L*h_L*normal;
+          Vector2 _z_flux = -0.5f*g*h_L*h_L*normal;
           _h_advection += flux.h*area / volume;
           _hU_advection += (_hU_flux + _z_flux)*area / volume;
         }
@@ -682,7 +682,7 @@ namespace GC{
           Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-          Vector2 _z_flux = -0.5*g*h_L*h_L*normal;
+          Vector2 _z_flux = -0.5f*g*h_L*h_L*normal;
           _h_advection += flux.h*area / volume;
           if(i == 0){
             hU_NS[index].y = flux.h;
@@ -797,9 +797,9 @@ namespace GC{
           Scalar h_R = fmax((Scalar)0.0, h_neib + z_neib - z_f);
           auto flux = cuHLLCRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
           auto flux_relaxation = cuLaxFriedrichsRiemannSolverSWEs(g, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));          
-          Scalar _h_flux = (1.0 - Tr)*flux_relaxation.h + Tr*flux.h;
-          Vector2 _hU_flux = (1.0 - Tr)*(flux_relaxation.q.x*normal + flux_relaxation.q.y*shear) + Tr*(flux.q.x*normal + flux.q.y*shear);
-          Vector2 _z_flux = -0.5*g*h_L*h_L*normal;
+          Scalar _h_flux = (1.0f - Tr)*flux_relaxation.h + Tr*flux.h;
+          Vector2 _hU_flux = (1.0f - Tr)*(flux_relaxation.q.x*normal + flux_relaxation.q.y*shear) + Tr*(flux.q.x*normal + flux.q.y*shear);
+          Vector2 _z_flux = -0.5f*g*h_L*h_L*normal;
           _h_advection += _h_flux*area / volume;
           _hU_advection += (_hU_flux + _z_flux)*area / volume;
         }
@@ -901,8 +901,8 @@ namespace GC{
           else{
             u_neib = hU_neib / h_neib;
           }
-          Vector2 direction_this = 0.5*normal*area;
-          Vector2 direction_neib = -0.5*normal*area;
+          Vector2 direction_this = 0.5f*normal*area;
+          Vector2 direction_neib = -0.5f*normal*area;
           Scalar _z_this = z_this + dot(_z_gradient_this, direction_this);
           Scalar _z_neib = z_neib + dot(_z_gradient_neib, direction_neib);
           Scalar z_f = fmax(z_this, z_neib);
@@ -931,7 +931,7 @@ namespace GC{
             delta_z = fmax((Scalar)0.0, fmin(dz_clip, z_f - eta_this));
           }
           z_f -= delta_z;
-          Vector2 _z_flux = 0.5*g*(h_L + h_this)*(z_f - z_this)*normal;
+          Vector2 _z_flux = 0.5f*g*(h_L + h_this)*(z_f - z_this)*normal;
           _h_advection += _h_flux*area / volume;
           _hU_advection += (_hU_flux + _z_flux)*area / volume;
         }
@@ -1031,8 +1031,8 @@ namespace GC{
           else{
             u_neib = hU_neib / h_neib;
           }
-          Vector2 direction_this = 0.5*normal*area;
-          Vector2 direction_neib = -0.5*normal*area;
+          Vector2 direction_this = 0.5f*normal*area;
+          Vector2 direction_neib = -0.5f*normal*area;
           Scalar _z_this = z_this + dot(_z_gradient_this, direction_this);
           Scalar _z_neib = z_neib + dot(_z_gradient_neib, direction_neib);
           Scalar z_f = fmax(z_this, z_neib);
@@ -1062,7 +1062,7 @@ namespace GC{
           }
           z_f -= delta_z;
           Scalar eta_f = z_f + h_L;
-          Vector2 _z_flux = -0.5*(g + centrifugal_this)*h_L*h_L*normal + (g_this + centrifugal_this)*h_this*eta_f*normal;
+          Vector2 _z_flux = -0.5f*(g + centrifugal_this)*h_L*h_L*normal + (g_this + centrifugal_this)*h_this*eta_f*normal;
           _h_advection += _h_flux*area / volume;
           _hU_advection += (_hU_flux + _z_flux)*area / volume;
         }
@@ -1118,7 +1118,7 @@ namespace GC{
         for (Flag i = 0; i < 4; ++i){
           Vector2 normal = face_normal[i];
           Vector2 shear = uni(perpend(normal));
-          Vector2 direction_this = 0.5*normal*cell_size;
+          Vector2 direction_this = 0.5f*normal*cell_size;
           Scalar _h_this = h_this + dot(grad_h_this, direction_this);
           Scalar _eta_this = eta_this + dot(grad_eta_this, direction_this);
           Scalar _z_this = _eta_this - _h_this;
@@ -1134,12 +1134,12 @@ namespace GC{
             Vector2 grad_h_neib = h_gradient[id_neib];
             Vector2 grad_eta_neib = eta_gradient[id_neib];
             Tensor2 grad_u_neib = u_gradient[id_neib];
-            Vector2 direction_neib = -0.5*normal*cell_size;
+            Vector2 direction_neib = -0.5f*normal*cell_size;
             Scalar _h_neib = h_neib + dot(grad_h_neib, direction_neib);
             Scalar _eta_neib = eta_neib + dot(grad_eta_neib, direction_neib);
             Scalar _z_neib = _eta_neib - _h_neib;
             Vector2 _u_neib = u_neib + dot(grad_u_neib, direction_neib);
-            Scalar grav = (g_this + g_neib) / 2.0;
+            Scalar grav = (g_this + g_neib) / 2.0f;
             Scalar z_face = fmax(_z_this, _z_neib);
             Scalar h_L = fmax(_h_this + _z_this - z_face, (Scalar)0.0);
             Scalar h_R = fmax(_h_neib + _z_neib - z_face, (Scalar)0.0);
@@ -1147,7 +1147,7 @@ namespace GC{
             Vector2 u_R(dot(_u_neib, normal), dot(_u_neib, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area / volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
           }
@@ -1165,7 +1165,7 @@ namespace GC{
             Vector2 u_R(dot(u_bound, normal), dot(u_bound, shear));
             auto flux = cuHLLCRiemannSolverSWEs(grav, ScalarRiemannState(h_L, h_R), VectorRiemannState(h_L*u_L, h_R*u_R));
             Vector2 _hU_flux = flux.q.x*normal + flux.q.y*shear;
-            Vector2 _z_flux = -0.5*grav*h_L*h_L*normal + 0.5*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
+            Vector2 _z_flux = -0.5f*grav*h_L*h_L*normal + 0.5f*g_this*(_eta_this - z_this)*(_eta_this - z_this)*normal;
             _h_advection += flux.h*area / volume_this;
             _hU_advection += (_hU_flux + _z_flux)*area / volume_this;
           }
